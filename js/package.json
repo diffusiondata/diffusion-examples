@@ -1,0 +1,17 @@
+{
+  "name": "diffusion-examples",
+  "version": "1.0.0",
+  "description": "Examples for using the Diffusion Javascript UCI client",
+  
+  "main": "index.js",
+  
+  "directories": {
+    "example": "examples"
+  },
+
+  "license": "Apache-2.0",
+
+  "dependencies": {
+    "diffusion": "^5.3.0"
+  }
+}
