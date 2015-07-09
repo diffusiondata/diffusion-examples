@@ -14,8 +14,6 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
 
-import java.util.concurrent.TimeUnit;
-
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.Session.Listener;
@@ -38,25 +36,22 @@ public class ClientWithReconnectionStrategy {
     public ClientWithReconnectionStrategy() {
 
         // Set the maximum amount of time we'll try and reconnect for to 10 minutes.
-        final long maximumTimeoutDuration = TimeUnit.MINUTES.toMillis(10);
+        final int maximumTimeoutDuration = 1000 * 60 * 10;
 
         // Set the maximum interval between reconnect attempts to 60 seconds.
-        final long maximumAttemptInterval = TimeUnit.SECONDS.toMillis(60);
+        final long maximumAttemptInterval = 1000 * 60;
 
         // Create a new reconnection strategy that applies an exponential backoff
         final ReconnectionStrategy reconnectionStrategy = new ReconnectionStrategy() {
             private int retries = 0;
 
             @Override
-            public void apply(ReconnectionAttempt reconnection) {
+            public void performReconnection(ReconnectionAttempt reconnection) {
                 final long exponentialWaitTime =
                     Math.min((long) Math.pow(2,  retries++) * 100L, maximumAttemptInterval);
 
                 try {
                     Thread.sleep(exponentialWaitTime);
-
-                    retries++;
-
                     reconnection.start();
                 }
                 catch (InterruptedException e) {
@@ -65,7 +60,8 @@ public class ClientWithReconnectionStrategy {
             }
         };
 
-        final Session session = Diffusion.sessions().reconnectionStrategy(reconnectionStrategy, maximumTimeoutDuration)
+        final Session session = Diffusion.sessions().reconnectionTimeout(maximumTimeoutDuration)
+                                                    .reconnectionStrategy(reconnectionStrategy)
                                                     .open("ws://diffusion.example.com:80");
         session.addListener(new Listener() {
             @Override
