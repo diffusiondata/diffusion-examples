@@ -14,6 +14,10 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.Session.Listener;
@@ -43,20 +47,20 @@ public class ClientWithReconnectionStrategy {
 
         // Create a new reconnection strategy that applies an exponential backoff
         final ReconnectionStrategy reconnectionStrategy = new ReconnectionStrategy() {
-            private int retries = 0;
+            private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+            private volatile int retries = 0;
 
             @Override
-            public void performReconnection(ReconnectionAttempt reconnection) {
+            public void performReconnection(final ReconnectionAttempt reconnection) {
                 final long exponentialWaitTime =
                     Math.min((long) Math.pow(2,  retries++) * 100L, maximumAttemptInterval);
 
-                try {
-                    Thread.sleep(exponentialWaitTime);
-                    reconnection.start();
-                }
-                catch (InterruptedException e) {
-                    reconnection.abort();
-                }
+                scheduler.schedule(new Runnable() {
+                    @Override
+                    public void run() {
+                        reconnection.start();
+                    }
+                }, exponentialWaitTime, TimeUnit.MILLISECONDS);
             }
         };
 
