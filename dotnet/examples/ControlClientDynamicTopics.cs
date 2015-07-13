@@ -18,7 +18,7 @@ using PushTechnology.ClientInterface.Client.Features.Control.Topics;
 using PushTechnology.ClientInterface.Client.Session;
 using PushTechnology.ClientInterface.Client.Topics;
 
-namespace UCIStack.Examples
+namespace Examples
 {
     /// <summary>
     /// An example of using control client to create topics dynamically, i.e. when topics that do not exist are

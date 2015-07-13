@@ -19,7 +19,7 @@ using PushTechnology.ClientInterface.Client.Features.Control.Clients;
 using PushTechnology.ClientInterface.Client.Session;
 using PushTechnology.ClientInterface.CommandServices.Commands.Control.Client;
 
-namespace UCIStack.Examples
+namespace Examples
 {
     /// <summary>
     /// This demonstrates the use of a control client to apply both throttling and conflation to clients.  It throttles

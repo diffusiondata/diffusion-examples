@@ -19,7 +19,7 @@ using System.Threading;
 using PushTechnology.ClientInterface.Client.Details;
 using PushTechnology.ClientInterface.Client.Factories;
 
-namespace UCIStack.Examples
+namespace Examples
 {
     /// <summary>
     /// This is a control client which registers an authentication handler with a server.
@@ -29,8 +29,7 @@ namespace UCIStack.Examples
         /// <summary>
         /// Main entry point.
         /// </summary>
-        /// <param name="args">The command line arguments, currently ignored.</param>
-        public static void Main( string[] args )
+        public static void Run()
         {
             var session = Diffusion.Sessions
                 .Principal( "auth" )

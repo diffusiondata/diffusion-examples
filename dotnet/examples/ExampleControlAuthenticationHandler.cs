@@ -20,7 +20,7 @@ using PushTechnology.ClientInterface.Client.Features.Control.Clients;
 using PushTechnology.ClientInterface.Client.Security.Authentication;
 using PushTechnology.DiffusionCore.Client.Types;
 
-namespace UCIStack.Examples
+namespace Examples
 {
     /// <summary>
     /// Implementation of <see cref="IControlAuthenticationHandler"/>.

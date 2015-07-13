@@ -16,7 +16,7 @@
 using PushTechnology.ClientInterface.Client.Content.Metadata;
 using PushTechnology.ClientInterface.Client.Factories;
 
-namespace UCIStack.Examples
+namespace Examples
 {
     /// <summary>
     /// This example class has a number of methods that demonstrate the creation of metadata using the Diffusion

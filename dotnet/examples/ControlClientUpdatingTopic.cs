@@ -18,7 +18,7 @@ using PushTechnology.ClientInterface.Client.Features.Control.Topics;
 using PushTechnology.ClientInterface.Client.Session;
 using PushTechnology.ClientInterface.Client.Topics;
 
-namespace UCIStack.Examples
+namespace Examples
 {
     /// <summary>
     /// An example of using a control client to create and update a topic in non-exclusive mode (as opposed to acting

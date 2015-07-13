@@ -20,7 +20,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace UCIStack.Examples
+namespace Examples
 {
     /// <summary>
     ///     Factory class to create a periodic Task to simulate a <see cref="System.Threading.Timer" /> using

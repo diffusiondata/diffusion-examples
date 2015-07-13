@@ -17,7 +17,7 @@ using PushTechnology.ClientInterface.Client.Factories;
 using PushTechnology.ClientInterface.Client.Features.Control.Topics;
 using PushTechnology.ClientInterface.Client.Session;
 
-namespace UCIStack.Examples
+namespace Examples
 {
     /// <summary>
     /// This demonstrates using a client to subscribe and unsubscribe other clients to topics.

@@ -17,31 +17,30 @@ using PushTechnology.ClientInterface.Client.Factories;
 using PushTechnology.ClientInterface.Client.Features;
 using PushTechnology.ClientInterface.Client.Session;
 
-namespace UCIStack.Examples
+namespace Examples
 {
     /// <summary>
-    /// This demonstrates a client's use of credentials, specifically the ability to change the principal for an active
-    /// session.
+    /// This is a simple client example that pings the server and prints out the round-trip time.
     /// 
-    /// This is not a realistic use case on its own, but it shown separately here for clarity.
+    /// This uses the <see cref="IPings"/> feature only.
     /// </summary>
-    public class ClientUsingCredentials
+    public class ClientUsingPings
     {
         #region Fields
 
         private readonly ISession session;
-        private readonly ISecurity security;
+        private readonly IPings pings;
 
         #endregion Fields
 
         #region Constructor
 
-        public ClientUsingCredentials()
+        public ClientUsingPings()
         {
             session = Diffusion.Sessions.Principal( "client" ).Password( "password" )
                 .Open( "ws://diffusion.example.com:80" );
 
-            security = session.GetSecurityFeature();
+            pings = session.GetPingFeature();
         }
 
         #endregion Constructor
@@ -49,14 +48,13 @@ namespace UCIStack.Examples
         #region Public Methods
 
         /// <summary>
-        /// Request a change of principal for the session.
+        /// Ping the server.
         /// </summary>
-        /// <param name="principal">The new principal name.</param>
-        /// <param name="password">The password.</param>
-        /// <param name="callback">Notifies success or failure.</param>
-        public void ChangePrincipal( string principal, string password, IChangePrincipalCallback callback )
+        /// <param name="context">The string to log with round-trip time.</param>
+        /// <param name="callback">Used to return the ping reply.</param>
+        public void Ping( string context, IPingContextCallback<string> callback )
         {
-            security.ChangePrincipal( principal, Diffusion.Credentials.Password( password ), callback );
+            pings.PingServer( context, callback );
         }
 
         /// <summary>

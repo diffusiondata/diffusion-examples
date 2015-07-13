@@ -24,7 +24,7 @@ using PushTechnology.ClientInterface.Client.Security.Authentication;
 using PushTechnology.ClientInterface.Client.Session;
 using PushTechnology.DiffusionCore.Client.Types;
 
-namespace UCIStack.Examples
+namespace Examples
 {
     /// <summary>
     /// This demonstrates the use of a control client to authenticate client connections.

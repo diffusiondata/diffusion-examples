@@ -17,7 +17,7 @@ using PushTechnology.ClientInterface.Client.Details;
 using PushTechnology.ClientInterface.Client.Security.Authentication;
 using PushTechnology.DiffusionCore.Client.Types;
 
-namespace UCIStack.Examples
+namespace Examples
 {
     /// <summary>
     /// This is a local authentication handler that allows control clients to install their own authentication

@@ -21,7 +21,7 @@ using PushTechnology.ClientInterface.Client.Features.Control.Topics;
 using PushTechnology.ClientInterface.Client.Session;
 using PushTechnology.ClientInterface.Client.Types;
 
-namespace UCIStack.Examples
+namespace Examples
 {
     /// <summary>
     /// This is an example of a control client using the 'MessagingControl' feature to send messages to clients using

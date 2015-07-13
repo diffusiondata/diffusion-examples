@@ -22,7 +22,7 @@ using PushTechnology.ClientInterface.Client.Session;
 using PushTechnology.ClientInterface.Client.Topics;
 using PushTechnology.ClientInterface.Client.Types;
 
-namespace UCIStack.Examples
+namespace Examples
 {
     /// <summary>
     /// In this simple and commonest case for a client, we just subscribe to a few topics and assign handlers for each

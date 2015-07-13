@@ -19,7 +19,7 @@ using PushTechnology.ClientInterface.Client.Features;
 using PushTechnology.ClientInterface.Client.Features.Control.Topics;
 using PushTechnology.ClientInterface.Client.Session;
 
-namespace UCIStack.Examples
+namespace Examples
 {
     public class ControlClientMissingTopicNotification
     {

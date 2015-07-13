@@ -16,31 +16,32 @@
 using PushTechnology.ClientInterface.Client.Factories;
 using PushTechnology.ClientInterface.Client.Features;
 using PushTechnology.ClientInterface.Client.Session;
+using PushTechnology.DiffusionCore.Messaging.Topic;
 
-namespace UCIStack.Examples
+namespace Examples
 {
     /// <summary>
-    /// This is a simple client example that pings the server and prints out the round-trip time.
+    /// This is a simple example of a client that fetches the state of topics but does not subscribe to them.
     /// 
-    /// This uses the <see cref="IPings"/> feature only.
+    /// This makes use of the <see cref="ITopics"/> feature only.
     /// </summary>
-    public class ClientUsingPings
+    public class ClientUsingFetch
     {
         #region Fields
 
         private readonly ISession session;
-        private readonly IPings pings;
+        private readonly ITopics topics;
 
         #endregion Fields
 
         #region Constructor
 
-        public ClientUsingPings()
+        public ClientUsingFetch()
         {
             session = Diffusion.Sessions.Principal( "client" ).Password( "password" )
                 .Open( "ws://diffusion.example.com:80" );
 
-            pings = session.GetPingFeature();
+            topics = session.GetTopicsFeature();
         }
 
         #endregion Constructor
@@ -48,13 +49,14 @@ namespace UCIStack.Examples
         #region Public Methods
 
         /// <summary>
-        /// Ping the server.
+        /// Issues a fetch request for a topic or selection of topics.
         /// </summary>
-        /// <param name="context">The string to log with round-trip time.</param>
-        /// <param name="callback">Used to return the ping reply.</param>
-        public void Ping( string context, IPingContextCallback<string> callback )
+        /// <param name="topicSelector">A <see cref="TopicSelector"/> expression.</param>
+        /// <param name="fetchContext">The context string to be returned with the fetch response(s).</param>
+        /// <param name="stream">The callback for fetch responses.</param>
+        public void Fetch( string topicSelector, string fetchContext, IFetchContextStream<string> stream )
         {
-            pings.PingServer( context, callback );
+            topics.Fetch( topicSelector, fetchContext, stream );
         }
 
         /// <summary>

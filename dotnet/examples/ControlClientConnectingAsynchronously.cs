@@ -19,7 +19,7 @@ using PushTechnology.ClientInterface.Client.Features.Control.Topics;
 using PushTechnology.ClientInterface.Client.Session;
 using PushTechnology.ClientInterface.Client.Topics;
 
-namespace UCIStack.Examples
+namespace Examples
 {
     /// <summary>
     /// This is a simple example of a client that uses asynchronous connection to connect, create a topic and then

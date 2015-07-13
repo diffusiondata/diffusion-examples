@@ -19,7 +19,7 @@ using PushTechnology.ClientInterface.Client.Features;
 using PushTechnology.ClientInterface.Client.Session;
 using PushTechnology.ClientInterface.Client.Types;
 
-namespace UCIStack.Examples
+namespace Examples
 {
     /// <summary>
     /// This is a simple example of a client that uses the 'Messaging' feature to send messages on a topic path.

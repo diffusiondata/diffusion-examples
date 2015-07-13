@@ -16,32 +16,32 @@
 using PushTechnology.ClientInterface.Client.Factories;
 using PushTechnology.ClientInterface.Client.Features;
 using PushTechnology.ClientInterface.Client.Session;
-using PushTechnology.DiffusionCore.Messaging.Topic;
 
-namespace UCIStack.Examples
+namespace Examples
 {
     /// <summary>
-    /// This is a simple example of a client that fetches the state of topics but does not subscribe to them.
+    /// This demonstrates a client's use of credentials, specifically the ability to change the principal for an active
+    /// session.
     /// 
-    /// This makes use of the <see cref="ITopics"/> feature only.
+    /// This is not a realistic use case on its own, but it shown separately here for clarity.
     /// </summary>
-    public class ClientUsingFetch
+    public class ClientUsingCredentials
     {
         #region Fields
 
         private readonly ISession session;
-        private readonly ITopics topics;
+        private readonly ISecurity security;
 
         #endregion Fields
 
         #region Constructor
 
-        public ClientUsingFetch()
+        public ClientUsingCredentials()
         {
             session = Diffusion.Sessions.Principal( "client" ).Password( "password" )
                 .Open( "ws://diffusion.example.com:80" );
 
-            topics = session.GetTopicsFeature();
+            security = session.GetSecurityFeature();
         }
 
         #endregion Constructor
@@ -49,14 +49,14 @@ namespace UCIStack.Examples
         #region Public Methods
 
         /// <summary>
-        /// Issues a fetch request for a topic or selection of topics.
+        /// Request a change of principal for the session.
         /// </summary>
-        /// <param name="topicSelector">A <see cref="TopicSelector"/> expression.</param>
-        /// <param name="fetchContext">The context string to be returned with the fetch response(s).</param>
-        /// <param name="stream">The callback for fetch responses.</param>
-        public void Fetch( string topicSelector, string fetchContext, IFetchContextStream<string> stream )
+        /// <param name="principal">The new principal name.</param>
+        /// <param name="password">The password.</param>
+        /// <param name="callback">Notifies success or failure.</param>
+        public void ChangePrincipal( string principal, string password, IChangePrincipalCallback callback )
         {
-            topics.Fetch( topicSelector, fetchContext, stream );
+            security.ChangePrincipal( principal, Diffusion.Credentials.Password( password ), callback );
         }
 
         /// <summary>

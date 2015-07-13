@@ -21,7 +21,7 @@ using PushTechnology.ClientInterface.Client.Features.Control.Clients;
 using PushTechnology.ClientInterface.Client.Types;
 using IUpdateStoreCallback = PushTechnology.ClientInterface.Client.Features.Control.Clients.SecurityControl.IUpdateStoreCallback;
 
-namespace UCIStack.Examples
+namespace Examples
 {
     public class ControlClientChangingSystemAuthentication
     {

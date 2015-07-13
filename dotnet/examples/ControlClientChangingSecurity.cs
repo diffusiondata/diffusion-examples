@@ -20,7 +20,7 @@ using PushTechnology.ClientInterface.Client.Factories;
 using PushTechnology.ClientInterface.Client.Features.Control.Clients.SecurityControl;
 using PushTechnology.ClientInterface.Client.Types;
 
-namespace UCIStack.Examples
+namespace Examples
 {
     /// <summary>
     /// An example of using a control client to alter the security configuration.
