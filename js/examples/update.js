@@ -57,4 +57,31 @@ diffusion.connect({
     session.topics.add('topic', '').then(function() {
         session.topics.update('topic', builder.build());
     });
+
+    // 3. A session may establish an exclusive update source. Once active, only this session may update topics at or
+    // under the registration branch.
+
+    session.topics.registerUpdateSource('exclusive/topic', {
+        onRegister : function(topic, deregister) {
+            // The handler provides a deregistration function to remove this registration and allow other sessions to
+            // update topics under the registered path.
+        },
+        onActive : function(topic, updater) {
+            // Once active, a handler may use the provided updater to update any topics at or under the registered path
+            updater.update('exclusive/topic/bar', 123).then(function() {
+                // The update was successful.
+            }, function(err) {
+                // There was an error updating the topic
+            });
+        },
+        onStandBy : function(topic) {
+            // If there is another update source registered for the same topic path, any subsequent registrations will
+            // be put into a standby state. The registration is still held by the server, and the 'onActive' function
+            // will be called if the pre-existing registration is closed at a later point in time
+        },
+        onClose : function(topic, err) {
+            // The 'onClose' function will be called once the registration is closed, either by the session being closed
+            // or the 'deregister' function being called.
+        }
+    });
 });

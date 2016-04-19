@@ -1,6 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -11,7 +11,7 @@
 
     <groupId>com.pushtechnology.diffusion</groupId>
     <artifactId>diffusion-api-java-examples</artifactId>
-    <version>5.5.0</version>
+    <version>5.7.1</version>
     <packaging>jar</packaging>
     <description>Diffusion public API examples.</description>
 
@@ -30,13 +30,13 @@
         <dependency>
             <groupId>com.pushtechnology.diffusion</groupId>
             <artifactId>diffusion-api</artifactId>
-            <version>${project.version}</version>
+            <version>5.7.0</version>
         </dependency>
 
         <dependency>
             <groupId>com.pushtechnology.diffusion</groupId>
             <artifactId>diffusion-client</artifactId>
-            <version>${project.version}</version>
+            <version>5.7.1</version>
             <scope>runtime</scope>
         </dependency>
 
@@ -64,6 +64,7 @@
                 Configuration to allow the PublishingClient to be executed from Maven.
 
                 To use, edit PublishingClient.java to set an appropriate URL for
+                your Diffusion or Reappt server. Then start using Maven:
                 your Diffusion or Reappt server. Then start using Maven:
 
                     mvn clean compile exec:java

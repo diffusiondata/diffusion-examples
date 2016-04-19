@@ -52,7 +52,7 @@ diffusion.connect({
                                                    .build();
 
     // Update the server-side store with the generated script
-    session.security.updateStore(setPermissionScript).then(function() {
+    session.security.updateSecurityStore(setPermissionScript).then(function() {
         console.log('Security configuration updated successfully');
     }, function(error) {
         console.log('Failed to update security configuration: ', error);
@@ -75,7 +75,7 @@ diffusion.connect({
                                                    .build();
 
     // Update the system authentication store
-    session.security.updateStore(addUserScript).then(function() {
+    session.security.updateAuthenticationStore(addUserScript).then(function() {
         console.log('Updated system authentication config');
     }, function(error) {
         console.log('Failed to update system authentication: ', error);

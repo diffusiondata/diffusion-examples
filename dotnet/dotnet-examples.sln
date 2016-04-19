@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Examples", "examples\Examples.csproj", "{F0652B6E-3416-4ED1-97E4-09EE84337155}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Examples", "Examples\Examples.csproj", "{F0652B6E-3416-4ED1-97E4-09EE84337155}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C9AA1812-0416-4217-8F9C-DA0DA49E65FA}"
 	ProjectSection(SolutionItems) = preProject
-		ReadMe.md = ReadMe.md
+		README.md = README.md
 	EndProjectSection
 EndProject
 Global
