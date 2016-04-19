@@ -1,3 +1,17 @@
+/*******************************************************************************
+ * Copyright (C) 2014, 2015 Push Technology Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
 
 import com.pushtechnology.diffusion.client.Diffusion;
@@ -28,7 +42,7 @@ public final class ControlClientHandlingMissingTopicNotification {
      */
     public ControlClientHandlingMissingTopicNotification() {
         // Create a session
-        session = Diffusion.sessions().password("password").principal("admin").open("dpt://localhost:8081");
+        session = Diffusion.sessions().password("password").principal("admin").open("dpt://diffusion.example.com:8080");
 
         topicControl = session.feature(TopicControl.class);
 
@@ -75,9 +89,9 @@ public final class ControlClientHandlingMissingTopicNotification {
     }
 
     private final class AddTopicCallback implements TopicControl.AddCallback {
-        private MissingTopicNotification notification;
+        private final MissingTopicNotification notification;
 
-        public AddTopicCallback(MissingTopicNotification notification) {
+        AddTopicCallback(MissingTopicNotification notification) {
             this.notification = notification;
         }
 

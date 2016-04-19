@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2015 Push Technology Ltd.
+ * Copyright (C) 2014, 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@ package com.pushtechnology.diffusion.gettingstarted;
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.content.Content;
 import com.pushtechnology.diffusion.client.features.Topics;
-import com.pushtechnology.diffusion.client.features.Topics.TopicStream;
+import com.pushtechnology.diffusion.client.features.Topics.ValueStream;
 import com.pushtechnology.diffusion.client.session.Session;
-import com.pushtechnology.diffusion.client.types.UpdateContext;
+import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 
 /**
- * A client that publishes an incrementing count to the topic 'foo/counter.
+ * A client that subscribes to the topic 'foo/counter.
  *
  * @author Push Technology Limited
  * @since 5.5
@@ -41,12 +41,11 @@ public class SubscribingClient {
         // Get the Topics feature to subscribe to topics
         final Topics topics = session.feature(Topics.class);
 
-        // Add a new topic stream for 'foo/counter'
-        topics.addTopicStream(">foo/counter", new TopicStreamPrintLn());
+        // Add a new stream for 'foo/counter'
+        topics.addStream(">foo/counter", Content.class, new ValueStreamPrintLn());
 
         // Subscribe to the topic 'foo/counter'
-        topics.subscribe("foo/counter",
-                new Topics.CompletionCallback.Default());
+        topics.subscribe("foo/counter", new Topics.CompletionCallback.Default());
 
         // Wait for a minute while the stream prints updates
         Thread.sleep(60000);
@@ -55,12 +54,14 @@ public class SubscribingClient {
     /**
      * A topic stream that prints updates to the console.
      */
-    private static class TopicStreamPrintLn extends TopicStream.Default {
+    private static class ValueStreamPrintLn extends ValueStream.Default<Content> {
         @Override
-        public void onTopicUpdate(String topic, Content content,
-                UpdateContext context) {
-
-            System.out.println(topic + ":   " + content.asString());
+        public void onValue(
+            String topicPath,
+            TopicSpecification specification,
+            Content oldValue,
+            Content newValue) {
+            System.out.println(topicPath + ":   " + newValue.asString());
         }
     }
 }

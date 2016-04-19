@@ -61,7 +61,7 @@ public final class ClientCreatingMetadata {
      * @param value default value
      * @return new decimal field metadata
      */
-    public MDecimalString createDecimal(String name, int scale, double value) {
+    public MDecimalString createDecimal(String name, int scale, String value) {
         return factory.decimalBuilder(name).scale(scale).defaultValue(value)
             .build();
     }

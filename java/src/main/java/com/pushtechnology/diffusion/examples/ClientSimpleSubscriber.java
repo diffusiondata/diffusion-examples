@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2015 Push Technology Ltd.
+ * Copyright (C) 2014, 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@ import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.content.Content;
-import com.pushtechnology.diffusion.client.content.RecordContentReader;
 import com.pushtechnology.diffusion.client.features.Topics;
-import com.pushtechnology.diffusion.client.features.Topics.TopicStream;
+import com.pushtechnology.diffusion.client.features.Topics.ValueStream;
 import com.pushtechnology.diffusion.client.session.Session;
-import com.pushtechnology.diffusion.client.types.UpdateContext;
+import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
+import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
  * In this simple and commonest case for a client we just subscribe to a few
@@ -31,8 +31,9 @@ import com.pushtechnology.diffusion.client.types.UpdateContext;
  * <P>
  * This makes use of the 'Topics' feature only.
  * <P>
- * To subscribe to a topic, the client session must have the 'read_topic'
- * permission for that branch of the topic tree.
+ * To subscribe to a topic, the client session must have the
+ * 'select_topic' and 'read_topic' permissions for that branch of the
+ * topic tree.
  *
  * @author Push Technology Limited
  * @since 5.0
@@ -56,8 +57,8 @@ public final class ClientSimpleSubscriber {
         // Use the Topics feature to add a topic stream for
         // Foo and all topics under Bar and request subscription to those topics
         final Topics topics = session.feature(Topics.class);
-        topics.addTopicStream(">Foo", new FooTopicStream());
-        topics.addTopicStream(">Bar/", new BarTopicStream());
+        topics.addStream(">Foo", Content.class, new FooStream());
+        topics.addStream(">Bar//", JSON.class, new BarStream());
         topics.subscribe(
             Diffusion.topicSelectors().anyOf("Foo", "Bar//"),
             new Topics.CompletionCallback.Default());
@@ -71,44 +72,30 @@ public final class ClientSimpleSubscriber {
     }
 
     /**
-     * The topic stream for all messages on the 'Foo' topic.
+     * The stream for all messages on the 'Foo' topic.
      */
-    private class FooTopicStream extends TopicStream.Default {
+    private class FooStream extends ValueStream.Default<Content> {
         @Override
-        public void onTopicUpdate(
-            String topic,
-            Content content,
-            UpdateContext context) {
-
-            LOG.info(content.asString());
+        public void onValue(
+            String topicPath,
+            TopicSpecification specification,
+            Content oldValue,
+            Content newValue) {
+            LOG.info(newValue.asString());
         }
     }
 
     /**
-     * The topic stream for all messages on 'Bar' topics.
+     * The stream for all messages on 'Bar' topics which are JSON topics.
      */
-    private class BarTopicStream extends TopicStream.Default {
+    private class BarStream extends ValueStream.Default<JSON> {
         @Override
-        public void onTopicUpdate(
-            String topic,
-            Content content,
-            UpdateContext context) {
-
-            // Process the message - one with a record with a variable number of
-            // fields followed by two more fields (effectively another record
-            // but no need to process as such).
-
-            final RecordContentReader reader =
-                Diffusion.content().newReader(
-                    RecordContentReader.class,
-                    content);
-
-            for (String field : reader.nextRecord()) {
-                LOG.info("Record 1 Field={}", field);
-            }
-
-            LOG.info("Extra Field 1={}", reader.nextField());
-            LOG.info("Extra Field 2={}", reader.nextField());
+        public void onValue(
+            String topicPath,
+            TopicSpecification specification,
+            JSON oldValue,
+            JSON newValue) {
+            LOG.info(newValue.toJsonString());
         }
     }
 }

@@ -34,6 +34,7 @@ import com.pushtechnology.diffusion.client.session.reconnect.ReconnectionStrateg
  */
 public class ClientWithReconnectionStrategy {
 
+    private volatile int retries = 0;
     /**
      * Constructor.
      */
@@ -48,7 +49,6 @@ public class ClientWithReconnectionStrategy {
         // Create a new reconnection strategy that applies an exponential backoff
         final ReconnectionStrategy reconnectionStrategy = new ReconnectionStrategy() {
             private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-            private volatile int retries = 0;
 
             @Override
             public void performReconnection(final ReconnectionAttempt reconnection) {
@@ -74,6 +74,11 @@ public class ClientWithReconnectionStrategy {
                 if (newState == State.RECOVERING_RECONNECT) {
                     // The session has been disconnected, and has entered recovery state. It is during this state that
                     // the reconnect strategy will be called
+                }
+
+                if (newState == State.CONNECTED_ACTIVE) {
+                    // The session has connected for the first time, or it has been reconnected.
+                    retries = 0;
                 }
 
                 if (oldState == State.RECOVERING_RECONNECT) {

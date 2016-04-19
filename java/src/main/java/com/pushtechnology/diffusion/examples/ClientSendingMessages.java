@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2015 Push Technology Ltd.
+ * Copyright (C) 2014, 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import com.pushtechnology.diffusion.client.features.Messaging;
 import com.pushtechnology.diffusion.client.features.Messaging.SendCallback;
 import com.pushtechnology.diffusion.client.features.Messaging.SendContextCallback;
 import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
  * This is a simple example of a client that uses the 'Messaging' feature to
@@ -58,10 +59,19 @@ public final class ClientSendingMessages {
      * @param callback notifies message sent
      */
     public void send(String topicPath, String message, SendCallback callback) {
-        messaging.send(
-            topicPath,
-            Diffusion.content().newContent(message),
-            callback);
+        messaging.send(topicPath, message, callback);
+    }
+
+    /**
+     * Sends a JSON object to a specified topic path.
+     * <P>
+     *
+     * @param topicPath the topic path
+     * @param message the JSON object to send
+     * @param callback notifies message sent
+     */
+    public void send(String topicPath, JSON message, SendCallback callback) {
+        messaging.send(topicPath, message, callback);
     }
 
     /**
@@ -81,11 +91,7 @@ public final class ClientSendingMessages {
         String context,
         SendContextCallback<String> callback) {
 
-        messaging.send(
-            topicPath,
-            Diffusion.content().newContent(message),
-            context,
-            callback);
+        messaging.send(topicPath, message, context, callback);
     }
 
     /**

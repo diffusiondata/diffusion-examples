@@ -15,6 +15,7 @@
 package com.pushtechnology.diffusion.examples;
 
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.EnumSet;
 
 import com.pushtechnology.diffusion.client.Diffusion;
@@ -76,7 +77,7 @@ public class ControlClientIdentityChecks {
 
             if ("admin".equals(principal) &&
                 credentials.getType() == Credentials.Type.PLAIN_PASSWORD &&
-                credentials.toBytes().equals(passwordBytes)) {
+                Arrays.equals(credentials.toBytes(), passwordBytes)) {
                 callback.allow();
             }
             else {

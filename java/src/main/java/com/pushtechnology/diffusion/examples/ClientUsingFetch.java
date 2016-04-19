@@ -18,6 +18,7 @@ import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.Topics;
 import com.pushtechnology.diffusion.client.features.Topics.FetchContextStream;
 import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.client.topics.TopicSelector;
 
 /**
  * This is a simple example of a client that fetches the state of topics but

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2015 Push Technology Ltd.
+ * Copyright (C) 2014, 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,36 +39,41 @@ public final class PublishingClient {
 
         // Connect using a principal with 'modify_topic' and 'update_topic'
         // permissions
-        final Session session = Diffusion.sessions().principal("principal")
-                .password("password").open("ws://host:80");
+        final Session session =
+            Diffusion.sessions().principal("principal").password("password").
+            open("ws://host:80");
 
         // Get the TopicControl and TopicUpdateControl feature
         final TopicControl topicControl = session.feature(TopicControl.class);
 
-        final TopicUpdateControl updateControl = session
-                .feature(TopicUpdateControl.class);
+        final TopicUpdateControl updateControl =
+            session.feature(TopicUpdateControl.class);
 
         final CountDownLatch waitForStart = new CountDownLatch(1);
 
         // Create a single value topic 'foo/counter'
-        topicControl.addTopic("foo/counter", TopicType.SINGLE_VALUE,
-                new AddCallback.Default() {
-                    @Override
-                    public void onTopicAdded(String topicPath) {
-                        waitForStart.countDown();
-                    }
-                });
+        topicControl.addTopic(
+            "foo/counter",
+            TopicType.SINGLE_VALUE,
+            new AddCallback.Default() {
+                @Override
+                public void onTopicAdded(String topicPath) {
+                    waitForStart.countDown();
+                }
+            });
 
         // Wait for the onTopicAdded() callback.
         waitForStart.await();
 
         // Update the topic
+        final UpdateCallback updateCallback = new UpdateCallback.Default();
         for (int i = 0; i < 1000; ++i) {
 
-            // Use the non-exclusive updater to update the topic without locking
-            // it
-            updateControl.updater().update("foo/counter", Integer.toString(i),
-                    new UpdateCallback.Default());
+            // Use the non-exclusive updater to update the topic without locking it
+            updateControl.updater().update(
+                "foo/counter",
+                Integer.toString(i),
+                updateCallback);
 
             Thread.sleep(1000);
         }

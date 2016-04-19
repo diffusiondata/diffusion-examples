@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2015 Push Technology Ltd.
+ * Copyright (C) 2014, 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,22 +59,22 @@ public class ControlClientAddingTopics {
     }
 
     /**
-     * Adds a topic with type derived from value.
+     * Adds a topic with type derived from the initial value.
      * <P>
      * This uses the simple convenience method for adding topics where the topic
-     * type and metadata are derived from a supplied value which can be any
-     * object. For example, an Integer would result in a single value topic of
-     * type integer.
+     * type (and metadata, if appropriate) are derived from a supplied value
+     * which can be any object. For example, an Integer would result in a single
+     * value topic of type integer or a JSON object would result in a JSON topic.
      *
      * @param topicPath full topic path
-     * @param initialValue an optional initial value for the topic
+     * @param initialValue an initial value for the topic
      * @param context this will be passed back to the callback when reporting
      *        success or failure of the topic add
      * @param callback to notify result of operation
      * @param <T> the value type
      * @return the topic details used to add the topic
      */
-    public <T> TopicDetails addTopicForValue(
+    public <T> TopicDetails addTopic(
         String topicPath,
         T initialValue,
         String context,
