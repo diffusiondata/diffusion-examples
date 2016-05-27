@@ -1,0 +1,32 @@
+<DOCTYPE html>
+<html>
+    <head>
+        <!-- Add Reappt/Diffusion library -->
+        <script src="http://developer.reappt.io/clients/js/diffusion.js"></script>
+    </head>
+    
+    <body>
+    </body>
+
+    <script>
+        diffusion.connect({
+            // Change to your Reappt 'TopicControl' user name and password
+            principal : 'control-client',
+            credentials : 'password',
+
+            // Change to your Reappt instance name
+            host : 'HOSTNAME',
+        }).then(function (session) { 
+            // Create a counter with an initial value of 0.
+            var counter = 0;
+    
+            // Create a topic with a default value of 0.
+            session.topics.add('foo/counter', counter);
+
+            // Start updating the topic every second
+            setInterval(function() { 
+                session.topics.update('foo/counter', counter++); 
+            }, 1000);
+        });
+    </script>
+</html>

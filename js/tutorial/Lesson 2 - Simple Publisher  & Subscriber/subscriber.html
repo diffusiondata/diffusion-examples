@@ -1,0 +1,37 @@
+<DOCTYPE html>
+<html>
+    <head>
+        <!-- Add Reappt/Diffusion library -->
+        <script src="http://developer.reappt.io/clients/js/diffusion.js"></script>
+    </head>
+
+    <body>
+    </body>
+
+    <script>
+        diffusion.connect({
+
+            // Change to your Reappt control client user name and password
+            principal : 'control',
+            credentials : 'password',
+
+            // Change to your Reappt instance name
+            host : 'HOSTNAME',
+
+        }).then(function (session) { 
+            // Subscribe to the Topic 'foo/counter' and define callbacks    
+            
+            session.subscribe('foo/counter').on({
+                subscribe : function(topic) {
+                    console.log("Subscribed to: " + topic);
+                },
+                unsubscribe : function(topic, reason) {
+                    console.log("Unsubscribed from: " + topic);
+                },
+                update : function(value, topic) {
+                    console.log("Topic " + topic + " updated. Value " + value);
+                }
+            });
+        });
+    </script>
+</html>
