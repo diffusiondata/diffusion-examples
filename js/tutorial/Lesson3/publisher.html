@@ -1,0 +1,45 @@
+<DOCTYPE html>
+<html>
+    <head>
+        <!-- Add Reappt/Diffusion library -->
+        <script src="http://developer.reappt.io/clients/js/diffusion.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    </head>
+
+    <script>
+        diffusion.connect({
+            // Change to your Reappt 'TopicControl' user name and password
+            principal : 'control-client',
+            credentials : 'password',
+
+            // Change to your Reappt instance name
+            host : 'HOSTNAME',
+        }).then(function (session) { 
+            
+            session.topics.add('json', diffusion.topics.TopicType.JSON).then(
+                function(result) {
+                    startUpdate(session);
+                },
+                function(error) {
+                    console.log('Error creating topic');
+                }
+            )
+
+        });
+
+        function startUpdate(session){
+            console.log('Starting Updater');
+
+            setInterval(function(){ 
+                $.ajax({
+                    url: 'https://api.bitcoinaverage.com/ticker/global/EUR/',
+                    type: 'GET',
+                    success: function(data) { 
+                        session.topics.update('json', data);
+                    }
+                });
+            }, 3000);
+        }
+
+    </script>
+</html>
