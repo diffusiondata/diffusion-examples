@@ -20,8 +20,10 @@
     <head>
         <!-- Add Reappt/Diffusion library -->
         <script src="http://developer.reappt.io/clients/js/diffusion.js"></script>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
     </head>
+
+    <body>
+    </body>
 
     <script>
         diffusion.connect({
@@ -32,31 +34,17 @@
             // Change to your Reappt instance name
             host : 'HOSTNAME',
         }).then(function (session) { 
+            // Subscribe to JSON topic, print JSON to console
+            var datatype = diffusion.datatypes.json();  
             
-            session.topics.add('json', diffusion.topics.TopicType.JSON).then(
-                function(result) {
-                    startUpdate(session);
-                },
-                function(error) {
-                    console.log('Error creating topic');
+            session.subscribe('json').asType(datatype).on({
+                
+                value : function(topic, specification, newValue, oldValue) {
+                    newValue = newValue.get();
+                    console.log(newValue);
                 }
-            )
-
+            });
+            
         });
-
-        function startUpdate(session){
-            console.log('Starting Updater');
-
-            setInterval(function(){ 
-                $.ajax({
-                    url: 'https://api.bitcoinaverage.com/ticker/global/EUR/',
-                    type: 'GET',
-                    success: function(data) { 
-                        session.topics.update('json', data);
-                    }
-                });
-            }, 3000);
-        }
-
     </script>
 </html>
