@@ -6,7 +6,7 @@ The videos can be found on our [YouTube Channel](https://www.youtube.com/user/Pu
 
 #### Video 1: Getting Started with Reappt on IBM Bluemix
 
-[![ScreenShot](https://www.pushtechnology.com/img/video/video1.png)](https://www.youtube.com/watch?v=e38FbjF2zIs)
+[![ScreenShot](https://www.pushtechnology.com/img/video/video1.png)](https://www.youtube.com/watch?v=e38FbjF2zIs&index=1&list=PLYzjzg_h2Tcxc9BZfE6_8Chw2buBzL204)
 
 
 This first short video is about getting started with Reappt, Real-Time Messaging from Push Technology, and IBM Bluemix.
@@ -14,7 +14,7 @@ This first short video is about getting started with Reappt, Real-Time Messaging
  * Get an IBM Bluemix Account at 
  [IBM Registration](https://console.ng.bluemix.net/registration/) 
  
- * Find Reappt in the [Bluemix Catalogue](https://console.ng.bluemix.net/catalog/services/reappt-from-push-technology/)
+ * Find Reappt in the [Bluemix Catalogue](https://www.youtube.com/watch?v=O8gQVetIbFI&list=PLYzjzg_h2Tcxc9BZfE6_8Chw2buBzL204&index=2)
  
  * Create Reappt Service.
 
@@ -28,3 +28,15 @@ The second video in this series shows how simple it is to create a publish subsc
 * Adding Reappt System Users
 * Creating a Simple Publisher - the publisher will update a topic once per second with an incrementing integer. 
 * Creating a Simple Subscriber - the subscriber will print the value of the topic to the browser console.
+
+
+#### Video 3: REST API to Push API
+
+[![ScreenShot](https://www.pushtechnology.com/img/video/video3.png)](https://www.youtube.com/watch?v=19FsL_jprRo&list=PLYzjzg_h2Tcxc9BZfE6_8Chw2buBzL204&index=3)
+
+The third video in this series demonstrates how easy it is to convert a standard JSON REST API into a Push based API, with only the data deltas being sent over the network.
+
+* Create a JSON Topic
+* Publish to JSON Topic
+* Subscribe to JSON Topic
+* Use JSON in application
