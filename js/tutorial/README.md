@@ -6,7 +6,7 @@ The videos can be found on our [YouTube Channel](https://www.youtube.com/user/Pu
 
 #### Video 1: Getting Started with Reappt on IBM Bluemix
 
-[![ScreenShot](https://www.pushtechnology.com/img/video/video1.jpg)](https://www.youtube.com/watch?v=e38FbjF2zIs)
+[![ScreenShot](https://www.pushtechnology.com/img/video/video1.png)](https://www.youtube.com/watch?v=e38FbjF2zIs)
 
 
 This first short video is about getting started with Reappt, Real-Time Messaging from Push Technology, and IBM Bluemix.
@@ -20,7 +20,7 @@ This first short video is about getting started with Reappt, Real-Time Messaging
 
 #### Video 2: Simple Publisher and Subscriber Clients
 
-[![ScreenShot](https://www.pushtechnology.com/img/video/video2.jpg)](https://www.youtube.com/watch?v=O8gQVetIbFI&list=PLYzjzg_h2Tcxc9BZfE6_8Chw2buBzL204&index=2)
+[![ScreenShot](https://www.pushtechnology.com/img/video/video2.png)](https://www.youtube.com/watch?v=O8gQVetIbFI&list=PLYzjzg_h2Tcxc9BZfE6_8Chw2buBzL204&index=2)
 
 The second video in this series shows how simple it is to create a publish subscribe architecture with Reappt, and how this is much more efficient than the traditional REST model.
 
