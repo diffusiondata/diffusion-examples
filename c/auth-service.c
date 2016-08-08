@@ -1,5 +1,5 @@
-/**
- * Copyright © 2014, 2015 Push Technology Ltd.
+/*
+ * Copyright © 2014, 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,24 +12,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * This example is written in C99. Please use an appropriate C99 capable compiler
+ *
  * @author Push Technology Limited
  * @since 5.0
  */
 
 /*
- * Diffusion can be configured to delegate authentication requests to an
- * external handler. This program provides a control authentication handler
- * to demonstrate this feature. A detailed description of security and
- * authentication handlers can be found in the Diffusion user manual.
+ * Diffusion can be configured to delegate authentication requests to
+ * an external handler. This program provides an authentication
+ * handler to demonstrate this feature. A detailed description of
+ * security and authentication handlers can be found in the Diffusion
+ * user manual.
  *
- * In order to verify the authenticity of an external handler, an internal
- * handler needs to be provided; see ControlAuthenticationEnabler.java in
- * the Java examples for a simple implementation.
+ * Authentication handlers are registered with a name, which is typically specified in
+ * Server.xml
+ *
+ * Two handler names are provided by Diffusion and Reappt by default;
+ * before-system-handler and after-system-handler, and additional
+ * handlers may be specified for Diffusion through the Server.xml file
+ * and an accompanying Java class that implements the
+ * AuthenticationHandler interface.
  *
  * This control authentication handler connects to Diffusion and attempts
  * to register itself with a user-supplied name, which should match the name
- * configured in Server.xml. It is also possible to pass a username and
- * password (which is required if using the Java sample, described above).
+ * configured in Server.xml.
+ *
+ * The default behavior is to install as the "before-system-handler",
+ * which means that it will intercept authentication requests before
+ * Diffusion has a chance to act on them.
+ *
+ * It will:
+ * <ul>
+ * <li>Deny all anonymous connections</li>
+ * <li>Allow connections where the principal and credentials (i.e., username and password) match some hardcoded values</li>
+ * <li>Abstain from all other decisions, thereby letting Diffusion and other authentication handlers decide what to do.</li>
+ * </ul>
  */
 
 #include <stdio.h>
@@ -45,6 +63,9 @@ struct user_credentials_s {
         const char *password;
 };
 
+/*
+ * Username/password pairs that this handler accepts.
+ */
 static const struct user_credentials_s USERS[] = {
         { "fish", "chips" },
         { "ham", "eggs" },
@@ -53,14 +74,14 @@ static const struct user_credentials_s USERS[] = {
 
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
-        {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "dpt://localhost:8080"},
-        {'n', "name", "Name under which to register the authorisation handler", ARG_OPTIONAL, ARG_HAS_VALUE, "c-auth-handler"},
+        {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "ws://localhost:8080"},
+        {'n', "name", "Name under which to register the authorisation handler", ARG_OPTIONAL, ARG_HAS_VALUE, "before-system-handler"},
         {'p', "principal", "Principal (username) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
         {'c', "credentials", "Credentials (password) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
         END_OF_ARG_OPTS
 };
 
-/**
+/*
  * When the authentication service has been registered, this function will be
  * called.
  */
@@ -71,7 +92,7 @@ on_registration(SESSION_T *session, void *context)
         return HANDLER_SUCCESS;
 }
 
-/**
+/*
  * When the authentication service has be deregistered, this function will be
  * called.
  */
@@ -82,7 +103,7 @@ on_deregistration(SESSION_T *session, void *context)
         return HANDLER_SUCCESS;
 }
 
-/**
+/*
  * This is the function that is called when authentication has been delegated
  * from Diffusion.
  *
@@ -167,7 +188,7 @@ main(int argc, char** argv)
         HASH_T *options = parse_cmdline(argc, argv, arg_opts);
         if (options == NULL || hash_get(options, "help") != NULL) {
                 show_usage(argc, argv, arg_opts);
-                return 1;
+                return EXIT_FAILURE;
         }
 
         char *url = hash_get(options, "url");
@@ -175,9 +196,11 @@ main(int argc, char** argv)
         char *principal = hash_get(options, "principal");
         char *credentials = hash_get(options, "credentials");
 
-        // Create a session with Diffusion.
+        /*
+         * Create a session with Diffusion.
+         */
         puts("Creating session");
-        DIFFUSION_ERROR_T error;
+        DIFFUSION_ERROR_T error = { 0 };
         SESSION_T *session = session_create(url,
                                             principal,
                                             credentials != NULL ? credentials_create_password(credentials) : NULL,
@@ -186,12 +209,14 @@ main(int argc, char** argv)
         if (session == NULL) {
                 fprintf(stderr, "TEST: Failed to create session\n");
                 fprintf(stderr, "ERR : %s\n", error.message);
-                return 1;
+                return EXIT_FAILURE;
         }
 
-        // Provide a set (via a hash map containing keys and NULL values)
-        // to indicate what information about the connecting client that we'd
-        // like Diffusion to send us.
+        /*
+         * Provide a set (via a hash map containing keys and NULL
+         * values) to indicate what information about the connecting
+         * client that we'd like Diffusion to send us.
+         */
         HASH_T *detail_set = hash_new(5);
         char buf[2];
         sprintf(buf, "%d", SESSION_DETAIL_SUMMARY);
@@ -201,6 +226,9 @@ main(int argc, char** argv)
         sprintf(buf, "%d", SESSION_DETAIL_CONNECTOR_NAME);
         hash_add(detail_set, strdup(buf), NULL);
 
+        /*
+         * Register the authentication handler.
+         */
         AUTHENTICATION_REGISTRATION_PARAMS_T auth_registration_params = {
                 .name = name,
                 .detail_set = detail_set,
@@ -208,30 +236,28 @@ main(int argc, char** argv)
                 .authentication_handlers.on_authentication = on_authentication
         };
 
-        // Register the authentication handler.
         puts("Sending registration request");
         SVC_AUTHENTICATION_REGISTER_REQUEST_T *reg_request =
                 authentication_register(session, auth_registration_params);
 
-        // Wait a while before moving on to deregistration.
-        sleep(10);
+        /*
+         *  Wait a while before moving on to deregistration.
+         */
+        sleep(30);
 
         AUTHENTICATION_DEREGISTRATION_PARAMS_T auth_deregistration_params = {
                 .on_deregistration = on_deregistration,
                 .original_request = reg_request
         };
 
+        /*
+         * Deregister the authentication handler.
+         */
         printf("Deregistering authentication handler\n");
         authentication_deregister(session, auth_deregistration_params);
 
-        // Never exit
-        while (1) {
-                sleep(10);
-        }
+        session_close(session, NULL);
+        session_free(session);
 
-        // Not called, but this is the way you would gracefully terminate the
-        // connection with Diffusion.
-        session_close(session, &error);
-
-        return(EXIT_SUCCESS);
+        return EXIT_SUCCESS;
 }

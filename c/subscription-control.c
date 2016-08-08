@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * This example is written in C99. Please use an appropriate C99 capable compiler
+ *
  * @author Push Technology Limited
  * @since 5.7
  */
@@ -33,7 +35,7 @@
 
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
-        {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "dpt://localhost:8080"},
+        {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "ws://localhost:8080"},
         {'p', "principal", "Principal (username) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
         {'c', "credentials", "Credentials (password) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
         {'t', "topic_selector", "Topic selector to subscribe/unsubscribe clients from", ARG_OPTIONAL, ARG_HAS_VALUE, ">foo"},
@@ -41,6 +43,10 @@ ARG_OPTS_T arg_opts[] = {
 };
 HASH_T *options = NULL;
 
+/*
+ * Callback invoked when a client has been successfully subscribed to
+ * a topic.
+ */
 static int
 on_subscription_complete(SESSION_T *session, void *context)
 {
@@ -48,11 +54,14 @@ on_subscription_complete(SESSION_T *session, void *context)
         return HANDLER_SUCCESS;
 }
 
+/*
+ * Callback invoked when a client session has been opened.
+ */
 static int
 on_session_open(SESSION_T *session, const SESSION_PROPERTIES_EVENT_T *request, void *context)
 {
         if(session_id_cmp(*session->id, request->session_id) == 0) {
-                // It's our session, ignore.
+                // It's our own session, ignore.
                 return HANDLER_SUCCESS;
         }
 
@@ -62,6 +71,9 @@ on_session_open(SESSION_T *session, const SESSION_PROPERTIES_EVENT_T *request, v
         printf("Subscribing session %s to topic selector %s\n", sid_str, topic_selector);
         free(sid_str);
 
+        /*
+         * Subscribe the client session to the topic.
+         */
         SUBSCRIPTION_CONTROL_PARAMS_T subscribe_params = {
                 .session_id = request->session_id,
                 .topic_selector = topic_selector,
@@ -75,11 +87,13 @@ on_session_open(SESSION_T *session, const SESSION_PROPERTIES_EVENT_T *request, v
 int
 main(int argc, char **argv)
 {
-        // Standard command line parsing.
+        /*
+         * Standard command-line parsing.
+         */
         options = parse_cmdline(argc, argv, arg_opts);
         if(options == NULL || hash_get(options, "help") != NULL) {
                 show_usage(argc, argv, arg_opts);
-                return 1;
+                return EXIT_FAILURE;
         }
 
         const char *url = hash_get(options, "url");
@@ -90,18 +104,22 @@ main(int argc, char **argv)
                 credentials = credentials_create_password(password);
         }
 
-        // Create a session with Diffusion.
-        DIFFUSION_ERROR_T error;
+        /*
+         * Create a session with Diffusion.
+         */
+        DIFFUSION_ERROR_T error = { 0 };
         SESSION_T *session = session_create(url, principal, credentials, NULL, NULL, &error);
         if(session == NULL) {
                 fprintf(stderr, "Failed to create session: %s\n", error.message);
                 return EXIT_FAILURE;
         }
 
-        // Register a session properties listener, so we are notified
-        // of new client connections.
-        // In the callback, we will subscribe the client to topics
-        // according to the topic_selector argument.
+        /*
+         * Register a session properties listener, so we are notified
+         * of new client connections.
+         * In the callback, we will subscribe the client to topics
+         * according to the topic_selector argument.
+         */
         SET_T *required_properties = set_new_string(1);
         set_add(required_properties, PROPERTIES_SELECTOR_ALL_FIXED_PROPERTIES);
         SESSION_PROPERTIES_REGISTRATION_PARAMS_T params = {
@@ -111,9 +129,16 @@ main(int argc, char **argv)
         session_properties_listener_register(session, params);
         set_free(required_properties);
 
-        // Pretend to do some work.
+        /*
+         * Pretend to do some work.
+         */
         sleep(10);
 
+        /*
+         * Close session and tidy up.
+         */
         session_close(session, NULL);
         session_free(session);
+
+        return EXIT_SUCCESS;
 }

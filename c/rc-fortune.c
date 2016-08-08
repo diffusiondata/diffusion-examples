@@ -1,5 +1,5 @@
 /**
- * Copyright © 2014, 2015 Push Technology Ltd.
+ * Copyright © 2014, 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,6 +11,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * This example is written in C99. Please use an appropriate C99 capable compiler
  *
  * @author Push Technology Limited
  * @since 5.0
@@ -40,7 +42,7 @@ static int fortune_count = 0;
 
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
-        {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "dpt://localhost:8080"},
+        {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "ws://localhost:8080"},
         {'p', "principal", "Principal (username) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
         {'c', "credentials", "Credentials (password) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
         {'t', "topic", "Topic on which to supply fortunes", ARG_OPTIONAL, ARG_HAS_VALUE, "fortune"},
@@ -48,7 +50,7 @@ ARG_OPTS_T arg_opts[] = {
         END_OF_ARG_OPTS
 };
 
-/**
+/*
  * Reads a fortune file into an array of char *, so we can easily select an
  * individual fortune when asked to do so.
  */
@@ -99,7 +101,7 @@ read_fortunes(const char *path)
         printf("Loaded %d fortunes\n", fortune_count);
 }
 
-/**
+/*
  * This callback is used when the session state changes, e.g. when a session
  * moves from a "connecting" to a "connected" state, or from "connected" to
  * "closed".
@@ -115,7 +117,7 @@ on_session_state_changed(SESSION_T *session, const SESSION_STATE_T old_state, co
         }
 }
 
-/**
+/*
  * This will be called when the state provider is registered with Diffusion.
  */
 static int
@@ -125,7 +127,7 @@ on_registration(SESSION_T *session, const char *path, void *context)
         return HANDLER_SUCCESS;
 }
 
-/**
+/*
  * This is the main handler which is called when a request for state is
  * received from Diffusion.
  *
@@ -147,16 +149,20 @@ fortune_state_handler(SESSION_T *session, const SVC_STATE_REQUEST_T *request, SV
 int
 main(int argc, char **argv)
 {
-        // Standard command line parsing.
+        /*
+         * Standard command-line parsing.
+         */
         HASH_T *options = parse_cmdline(argc, argv, arg_opts);
         if(options == NULL || hash_get(options, "help") != NULL) {
                 show_usage(argc, argv, arg_opts);
-                return 1;
+                return EXIT_FAILURE;
         }
 
         read_fortunes(hash_get(options, "fortune_file"));
 
-        // Seed random number generator.
+        /*
+         * Seed the random number generator.
+         */
         struct timeb t;
         ftime(&t);
         srandom((t.time * 1000 + t.millitm));
@@ -172,28 +178,36 @@ main(int argc, char **argv)
         }
         char *topic = hash_get(options, "topic");
 
-        // A SESSION_LISTENER_T holds callbacks to inform the client
-        // about changes to the state. Used here for informational
-        // purposes only.
-        SESSION_LISTENER_T session_listener;
+        /*
+         * A SESSION_LISTENER_T holds callbacks to inform the client
+         * about changes to the state. Used here for informational
+         * purposes only.
+         */
+        SESSION_LISTENER_T session_listener = { 0 };
         session_listener.on_state_changed = &on_session_state_changed;
 
-        // Creating a session requires at least a URL. Creating a session
-        // initiates a connection with Diffusion.
-        DIFFUSION_ERROR_T error;
+        /*
+         * Create a session with Diffusion.
+         */
+        DIFFUSION_ERROR_T error = { 0 };
         session = session_create(url, principal, credentials, &session_listener, NULL, &error);
         if(session == NULL) {
                 fprintf(stderr, "TEST: Failed to create session\n");
                 fprintf(stderr, "ERR : %s\n", error.message);
-                return 1;
+                return EXIT_FAILURE;
         }
 
-        // Add the "fortune" topic.
+        /*
+         * Add the "fortune" topic.
+         */
         TOPIC_DETAILS_T *details = create_topic_details_stateless();
         add_topic(session, (ADD_TOPIC_PARAMS_T) { .topic_path = "fortune", .details = details });
 
-        // Register a handler for the named topic, so that requests for that
-        // topic's state are routed to this handler by Diffusion.
+        /*
+         * Register a handler for the named topic, so that requests
+         * for that topic's state are routed to this handler by
+         * Diffusion.
+         */
         STATE_PARAMS_T state_params = {
                 .topic_path = topic,
                 .on_topic_control_registration = on_registration,
@@ -207,9 +221,12 @@ main(int argc, char **argv)
                 sleep(10);
         }
 
-        // Not called, but this is how we would close the connection with
-        // Diffusion gracefully.
-        session_close(session, &error);
+        /*
+         * Not called, but this is how we would gracefully close the
+         * connection with Diffusion.
+         */
+        session_close(session, NULL);
+        session_free(session);
 
-        return 0;
+        return EXIT_SUCCESS;
 }

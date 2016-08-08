@@ -12,12 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * This example is written in C99. Please use an appropriate C99 capable compiler
+ *
  * @author Push Technology Limited
  * @since 5.7
  */
 
 /*
- * This examples demonstrates how to register a listener that receives
+ * This example demonstrates how to register a listener that receives
  * notification of new client connections, clients closing and client
  * properties being updated.
  */
@@ -35,12 +37,15 @@
 
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
-        {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "dpt://localhost:8080"},
+        {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "ws://localhost:8080"},
         {'p', "principal", "Principal (username) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
         {'c', "credentials", "Credentials (password) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
         END_OF_ARG_OPTS
 };
 
+/*
+ * Helper function to print the properties hash key/value pairs.
+ */
 static void
 print_properties(HASH_T *properties)
 {
@@ -52,6 +57,9 @@ print_properties(HASH_T *properties)
         free(keys);
 }
 
+/*
+ * Callback invoked when our listener registers successfully.
+ */
 static int
 on_registered(SESSION_T *session, void *context)
 {
@@ -59,6 +67,9 @@ on_registered(SESSION_T *session, void *context)
         return HANDLER_SUCCESS;
 }
 
+/*
+ * Callback invoked if our listener fails to register.
+ */
 static int
 on_registration_error(SESSION_T *session, const DIFFUSION_ERROR_T *error)
 {
@@ -66,6 +77,10 @@ on_registration_error(SESSION_T *session, const DIFFUSION_ERROR_T *error)
         return HANDLER_SUCCESS;
 }
 
+/*
+ * Callback invoked when we receive notification of a new client
+ * session.
+ */
 static int
 on_session_open(SESSION_T *session, const SESSION_PROPERTIES_EVENT_T *request, void *context)
 {
@@ -76,6 +91,10 @@ on_session_open(SESSION_T *session, const SESSION_PROPERTIES_EVENT_T *request, v
         return HANDLER_SUCCESS;
 }
 
+/*
+ * Callback invoked when an existing client session undergoes a change
+ * of properties.
+ */
 static int
 on_session_update(SESSION_T *session, const SESSION_PROPERTIES_EVENT_T *request, void *context)
 {
@@ -87,6 +106,9 @@ on_session_update(SESSION_T *session, const SESSION_PROPERTIES_EVENT_T *request,
         return HANDLER_SUCCESS;
 }
 
+/*
+ * Callback invoked when a client session closes.
+ */
 static int
 on_session_close(SESSION_T *session, const SESSION_PROPERTIES_EVENT_T *request, void *context)
 {
@@ -98,6 +120,10 @@ on_session_close(SESSION_T *session, const SESSION_PROPERTIES_EVENT_T *request, 
         return HANDLER_SUCCESS;
 }
 
+/*
+ * Callback invoked if an error occurs while procssing a session
+ * property event from the server.
+ */
 static int
 on_session_error(SESSION_T *session, const DIFFUSION_ERROR_T *error)
 {
@@ -105,14 +131,19 @@ on_session_error(SESSION_T *session, const DIFFUSION_ERROR_T *error)
         return HANDLER_SUCCESS;
 }
 
+/*
+ * Program entry point.
+ */
 int
 main(int argc, char **argv)
 {
-        // Standard command line parsing.
+        /*
+         * Standard command-line parsing.
+         */
         const HASH_T *options = parse_cmdline(argc, argv, arg_opts);
         if(options == NULL || hash_get(options, "help") != NULL) {
                 show_usage(argc, argv, arg_opts);
-                return 1;
+                return EXIT_FAILURE;
         }
 
         const char *url = hash_get(options, "url");
@@ -123,15 +154,22 @@ main(int argc, char **argv)
                 credentials = credentials_create_password(password);
         }
 
-        // Create a session with Diffusion.
-        DIFFUSION_ERROR_T error;
+        /*
+         * Create a session with Diffusion.
+         */
+        DIFFUSION_ERROR_T error = { 0 };
         SESSION_T *session = session_create(url, principal, credentials, NULL, NULL, &error);
         if(session == NULL) {
                 fprintf(stderr, "Failed to create session: %s\n", error.message);
                 return EXIT_FAILURE;
         }
 
-        // Register a session properties listener.
+        /*
+         * Register a session properties listener.
+         *
+         * Requests all "fixed" properties, i.e. those defined by
+         * Diffusion rather than user-defined properties.
+         */
         SET_T *required_properties = set_new_string(5);
         set_add(required_properties, PROPERTIES_SELECTOR_ALL_FIXED_PROPERTIES);
 
@@ -146,8 +184,16 @@ main(int argc, char **argv)
         };
         session_properties_listener_register(session, params);
 
-        // Wait for session events for 2 minutes.
+        /*
+         *  Wait for session events for 2 minutes.
+         */
         sleep(120);
+
+        /*
+         * Close session and free resources.
+         */
+        session_close(session, NULL);
+        session_free(session);
 
         return EXIT_SUCCESS;
 }

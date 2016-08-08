@@ -1,5 +1,5 @@
 /**
- * Copyright © 2014, 2015 Push Technology Ltd.
+ * Copyright © 2014, 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,6 +11,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * This example is written in C99. Please use an appropriate C99 capable compiler
  *
  * @author Push Technology Limited
  * @since 5.5
@@ -37,12 +39,16 @@ apr_thread_cond_t *cond = NULL;
 
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
-        {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "dpt://localhost:8080"},
+        {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "ws://localhost:8080"},
         {'p', "principal", "Principal (username) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
         {'c', "credentials", "Credentials (password) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
         END_OF_ARG_OPTS
 };
 
+/*
+ * This callback is invoked when the system authentication store is
+ * received, and prints the contents of the store.
+ */
 int
 on_get_system_authentication_store(SESSION_T *session,
                                    const SYSTEM_AUTHENTICATION_STORE_T store,
@@ -93,11 +99,13 @@ on_get_system_authentication_store(SESSION_T *session,
 int
 main(int argc, char **argv)
 {
-        // Standard command line parsing.
+        /*
+         * Standard command-line parsing.
+         */
         const HASH_T *options = parse_cmdline(argc, argv, arg_opts);
         if(options == NULL || hash_get(options, "help") != NULL) {
                 show_usage(argc, argv, arg_opts);
-                return 1;
+                return EXIT_FAILURE;
         }
 
         const char *url = hash_get(options, "url");
@@ -108,22 +116,29 @@ main(int argc, char **argv)
                 credentials = credentials_create_password(password);
         }
 
-        // Setup for condition variable
+        /*
+         * Setup for condition variable
+         */
         apr_initialize();
         apr_pool_create(&pool, NULL);
         apr_thread_mutex_create(&mutex, APR_THREAD_MUTEX_UNNESTED, pool);
         apr_thread_cond_create(&cond, pool);
 
-        // Setup for session
+        /*
+         * Create a session with Diffusion.
+         */
         SESSION_T *session;
-        DIFFUSION_ERROR_T error;
+        DIFFUSION_ERROR_T error = { 0 };
         session = session_create(url, principal, credentials, NULL, NULL, &error);
         if(session == NULL) {
                 fprintf(stderr, "TEST: Failed to create session\n");
                 fprintf(stderr, "ERR : %s\n", error.message);
-                return 1;
+                return EXIT_FAILURE;
         }
 
+        /*
+         * Request the system authentication store.
+         */
         const GET_SYSTEM_AUTHENTICATION_STORE_PARAMS_T params = {
                 .on_get = on_get_system_authentication_store
         };
@@ -134,6 +149,17 @@ main(int argc, char **argv)
 
         apr_thread_cond_wait(cond, mutex);
         apr_thread_mutex_unlock(mutex);
-        
-        return 0;
+
+        /*
+         * Close the session and tidy up.
+         */
+        session_close(session, NULL);
+        session_free(session);
+
+        apr_thread_mutex_destroy(mutex);
+        apr_thread_cond_destroy(cond);
+        apr_pool_destroy(pool);
+        apr_terminate();
+
+        return EXIT_SUCCESS;
 }

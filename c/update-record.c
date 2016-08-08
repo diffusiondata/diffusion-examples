@@ -1,5 +1,5 @@
 /**
- * Copyright © 2014, 2015 Push Technology Ltd.
+ * Copyright © 2014, 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,6 +11,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * This example is written in C99. Please use an appropriate C99 capable compiler
  *
  * @author Push Technology Limited
  * @since 5.0
@@ -46,7 +48,7 @@ apr_thread_cond_t *cond = NULL;
 
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
-        {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "dpt://localhost:8080"},
+        {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "ws://localhost:8080"},
         {'p', "principal", "Principal (username) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
         {'c', "credentials", "Credentials (password) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
         {'t', "topic", "Topic name to create and update", ARG_OPTIONAL, ARG_HAS_VALUE, "foo"},
@@ -57,7 +59,7 @@ ARG_OPTS_T arg_opts[] = {
 static const char *EMPTY_FIELD_MARKER = "-EMPTY-";
 
 /*
- * Handlers for add topic feature.
+ * Handlers for adding topics.
  */
 static int
 on_topic_added(SESSION_T *session, const SVC_ADD_TOPIC_RESPONSE_T *response, void *context)
@@ -73,15 +75,6 @@ static int
 on_topic_add_failed(SESSION_T *session, const SVC_ADD_TOPIC_RESPONSE_T *response, void *context)
 {
         printf("Failed to add topic (%d)\n", response->response_code);
-        apr_thread_mutex_lock(mutex);
-        apr_thread_cond_broadcast(cond);
-        apr_thread_mutex_unlock(mutex);
-        return HANDLER_SUCCESS;
-}
-
-static int
-on_topic_add_discard(SESSION_T *session, const SVC_ADD_TOPIC_RESPONSE_T *response, void *context)
-{
         apr_thread_mutex_lock(mutex);
         apr_thread_cond_broadcast(cond);
         apr_thread_mutex_unlock(mutex);
@@ -183,11 +176,13 @@ on_update_failure(SESSION_T *session,
 int
 main(int argc, char** argv)
 {
-        // Standard command line parsing.
+        /*
+         * Standard command-line parsing.
+         */
         const HASH_T *options = parse_cmdline(argc, argv, arg_opts);
         if(options == NULL || hash_get(options, "help") != NULL) {
                 show_usage(argc, argv, arg_opts);
-                return 1;
+                return EXIT_FAILURE;
         }
 
         const char *url = hash_get(options, "url");
@@ -200,36 +195,39 @@ main(int argc, char** argv)
         const char *topic_name = hash_get(options, "topic");
         const int send_full_data = (hash_get(options, "full") != NULL) ? 1 : 0;
 
-        // Setup for condition variable
+        /*
+         * Setup for condition variable
+         */
         apr_initialize();
         apr_pool_create(&pool, NULL);
         apr_thread_mutex_create(&mutex, APR_THREAD_MUTEX_UNNESTED, pool);
         apr_thread_cond_create(&cond, pool);
 
-        // Setup for session
+        /*
+         * Connect to the Diffusion server.
+         */
         SESSION_T *session;
-        DIFFUSION_ERROR_T error;
+        DIFFUSION_ERROR_T error = { 0 };
         session = session_create(url, principal, credentials, NULL, NULL, &error);
         if(session == NULL) {
                 fprintf(stderr, "TEST: Failed to create session\n");
                 fprintf(stderr, "ERR : %s\n", error.message);
-                return 1;
+                return EXIT_FAILURE;
         }
 
-        // Simple record topic data, two fields.
+        /*
+         * Add a topic with a simple record topic data structure,
+         * containing two fields.
+         */
         BUF_T *schema = buf_create();
         buf_write_string(schema,
-                         "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n");
-        buf_write_string(schema,
-                         "<message topicDataType=\"record\" name=\"SimpleMessage\">\n");
-        buf_write_string(schema,
-                         "<record name=\"SimpleRecord\">\n");
-        buf_write_string(schema,
-                         "<field name=\"first\" type=\"string\" default=\"x\" allowsEmpty=\"true\"/>");
-        buf_write_string(schema,
-                         "<field name=\"second\" type=\"string\" default=\"y\" allowsEmpty=\"true\"/>");
-        buf_write_string(schema, "</record>\n");
-        buf_write_string(schema, "</message>\n");
+                         "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n"
+                         "<message topicDataType=\"record\" name=\"SimpleMessage\">\n"
+                         "<record name=\"SimpleRecord\">\n"
+                         "<field name=\"first\" type=\"string\" default=\"x\" allowsEmpty=\"true\"/>"
+                         "<field name=\"second\" type=\"string\" default=\"y\" allowsEmpty=\"true\"/>"
+                         "</record>\n"
+                         "</message>\n");
 
         TOPIC_DETAILS_T *record_topic_details = create_topic_details_record();
         record_topic_details->user_defined_schema = schema;
@@ -239,8 +237,7 @@ main(int argc, char** argv)
                 .topic_path = topic_name,
                 .details = record_topic_details,
                 .on_topic_added = on_topic_added,
-                .on_topic_add_failed = on_topic_add_failed,
-                .on_discard = on_topic_add_discard
+                .on_topic_add_failed = on_topic_add_failed
         };
 
         apr_thread_mutex_lock(mutex);
@@ -248,7 +245,9 @@ main(int argc, char** argv)
         apr_thread_cond_wait(cond, mutex);
         apr_thread_mutex_unlock(mutex);
 
-        // Handlers for add_update_source()
+        /*
+         * Define the handlers for add_update_source()
+         */
         const UPDATE_SOURCE_REGISTRATION_PARAMS_T update_reg_params = {
                 .topic_path = topic_name,
                 .on_init = on_update_source_init,
@@ -258,7 +257,9 @@ main(int argc, char** argv)
                 .on_close = on_update_source_closed
         };
 
-        // Register an updater
+        /*
+         * Register an update source.
+         */
         apr_thread_mutex_lock(mutex);
         const CONVERSATION_ID_T *updater_id = register_update_source(session, update_reg_params);
         apr_thread_cond_wait(cond, mutex);
@@ -271,7 +272,9 @@ main(int argc, char** argv)
                 .on_failure = on_update_failure
         };
 
-        // Alternately update one field or both every second.
+        /*
+         * Alternately update one field or both every second.
+         */
         int count1 = 0;
         int count2 = 0;
         BUF_T *buf;
@@ -294,6 +297,10 @@ main(int argc, char** argv)
                         buf_sprintf(buf, "%d%c%d", count1, DPT_FIELD_DELIM, count2);
                 }
 
+                /*
+                 * Prepare the structure that defines the update and
+                 * its contents.
+                 */
                 content = content_create(CONTENT_ENCODING_NONE, buf);
                 upd = update_create(send_full_data ? UPDATE_ACTION_REFRESH : UPDATE_ACTION_UPDATE,
                                     UPDATE_TYPE_CONTENT,
@@ -302,12 +309,26 @@ main(int argc, char** argv)
 
                 update_source_params.update = upd;
 
+                /*
+                 * Do the update.
+                 */
                 update(session, update_source_params);
                 update_free(upd);
 
                 sleep(1);
         }
 
+        /*
+         * Close session and tidy up.
+         */
+        session_close(session, NULL);
+        session_free(session);
+
+        apr_thread_mutex_destroy(mutex);
+        apr_thread_cond_destroy(cond);
+        apr_pool_destroy(pool);
+        apr_terminate();
+
         puts("Done.");
-        return 0;
+        return EXIT_SUCCESS;
 }

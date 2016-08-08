@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2014, 2015 Push Technology Ltd.
+ * Copyright © 2014, 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,36 +17,23 @@ using PushTechnology.ClientInterface.Client.Factories;
 using PushTechnology.ClientInterface.Client.Features;
 using PushTechnology.ClientInterface.Client.Session;
 
-namespace Examples
-{
+namespace Examples {
     /// <summary>
     /// This demonstrates a client's use of credentials, specifically the ability to change the principal for an active
     /// session.
-    /// 
+    ///
     /// This is not a realistic use case on its own, but it shown separately here for clarity.
     /// </summary>
-    public class ClientUsingCredentials
-    {
-        #region Fields
-
+    public class ClientUsingCredentials {
         private readonly ISession session;
         private readonly ISecurity security;
 
-        #endregion Fields
-
-        #region Constructor
-
-        public ClientUsingCredentials()
-        {
+        public ClientUsingCredentials() {
             session = Diffusion.Sessions.Principal( "client" ).Password( "password" )
                 .Open( "ws://diffusion.example.com:80" );
 
             security = session.GetSecurityFeature();
         }
-
-        #endregion Constructor
-
-        #region Public Methods
 
         /// <summary>
         /// Request a change of principal for the session.
@@ -54,19 +41,15 @@ namespace Examples
         /// <param name="principal">The new principal name.</param>
         /// <param name="password">The password.</param>
         /// <param name="callback">Notifies success or failure.</param>
-        public void ChangePrincipal( string principal, string password, IChangePrincipalCallback callback )
-        {
+        public void ChangePrincipal( string principal, string password, IChangePrincipalCallback callback ) {
             security.ChangePrincipal( principal, Diffusion.Credentials.Password( password ), callback );
         }
 
         /// <summary>
         /// Close the session.
         /// </summary>
-        public void Close()
-        {
+        public void Close() {
             session.Close();
         }
-
-        #endregion Public Methods
     }
 }

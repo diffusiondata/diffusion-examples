@@ -1,0 +1,31 @@
+<html>
+    <head>
+        <title>JavaScript example</title>
+        <script type="text/javascript" src="http://developer.reappt.io/clients/js/diffusion.js"></script>
+        
+    </head>
+    <body>
+        <div>
+            <span>The value of foo/counter is: </span>
+            <span id="update">Unknown</span>
+        </div>
+        
+        <script type="text/javascript">
+      function subscribeToTopic(session) {
+          session.subscribe('foo/counter')
+              .on('update', function(data) {
+                  document.getElementById('update').innerHTML = data;
+              }
+          );
+      }
+      diffusion.connect({
+          // Edit this line to include the URL of your Reappt service
+          host : 'service-name.reappt.io',
+          
+          // To connect anonymously you can leave out the following parameters
+          principal : 'user',
+          credentials : 'password'
+      }).then(subscribeToTopic);
+    </script>
+    </body>
+</html>

@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2014, 2015 Push Technology Ltd.
+ * Copyright © 2014, 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,33 +19,25 @@ using System.Threading;
 using PushTechnology.ClientInterface.Client.Details;
 using PushTechnology.ClientInterface.Client.Factories;
 
-namespace Examples
-{
+namespace Examples {
     /// <summary>
     /// This is a control client which registers an authentication handler with a server.
     /// </summary>
-    public class ControlAuthenticationClient
-    {
+    public class ControlAuthenticationClient {
         /// <summary>
         /// Main entry point.
         /// </summary>
-        public static void Run()
-        {
-            var session = Diffusion.Sessions
-                .Principal( "auth" )
-                .Password( "auth_secret" )
+        public static void Run() {
+            var session = Diffusion.Sessions.Principal( "auth" ).Password( "auth_secret" )
                 .Open( "ws://diffusion.example.com:80" );
 
-            session.GetAuthenticationControlFeature().SetAuthenticationHandler(
-                "control-client-auth-handler-example",
+            session.GetAuthenticationControlFeature().SetAuthenticationHandler( "control-client-auth-handler-example",
                 Enum.GetValues( typeof( DetailType ) ).OfType<DetailType>().ToList(),
                 new ExampleControlAuthenticationHandler() );
 
-            while( true )
-            {
+            while ( true ) {
                 Thread.Sleep( 60000 );
             }
-            // ReSharper disable once FunctionNeverReturns
         }
     }
 }

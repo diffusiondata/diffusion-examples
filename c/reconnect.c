@@ -19,12 +19,15 @@
  */
 
 /*
- * This examples shows how to make a synchronous connection to Diffusion.
+ * This examples shows how to make a synchronous connection to
+ * Diffusion, with user-provided reconnection logic.
  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
+
+#include <apr_time.h>
 
 #include "diffusion.h"
 #include "args.h"
@@ -34,10 +37,6 @@ ARG_OPTS_T arg_opts[] = {
         {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "ws://localhost:8080"},
         {'p', "principal", "Principal (username) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
         {'c', "credentials", "Credentials (password) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
-        {'d', "delay", "Delay between reconnection attempts, in ms", ARG_OPTIONAL, ARG_HAS_VALUE, "2000" },
-        {'r', "retries", "Reconnection retry attempts", ARG_OPTIONAL, ARG_HAS_VALUE, "5" },
-        {'t', "timeout", "Reconnection timeout for a disconnected session", ARG_OPTIONAL, ARG_HAS_VALUE, NULL },
-        {'x', "cascade_urls", "Comma-separated list of URLs to use for cascading", ARG_OPTIONAL, ARG_HAS_VALUE, NULL },
         {'s', "sleep", "Time to sleep before disconnecting (in seconds).", ARG_OPTIONAL, ARG_HAS_VALUE, "5" },
         END_OF_ARG_OPTS
 };
@@ -55,6 +54,53 @@ on_session_state_changed(SESSION_T *session,
         printf("Session state changed from %s (%d) to %s (%d)\n",
                session_state_as_string(old_state), old_state,
                session_state_as_string(new_state), new_state);
+}
+
+typedef struct {
+        long current_wait;
+        long max_wait;
+} BACKOFF_STRATEGY_ARGS_T;
+
+static RECONNECTION_ATTEMPT_ACTION_T
+backoff_reconnection_strategy(SESSION_T *session, void *args)
+{
+        BACKOFF_STRATEGY_ARGS_T *backoff_args = args;
+
+        printf("Waiting for %ld ms\n", backoff_args->current_wait);
+
+        apr_sleep(backoff_args->current_wait * 1000); // µs -> ms
+
+        // But only up to some maximum time.
+        if(backoff_args->current_wait > backoff_args->max_wait) {
+                backoff_args->current_wait = backoff_args->max_wait;
+        }
+
+        return RECONNECTION_ATTEMPT_ACTION_START;
+}
+
+static void
+backoff_success(SESSION_T *session, void *args)
+{
+        printf("Reconnection successful\n");
+
+        BACKOFF_STRATEGY_ARGS_T *backoff_args = args;
+        backoff_args->current_wait = 0; // Reset wait.
+}
+
+static void
+backoff_failure(SESSION_T *session, void *args)
+{
+        printf("Reconnection failed\n");
+
+        BACKOFF_STRATEGY_ARGS_T *backoff_args = args;
+
+        // Exponential backoff.
+        if(backoff_args->current_wait == 0) {
+                backoff_args->current_wait = 1;
+        }
+        else {
+                backoff_args->current_wait *= 2;
+        }
 }
 
 /*
@@ -80,50 +126,6 @@ main(int argc, char **argv)
                 credentials = credentials_create_password(password);
         }
 
-        long retry_delay = atol(hash_get(options, "delay"));
-        long retry_count = atol(hash_get(options, "retries"));
-        long reconnect_timeout;
-        if(hash_get(options, "timeout") != NULL) {
-                reconnect_timeout = atol(hash_get(options, "timeout"));
-        }
-        else {
-                reconnect_timeout = -1;
-        }
-
-        char *urls = hash_get(options, "cascade_urls");
-
-        /*
-         * Convert a comma-separated list of URLs into a
-         * NULL-terminated array giving URLs to try (in order) until
-         * we successfully connect, or they've all been tried
-         * unsuccessfully. These are in addition to the initial URL.
-         */
-        char **url_array = NULL;
-        if(urls != NULL) {
-                char *urls_copy = strdup(urls);
-                char *start = urls_copy;
-                char *end = urls_copy;
-                int url_count = 0;
-                while(1) {
-                        if(*end == ',' || *end == '\0') {
-                                url_array = realloc(url_array, (url_count + 1) * sizeof(char *));
-                                url_array[url_count] = start;
-                                url_count++;
-                                start = end+1;
-
-                                if(*end == '\0') {
-                                        break;
-                                }
-                                if(*end == ',') {
-                                        *end = '\0';
-                                }
-                        }
-                        end++;
-                }
-                url_array = realloc(url_array, (url_count + 1) * sizeof(char *));
-                url_array[url_count] = NULL;
-        }
-
         const unsigned int sleep_time = atol(hash_get(options, "sleep"));
 
         SESSION_T *session;
@@ -133,18 +135,26 @@ main(int argc, char **argv)
         session_listener.on_state_changed = &on_session_state_changed;
 
         /*
-         * Specify how we might want to cascade/failover or retry, and
-         * how long to keep the session alive on the server before
-         * it's discarded.
+         * Set the arguments to our exponential backoff strategy.
+         */
+        BACKOFF_STRATEGY_ARGS_T *backoff_args = calloc(1, sizeof(BACKOFF_STRATEGY_ARGS_T));
+        backoff_args->current_wait = 0;
+        backoff_args->max_wait = 5000;
+
+        /*
+         * Create the backoff strategy.
          */
         RECONNECTION_STRATEGY_T *reconnection_strategy =
-                make_reconnection_strategy_repeating_attempt(retry_count, retry_delay);
+                make_reconnection_strategy_user_function(backoff_reconnection_strategy,
+                                                         backoff_args,
+                                                         backoff_success,
+                                                         backoff_failure,
+                                                         NULL);
 
-        if(reconnect_timeout > 0) {
-                reconnection_strategy_set_timeout(reconnection_strategy, reconnect_timeout);
-        }
-
-        reconnection_strategy_set_cascade_urls(reconnection_strategy, (const char **)url_array);
+        /*
+         * Only ever retry for 30 seconds.
+         */
+        reconnection_strategy_set_timeout(reconnection_strategy, 30 * 1000);
 
         /*
          * Create a session, synchronously.
@@ -152,9 +162,7 @@ main(int argc, char **argv)
         session = session_create(url, principal, credentials, &session_listener, reconnection_strategy, &error);
         if(session != NULL) {
                 char *sid_str = session_id_to_string(session->id);
-                printf("Session created (state=%d, id=%s)\n",
-                       session_state_get(session),
-                       sid_str);
+                printf("Session created (state=%d, id=%s)\n", session_state_get(session), sid_str);
                 free(sid_str);
         }
         else {

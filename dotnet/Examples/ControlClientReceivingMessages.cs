@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2014, 2015 Push Technology Ltd.
+ * Copyright © 2014, 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,31 +21,22 @@ using PushTechnology.ClientInterface.Client.Features.Control.Topics;
 using PushTechnology.ClientInterface.Client.Session;
 using PushTechnology.ClientInterface.Client.Types;
 
-namespace Examples
-{
+namespace Examples {
     /// <summary>
     /// This is an example of a control client using the <see cref="IMessagingControl"/> feature to receive messages
     /// from clients and also send messages to clients.
-    /// 
+    ///
     /// It is a trivial example that simply responds to all messages on a particular branch of the topic tree by
     /// echoing them back to the client exactly as they are, complete with headers.
     /// </summary>
-    public class ControlClientReceivingMessages
-    {
-        #region Fields
-
+    public class ControlClientReceivingMessages {
         private readonly ISession session;
-
-        #endregion Fields
-
-        #region Constructor
 
         /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="callback">The callback to receive the result of message sending.</param>
-        public ControlClientReceivingMessages( ISendCallback callback )
-        {
+        public ControlClientReceivingMessages( ISendCallback callback ) {
             session = Diffusion.Sessions.Principal( "control" ).Password( "password" )
                 .Open( "ws://diffusion.example.com:80" );
 
@@ -56,43 +47,22 @@ namespace Examples
             messagingControl.AddMessageHandler( "foo", new EchoHandler( messagingControl, callback ) );
         }
 
-        #endregion Constructor
-
-        #region Public Methods
-
         /// <summary>
         /// Close the session.
         /// </summary>
-        public void Close()
-        {
+        public void Close() {
             session.Close();
         }
 
-        #endregion Public Methods
-
-        #region Private Classes
-
-        private class EchoHandler : MessageHandlerDefault
-        {
-            #region Fields
-
+        private class EchoHandler : MessageHandlerDefault {
             private readonly IMessagingControl theMessagingControl;
             private readonly ISendCallback theSendCallback;
 
-            #endregion Fields
-
-            #region Constructor
-
-            public EchoHandler( IMessagingControl messagingControl, ISendCallback sendCallback )
-            {
+            public EchoHandler( IMessagingControl messagingControl, ISendCallback sendCallback ) {
                 theMessagingControl = messagingControl;
                 theSendCallback = sendCallback;
             }
 
-            #endregion Constructor
-
-            #region Overrides
-
             /// <summary>
             /// Receives content sent from a session via a topic.
             /// </summary>
@@ -100,27 +70,15 @@ namespace Examples
             /// <param name="topicPath">The path of the topic that the content was sent on.</param>
             /// <param name="content">The content sent by the client.</param>
             /// <param name="context">The context associated with the content.</param>
-            public override void OnMessage( 
-                SessionId sessionId, 
-                string topicPath, 
-                IContent content, 
-                IReceiveContext context )
-            {
-                theMessagingControl.Send(
-                    sessionId,
-                    topicPath,
-                    content,
-                    theMessagingControl.CreateSendOptionsBuilder()
-                        .SetHeaders( context.HeadersList.ToList() )
-                        .Build(),
+            public override void OnMessage( SessionId sessionId, string topicPath, IContent content,
+                IReceiveContext context ) {
+                theMessagingControl.Send( sessionId, topicPath, content,
+                    theMessagingControl.CreateSendOptionsBuilder().SetHeaders( context.HeadersList.ToList() ).Build(),
                     theSendCallback );
             }
-
-            #endregion Overrides
         }
 
-        private class MessageHandlerDefault : TopicTreeHandlerDefault, IMessageHandler
-        {
+        private class MessageHandlerDefault : TopicTreeHandlerDefault, IMessageHandler {
             /// <summary>
             /// Receives content sent from a session via a topic.
             /// </summary>
@@ -128,11 +86,9 @@ namespace Examples
             /// <param name="topicPath">The path of the topic that the content was sent on.</param>
             /// <param name="content">The content sent by the client.</param>
             /// <param name="context">The context associated with the content.</param>
-            public virtual void OnMessage( SessionId sessionId, string topicPath, IContent content, IReceiveContext context )
-            {
+            public virtual void OnMessage( SessionId sessionId, string topicPath, IContent content,
+                IReceiveContext context ) {
             }
         }
-
-        #endregion Private Classes
     }
 }

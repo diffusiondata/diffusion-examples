@@ -1,5 +1,5 @@
 /**
- * Copyright © 2014, 2015 Push Technology Ltd.
+ * Copyright © 2014, 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,6 +11,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * This example is written in C99. Please use an appropriate C99 capable compiler
  *
  * @author Push Technology Limited
  * @since 5.0
@@ -34,13 +36,14 @@
 
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
-        {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "dpt://localhost:8080"},
+        {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "ws://localhost:8080"},
         {'t', "topic_selector", "Topic selector", ARG_REQUIRED, ARG_HAS_VALUE, NULL},
         END_OF_ARG_OPTS
 };
 
 /*
- * When a subscribed message is received, this callback is invoked.
+ * When a subscribed message is received by the first listener, this
+ * callback is invoked.
  */
 static int
 on_topic_message_1(SESSION_T *session, const TOPIC_MESSAGE_T *msg)
@@ -50,6 +53,10 @@ on_topic_message_1(SESSION_T *session, const TOPIC_MESSAGE_T *msg)
         return HANDLER_SUCCESS;
 }
 
+/*
+ * When a subscribed message is received by the second listener, this
+ * callback is invoked.
+ */
 static int
 on_topic_message_2(SESSION_T *session, const TOPIC_MESSAGE_T *msg)
 {
@@ -61,31 +68,36 @@ on_topic_message_2(SESSION_T *session, const TOPIC_MESSAGE_T *msg)
 int
 main(int argc, char **argv)
 {
-        // Standard command line parsing
+        /*
+         * Standard command-line parsing.
+         */
         HASH_T *options = parse_cmdline(argc, argv, arg_opts);
         if(options == NULL || hash_get(options, "help") != NULL) {
                 show_usage(argc, argv, arg_opts);
-                return 1;
+                return EXIT_FAILURE;
         }
 
         char *url = hash_get(options, "url");
         char *topic = hash_get(options, "topic_selector");
 
-        // Creating a session requires at least a URL. Creating a session
-        // initiates a connection with Diffusion.
-        DIFFUSION_ERROR_T error;
+        /*
+         * Create a session with Diffusion.
+         */
+        DIFFUSION_ERROR_T error = { 0 };
         SESSION_T *session = NULL;
         session = session_create(url, NULL, NULL, NULL, NULL, &error);
         if(session == NULL) {
                 fprintf(stderr, "TEST: Failed to create session\n");
                 fprintf(stderr, "ERR : %s\n", error.message);
-                return 1;
+                return EXIT_FAILURE;
         }
 
-        // When issuing commands to Diffusion (in this case, subscribe to
-        // a topic), it's typical that more than one message may be
-        // received in response and a handler can be installed for each
-        // message type.
+        /*
+         * When issuing commands to Diffusion (in this case, subscribe to
+         * a topic), it's typical that more than one message may be
+         * received in response and a handler can be installed for each
+         * message type.
+         */
         SUBSCRIPTION_PARAMS_T sub_params_1 = {
                 .topic_selector = topic,
                 .on_topic_message = on_topic_message_1
@@ -96,9 +108,11 @@ main(int argc, char **argv)
                 .on_topic_message = on_topic_message_2
         };
 
-        
-        // Register two subscription handlers for the same topic. We should see
-        // it invoked once only.
+        /*
+         * Register two subscription handlers for the same topic. The
+         * first handler is replaced by the second, so we will only
+         * see on_topic_message_2() invoked.
+         */
         TOPIC_HANDLER_T old_handlers = NULL;
         if((old_handlers = subscribe(session, sub_params_1)) != NULL) {
                 puts("Replacing existing handlers for topic selector");
@@ -107,11 +121,16 @@ main(int argc, char **argv)
                 puts("Replacing existing handlers for topic selector");
         }
 
-        // Keep receiving messages for 10 seconds.
+        /*
+         * Keep receiving messages for 10 seconds.
+         */
         sleep(10);
 
-        // Politely tell Diffusion we're closing down.
-        session_close(session, &error);
+        /*
+         * Politely close the connection.
+         */
+        session_close(session, NULL);
+        session_free(session);
 
-        return 0;
+        return EXIT_SUCCESS;
 }

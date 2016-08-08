@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2014, 2015 Push Technology Ltd.
+ * Copyright © 2014, 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,42 +21,32 @@ using PushTechnology.ClientInterface.Client.Session;
 using PushTechnology.ClientInterface.Client.Topics;
 using PushTechnology.ClientInterface.Client.Topics.Update;
 
-namespace Examples
-{
+namespace Examples {
     /// <summary>
     /// An example of using a control client to create and update paged topics.
-    /// 
+    ///
     /// This uses the <see cref="ITopicControl"/> feature to create a paged topic and the <see cref="ITopicUpdateControl"/>
     /// feature to send updates to it.
-    /// 
+    ///
     /// This demonstrates some simple examples of paged topic updates but not all of the possible ways in which they
     /// can be done.
-    /// 
+    ///
     /// To send updates to a topic, the client session requires the UPDATE_TOPIC permission for that branch of the
     /// topic tree.
     /// </summary>
-    public class ControlClientUpdatingPagedTopics
-    {
-        #region Fields
-
+    public class ControlClientUpdatingPagedTopics {
         private const string OrderedTopic = "Paged/Ordered";
         private const string UnorderedTopic = "Paged/Unordered";
-
         private readonly ISession session;
         private readonly ITopicControl topicControl;
         private readonly IPagedRecordOrderedUpdateFactory orderedUpdateFactory;
         private readonly IPagedStringUnorderedUpdateFactory unorderedUpdateFactory;
         private static ITopicUpdater _pagedUpdater;
 
-        #endregion Fields
-
-        #region Constructor
-
         /// <summary>
         /// Constructor.
         /// </summary>
-        public ControlClientUpdatingPagedTopics()
-        {
+        public ControlClientUpdatingPagedTopics() {
             session = Diffusion.Sessions.Principal( "control" ).Password( "password" )
                 .Open( "ws://diffusion.example.com:80" );
 
@@ -69,32 +59,22 @@ namespace Examples
             var metadata = Diffusion.Metadata;
 
             // Create an unordered paged string topic
-            topicControl.AddTopic(
-                UnorderedTopic,
-                topicControl.NewDetails( TopicType.PAGED_STRING ),
+            topicControl.AddTopic( UnorderedTopic, topicControl.NewDetails( TopicType.PAGED_STRING ),
                 new TopicControlAddCallbackDefault() );
 
             // Create an ordered paged record topic
-            var recordMetadata = metadata.Record(
-                "Record",
-                metadata.String( "Name" ),
-                metadata.String( "Address" ) );
+            var recordMetadata = metadata.Record( "Record", metadata.String( "Name" ), metadata.String( "Address" ) );
 
-            topicControl.AddTopic(
-                OrderedTopic,
-                topicControl
-                    .CreateDetailsBuilder<IPagedRecordTopicDetailsBuilder>()
+            topicControl.AddTopic( OrderedTopic,
+                topicControl.CreateDetailsBuilder<IPagedRecordTopicDetailsBuilder>()
                     .Metadata( recordMetadata )
-                    .Order( new PagedRecordOrderKey( "Name" ) ).Build(),
+                    .Order( new PagedRecordOrderKey( "Name" ) )
+                    .Build(),
                 new TopicControlAddCallbackDefault() );
 
             // Register an updater for topics under the 'Paged' branch
             updateControl.RegisterUpdateSource( "Paged", new UpdateSource() );
         }
-
-        #endregion Constructor
-
-        #region Public Methods
 
         /// <summary>
         /// Add a new line from an ordered topic.
@@ -102,12 +82,8 @@ namespace Examples
         /// <param name="name">The name field value.</param>
         /// <param name="address">The address field value.</param>
         /// <param name="callback">The callback to notify the result.</param>
-        public void AddOrdered( string name, string address, ITopicUpdaterUpdateCallback callback )
-        {
-            Update(
-                OrderedTopic,
-                orderedUpdateFactory.Add( Diffusion.Content.NewRecord( name, address ) ),
-                callback );
+        public void AddOrdered( string name, string address, ITopicUpdaterUpdateCallback callback ) {
+            Update( OrderedTopic, orderedUpdateFactory.Add( Diffusion.Content.NewRecord( name, address ) ), callback );
         }
 
         /// <summary>
@@ -116,11 +92,8 @@ namespace Examples
         /// <param name="name">The name of the line to update.</param>
         /// <param name="address">The new address field value.</param>
         /// <param name="callback">The callback to notify the result.</param>
-        public void UpdateOrdered( string name, string address, ITopicUpdaterUpdateCallback callback )
-        {
-            Update(
-                OrderedTopic,
-                orderedUpdateFactory.Update( Diffusion.Content.NewRecord( name, address ) ),
+        public void UpdateOrdered( string name, string address, ITopicUpdaterUpdateCallback callback ) {
+            Update( OrderedTopic, orderedUpdateFactory.Update( Diffusion.Content.NewRecord( name, address ) ),
                 callback );
         }
 
@@ -129,12 +102,8 @@ namespace Examples
         /// </summary>
         /// <param name="name">The name of the line to remove.</param>
         /// <param name="callback">The callback to notify the result.</param>
-        public void RemoveOrdered( string name, ITopicUpdaterUpdateCallback callback )
-        {
-            Update(
-                OrderedTopic,
-                orderedUpdateFactory.Remove( Diffusion.Content.NewRecord( name, "" ) ),
-                callback );
+        public void RemoveOrdered( string name, ITopicUpdaterUpdateCallback callback ) {
+            Update( OrderedTopic, orderedUpdateFactory.Remove( Diffusion.Content.NewRecord( name, "" ) ), callback );
         }
 
         /// <summary>
@@ -142,8 +111,7 @@ namespace Examples
         /// </summary>
         /// <param name="values">The lines to add.</param>
         /// <param name="callback">The callback to notify the result.</param>
-        public void AddUnordered( ICollection<string> values, ITopicUpdaterUpdateCallback callback )
-        {
+        public void AddUnordered( ICollection<string> values, ITopicUpdaterUpdateCallback callback ) {
             Update(
                 UnorderedTopic,
                 unorderedUpdateFactory.Add( values ),
@@ -156,12 +124,8 @@ namespace Examples
         /// <param name="index">The index at which to add the line.</param>
         /// <param name="values">The lines to insert.</param>
         /// <param name="callback">The callback to notify the result.</param>
-        public void InsertUnordered( int index, ICollection<string> values, ITopicUpdaterUpdateCallback callback )
-        {
-            Update(
-                UnorderedTopic,
-                unorderedUpdateFactory.Insert( index, values ),
-                callback );
+        public void InsertUnordered( int index, ICollection<string> values, ITopicUpdaterUpdateCallback callback ) {
+            Update( UnorderedTopic, unorderedUpdateFactory.Insert( index, values ), callback );
         }
 
         /// <summary>
@@ -169,13 +133,9 @@ namespace Examples
         /// </summary>
         /// <param name="index">The index of the line to remove.</param>
         /// <param name="callback">The callback to notify the result.</param>
-        public void RemoveUnordered( int index, ITopicUpdaterUpdateCallback callback )
-        {
-            Update(
-                UnorderedTopic,
-                unorderedUpdateFactory.Remove( index ),
-                callback );
-            
+        public void RemoveUnordered( int index, ITopicUpdaterUpdateCallback callback ) {
+            Update( UnorderedTopic, unorderedUpdateFactory.Remove( index ), callback );
+
         }
 
         /// <summary>
@@ -184,98 +144,59 @@ namespace Examples
         /// <param name="index">The index of the line to update.</param>
         /// <param name="value">The new line value.</param>
         /// <param name="callback">The callback to notify the result.</param>
-        public void UpdateUnordered( int index, string value, ITopicUpdaterUpdateCallback callback )
-        {
-            Update(
-                OrderedTopic,
-                unorderedUpdateFactory.Update( index, value ),
-                callback );
+        public void UpdateUnordered( int index, string value, ITopicUpdaterUpdateCallback callback ) {
+            Update( OrderedTopic, unorderedUpdateFactory.Update( index, value ), callback );
         }
 
         /// <summary>
         /// Close the session.
         /// </summary>
-        public void Close()
-        {
+        public void Close() {
             // Remove our topics and close the session when done.
             topicControl.RemoveTopics( ">Paged", new RemoveCallback( session ) );
         }
 
-        #endregion Public Methods
-
-        #region Private Methods
-
-        private static void Update( string topic, IUpdate update, ITopicUpdaterUpdateCallback callback )
-        {
-            if( _pagedUpdater == null )
-            {
+        private static void Update( string topic, IUpdate update, ITopicUpdaterUpdateCallback callback ) {
+            if ( _pagedUpdater == null ) {
                 throw new InvalidOperationException( "The paged updater has not been initialised." );
             }
 
             _pagedUpdater.Update( topic, update, callback );
         }
 
-        #endregion Private Methods
-
-        #region Private Classes
-
-        private class RemoveCallback : TopicControlRemoveCallbackDefault
-        {
-            #region Fields
-
+        private class RemoveCallback : TopicControlRemoveCallbackDefault {
             private readonly ISession theSession;
 
-            #endregion Fields
-
-            #region Constructor
-
-            public RemoveCallback( ISession session )
-            {
+            public RemoveCallback( ISession session ) {
                 theSession = session;
             }
 
-            #endregion Constructor
-
-            #region Overrides
-
             /// <summary>
             /// Notification that a call context was closed prematurely, typically due to a timeout or the session being
-            /// closed.  No further calls will be made for the context.
+            /// closed. No further calls will be made for the context.
             /// </summary>
-            public override void OnDiscard()
-            {
+            public override void OnDiscard() {
                 theSession.Close();
             }
 
             /// <summary>
             /// Topic(s) have been removed.
             /// </summary>
-            public override void OnTopicsRemoved()
-            {
+            public override void OnTopicsRemoved() {
                 theSession.Close();
             }
-
-            #endregion Overrides
         }
 
-        private class UpdateSource : TopicUpdateSourceDefault
-        {
-            #region Overrides
-
+        private class UpdateSource : TopicUpdateSourceDefault {
             /// <summary>
-            /// State notification that this source is now active for the specified topic path, and is therefore in a valid
-            /// state to send updates on topics at or below the registered topic path.
+            /// State notification that this source is now active for the specified topic path, and is therefore in a
+            /// valid state to send updates on topics at or below the registered topic path.
             /// </summary>
             /// <param name="topicPath">The registration path.</param>
             /// <param name="updater">An updater that may be used to update topics at or below the registered path.</param>
-            public override void OnActive( string topicPath, ITopicUpdater updater )
-            {
+            public override void OnActive( string topicPath, ITopicUpdater updater ) {
                 _pagedUpdater = updater;
             }
-
-            #endregion Overrides
         }
-
-        #endregion Private Classes
     }
 }

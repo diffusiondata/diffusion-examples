@@ -1,5 +1,5 @@
 /**
- * Copyright © 2014, 2015 Push Technology Ltd.
+ * Copyright © 2014, 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,6 +11,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * This example is written in C99. Please use an appropriate C99 capable compiler
  *
  * @author Push Technology Limited
  * @since 5.0
@@ -30,42 +32,55 @@
 
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
-        {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "dpt://localhost:8080"},
+        {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "ws://localhost:8080"},
         {'p', "principal", "Principal (username) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
         {'c', "credentials", "Credentials (password) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
         END_OF_ARG_OPTS
 };
 
 /*
- * Callback to display that the change_principal() request has been processed
- * by Diffusion.
+ * Callback to display that the principal has been successfully
+ * changed.
  */
 static int
 on_change_principal(SESSION_T *session, void *context)
 {
-        printf("on_change_principal\n");
+        printf("Successfully changed the principal.\n");
+        return HANDLER_SUCCESS;
+}
+
+/*
+ * Callback to display an error when attempting to change the
+ * principal.
+ */
+static int
+on_change_principal_failure(SESSION_T *session, void *context)
+{
+        printf("Failed to change the principal\n");
         return HANDLER_SUCCESS;
 }
 
 int
 main(int argc, char** argv)
 {
-        // Standard command line parsing.
+        /*
+         * Standard command-line parsing.
+         */
         HASH_T *options = parse_cmdline(argc, argv, arg_opts);
         if(options == NULL || hash_get(options, "help") != NULL) {
                 show_usage(argc, argv, arg_opts);
-                return 1;
+                return EXIT_FAILURE;
         }
 
         char *url = hash_get(options, "url");
 
         // Create a session with Diffusion, with no principal or credentials.
         SESSION_T *session;
-        DIFFUSION_ERROR_T error;
+        DIFFUSION_ERROR_T error = { 0 };
         session = session_create(url, NULL, NULL, NULL, NULL, &error);
         if(session == NULL) {
                 fprintf(stderr, "Failed to create session: %s\n", error.message);
-                return 1;
+                return EXIT_FAILURE;
         }
 
         // Wait for a couple of seconds.
@@ -73,13 +88,14 @@ main(int argc, char** argv)
 
         puts("Changing credentials");
 
-        CREDENTIALS_T *credentials = credentials_create_password("chips");
+        CREDENTIALS_T *credentials = credentials_create_password(hash_get(options, "credentials"));
 
         // Specify callbacks for the change_principal request.
         CHANGE_PRINCIPAL_PARAMS_T params = {
-                .principal = "fish",
+                .principal = hash_get(options, "principal"),
                 .credentials = credentials,
-                .on_change_principal = on_change_principal
+                .on_change_principal = on_change_principal,
+                .on_change_principal_failure = on_change_principal_failure
         };
 
         // Do the change.
@@ -91,7 +107,8 @@ main(int argc, char** argv)
         puts("Closing session");
 
         // Gracefully close the connection.
-        session_close(session, &error);
+        session_close(session, NULL);
+        session_free(session);
 
-        return 0;
+        return EXIT_SUCCESS;
 }

@@ -73,6 +73,7 @@
     <Compile Include="ControlClientReceivingMessages.cs" />
     <Compile Include="ControlClientSubscriptionControl.cs" />
     <Compile Include="ControlClientSubscriptionControlRouting.cs" />
+    <Compile Include="ControlClientUpdatingJSONTopics.cs" />
     <Compile Include="ControlClientUpdatingPagedTopics.cs" />
     <Compile Include="ControlClientUsingFiltersAndProperties.cs" />
     <Compile Include="ControlClientUsingSessionProperties.cs" />

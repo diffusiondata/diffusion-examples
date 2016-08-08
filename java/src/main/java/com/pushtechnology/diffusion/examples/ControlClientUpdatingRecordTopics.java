@@ -14,7 +14,12 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import com.pushtechnology.diffusion.client.Diffusion;
+import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
+import com.pushtechnology.diffusion.client.callbacks.Registration;
 import com.pushtechnology.diffusion.client.content.Content;
 import com.pushtechnology.diffusion.client.content.ContentFactory;
 import com.pushtechnology.diffusion.client.content.Record;
@@ -28,9 +33,7 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.RemoveCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.RemoveContextCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateContextCallback;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.UpdateSource;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.RecordTopicDetails;
 
@@ -66,12 +69,14 @@ public final class ControlClientUpdatingRecordTopics {
 
     private static final String ROOT_TOPIC = "FX";
 
+    private final CountDownLatch closeLatch = new CountDownLatch(2);
     private final Session session;
     private final TopicControl topicControl;
     private final MRecord recordMetadata;
     private final RecordTopicDetails topicDetails;
     private final ContentUpdateFactory updateFactory;
     private final StructuredBuilder deltaRecordBuilder;
+    private volatile Registration updateSourceRegistration;
     private volatile TopicUpdateControl.Updater topicUpdater;
 
     /**
@@ -117,13 +122,29 @@ public final class ControlClientUpdatingRecordTopics {
 
         updateFactory = updateControl.updateFactory(ContentUpdateFactory.class);
 
-        // Register as an updater for all topic under the root
+        // Register as an updater for all topics under the root
         updateControl.registerUpdateSource(
             ROOT_TOPIC,
-            new UpdateSource.Default() {
+            new TopicUpdateControl.UpdateSource.Default() {
                 @Override
-                public void onActive(String topicPath, Updater updater) {
+                public void onRegistered(String topicPath, Registration registration) {
+                    updateSourceRegistration = registration;
+                }
+
+                @Override
+                public void onActive(String topicPath, TopicUpdateControl.Updater updater) {
                     topicUpdater = updater;
+                }
+
+                @Override
+                public void onClose(String topicPath) {
+                    closeLatch.countDown();
+                }
+
+                @Override
+                public void onError(String topicPath, ErrorReason errorReason) {
+                    super.onError(topicPath, errorReason);
+                    closeLatch.countDown();
                 }
             });
 
@@ -295,22 +316,34 @@ public final class ControlClientUpdatingRecordTopics {
     /**
      * Close the session.
      */
-    public void close() {
+    public void close() throws InterruptedException {
+        // Close the registered update source
+        final Registration registration = this.updateSourceRegistration;
+        if (registration != null) {
+            registration.close();
+        }
+
         // Remove our topics and close session when done
         topicControl.removeTopics(
             ROOT_TOPIC,
             new RemoveCallback() {
                 @Override
                 public void onDiscard() {
-                    session.close();
+                    closeLatch.countDown();
                 }
 
                 @Override
                 public void onTopicsRemoved() {
-                    session.close();
+                    closeLatch.countDown();
                 }
             });
 
+        try {
+            closeLatch.await(5, TimeUnit.SECONDS);
+        }
+        finally {
+            session.close();
+        }
     }
 
     /**

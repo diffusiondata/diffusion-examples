@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2014, 2015 Push Technology Ltd.
+ * Copyright © 2014, 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,35 +16,27 @@
 using PushTechnology.ClientInterface.Client.Content.Metadata;
 using PushTechnology.ClientInterface.Client.Factories;
 
-namespace Examples
-{
+namespace Examples {
     /// <summary>
     /// This example class has a number of methods that demonstrate the creation of metadata using the Diffusion
     /// Unified API.
-    /// 
+    ///
     /// Metadata is normally created by a control client in order to create topics, but a standard client could create
     /// metadata to interpret content (however, it would make much more sense to get the details of the topic which
     /// would include its metadata).
-    /// 
-    /// This example shows the creation of various types of metadata in different methods.  Content metadata is used by
-    /// record type topics.  Record metadata is used by paged record topics and field metadata is used by single value
+    ///
+    /// This example shows the creation of various types of metadata in different methods. Content metadata is used by
+    /// record type topics. Record metadata is used by paged record topics and field metadata is used by single value
     /// topics.
-    /// 
+    ///
     /// Note that no client session is required in order to create metadata.
     /// </summary>
-    public class ClientCreatingMetadata
-    {
-        #region Fields
-
+    public class ClientCreatingMetadata {
         private readonly IMetadataFactory factory = Diffusion.Metadata;
-
-        #endregion Fields
-
-        #region Public Methods
 
         /// <summary>
         /// Example of using a decimal field builder.
-        /// 
+        ///
         /// This is purely to demonstrate the use of a builder as in most cases one of the factory convenience methods
         /// would be much easier to use to create a new field metadata definition.
         /// </summary>
@@ -53,8 +45,7 @@ namespace Examples
         /// decimal point.</param>
         /// <param name="value">The default value.</param>
         /// <returns></returns>
-        public IMDecimalString CreateDecimal( string name, int scale, double value )
-        {
+        public IMDecimalString CreateDecimal( string name, int scale, double value ) {
             return factory.DecimalBuilder( name ).SetScale( scale ).SetDefaultValue( value ).Build();
         }
 
@@ -62,17 +53,10 @@ namespace Examples
         /// Creates a simple name and address record definition with fixed name single multiplicity fields.
         /// </summary>
         /// <returns>The record metadata definition.</returns>
-        public IMRecord CreateNameAndAddressRecord()
-        {
-            return factory.Record( 
-                "NameAndAddress",
-                factory.String( "FirstName" ),
-                factory.String( "Surname" ),
-                factory.String( "HouseNumber" ),
-                factory.String( "Street" ),
-                factory.String( "Town" ),
-                factory.String( "State" ),
-                factory.String( "PostCode" ) );
+        public IMRecord CreateNameAndAddressRecord() {
+            return factory.Record( "NameAndAddress", factory.String( "FirstName" ), factory.String( "Surname" ),
+                factory.String( "HouseNumber" ), factory.String( "Street" ), factory.String( "Town" ),
+                factory.String( "State" ), factory.String( "PostCode" ) );
         }
 
         /// <summary>
@@ -80,12 +64,8 @@ namespace Examples
         /// with a default value of 1.00.
         /// </summary>
         /// <returns>The record metadata definition.</returns>
-        public IMRecord CreateCurrentRecord()
-        {
-            return factory.Record(
-                "CurrencyRecord",
-                factory.String( "Currency" ),
-                factory.Decimal( "Rate", "1.00" ) );
+        public IMRecord CreateCurrentRecord() {
+            return factory.Record( "CurrencyRecord", factory.String( "Currency" ), factory.Decimal( "Rate", "1.00" ) );
         }
 
         /// <summary>
@@ -95,8 +75,7 @@ namespace Examples
         /// <param name="name">The record name.</param>
         /// <param name="occurs">The number of occurrences of the "Rate" field.</param>
         /// <returns>The record metadata definition.</returns>
-        public IMRecord CreateMultipleRateCurrencyRecord( string name, int occurs )
-        {
+        public IMRecord CreateMultipleRateCurrencyRecord( string name, int occurs ) {
             return factory.RecordBuilder( name )
                 .Add( factory.String( "Currency" ) )
                 .Add( factory.Decimal( "Rate", "1.00" ), occurs )
@@ -107,17 +86,9 @@ namespace Examples
         /// A simple example of creating content metadata with two records.
         /// </summary>
         /// <returns>The content metadata.</returns>
-        public IMContent CreateContent()
-        {
-            return factory.Content(
-                "Content",
-                factory.Record(
-                    "Rec1",
-                    factory.String( "A" ),
-                    factory.String( "B" ) ),
-                factory.Record(
-                    "Rec2",
-                    factory.String( "C" ) ) );
+        public IMContent CreateContent() {
+            return factory.Content( "Content", factory.Record( "Rec1", factory.String( "A" ), factory.String( "B" ) ),
+                factory.Record( "Rec2", factory.String( "C" ) ) );
         }
 
         /// <summary>
@@ -125,19 +96,10 @@ namespace Examples
         /// occur zero to n times.
         /// </summary>
         /// <returns>The content metadata.</returns>
-        public IMContent CreateContentRepeating()
-        {
+        public IMContent CreateContentRepeating() {
             return factory.ContentBuilder( "Content" )
-                .Add(
-                    factory.Record(
-                        "Rec1",
-                        factory.String( "A" ),
-                        factory.String( "B" ) ),
-                    0,
-                    -1 )
+                .Add( factory.Record( "Rec1", factory.String( "A" ), factory.String( "B" ) ), 0, -1 )
                 .Build();
         }
-
-        #endregion Public Methods
     }
 }

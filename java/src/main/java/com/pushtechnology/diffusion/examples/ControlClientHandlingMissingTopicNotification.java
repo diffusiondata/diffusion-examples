@@ -42,7 +42,7 @@ public final class ControlClientHandlingMissingTopicNotification {
      */
     public ControlClientHandlingMissingTopicNotification() {
         // Create a session
-        session = Diffusion.sessions().password("password").principal("admin").open("dpt://diffusion.example.com:8080");
+        session = Diffusion.sessions().password("password").principal("admin").open("ws://diffusion.example.com:8080");
 
         topicControl = session.feature(TopicControl.class);
 

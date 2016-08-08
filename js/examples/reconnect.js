@@ -25,17 +25,26 @@ var maximumTimeoutDuration = 1000 * 60 * 10;
 // Set the maximum interval between reconnect attempts to 60 seconds
 var maximumAttemptInterval = 1000 * 60;
 
+// Set an upper limit to the number of times we'll try to reconnect for
+var maximumAttempts = 25;
+
+// Count the number of reconnection attempts we've made
 var attempts = 0;
 
 // Create a reconnection strategy that applies an exponential back-off
-var reconnectionStrategy = (function() {
-    return function(start, abort) {
+// The strategy will be called with two arguments, start & abort. Both
+// of these are functions, which allow the strategy to either start a
+// reconnection attempt, or to abort reconnection (which will close the session)
+var reconnectionStrategy = function(start, abort) {
+    if (attempts > maximumAttempts) {
+        abort();
+    } else {
         var wait = Math.min(Math.pow(2, attempts++) * 100, maximumAttemptInterval);
 
-        // Wait and then try to start the reconnection attempt
+        // Wait the specified time period, and then start the reconnection attempt
         setTimeout(start, wait);
-    };
-})();
+    }
+};
 
 // Connect to the server.
 diffusion.connect({

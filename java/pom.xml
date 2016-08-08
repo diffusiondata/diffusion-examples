@@ -11,7 +11,7 @@
 
     <groupId>com.pushtechnology.diffusion</groupId>
     <artifactId>diffusion-api-java-examples</artifactId>
-    <version>5.7.1</version>
+    <version>5.8.1</version>
     <packaging>jar</packaging>
     <description>Diffusion public API examples.</description>
 
@@ -27,16 +27,29 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
+
         <dependency>
             <groupId>com.pushtechnology.diffusion</groupId>
             <artifactId>diffusion-api</artifactId>
-            <version>5.7.0</version>
+            <version>5.8.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.7.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-cbor</artifactId>
+            <version>2.7.3</version>
         </dependency>
 
         <dependency>
             <groupId>com.pushtechnology.diffusion</groupId>
             <artifactId>diffusion-client</artifactId>
-            <version>5.7.1</version>
+            <version>5.8.1</version>
             <scope>runtime</scope>
         </dependency>
 

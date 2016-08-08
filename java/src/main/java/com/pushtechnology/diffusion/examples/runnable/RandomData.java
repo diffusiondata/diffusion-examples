@@ -35,7 +35,7 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  * @author Push Technology Limited
  * @since 5.7
  */
-final class RandomData {
+public final class RandomData {
     private static final AtomicInteger ID_GENERATOR = new AtomicInteger(0);
     private static final Random RANDOM = new Random();
     private static final CBORFactory CBOR_FACTORY = new CBORFactory();
@@ -55,21 +55,21 @@ final class RandomData {
     /**
      * @return The ID of the data value
      */
-    int getId() {
+    public int getId() {
         return id;
     }
 
     /**
      * @return The timestamp the data value was created
      */
-    long getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 
     /**
      * @return The random integer of the data value
      */
-    int getRandomInt() {
+    public int getRandomInt() {
         return randomInt;
     }
 

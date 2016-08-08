@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * This example is written in C99. Please use an appropriate C99 capable compiler
+ *
  * @author Push Technology Limited
  * @since 5.7
  */
@@ -19,6 +21,10 @@
 /*
  * In this example, we attempt to receive session properties for a client
  * with the specified client ID.
+ *
+ * In normal use, this could be used in conjunction with a session
+ * properties listener that can track connecting client sessions and
+ * their associated client IDs.
  */
 
 #include <stdio.h>
@@ -37,7 +43,7 @@ apr_thread_cond_t *cond = NULL;
 
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
-        {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "dpt://localhost:8080"},
+        {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "ws://localhost:8080"},
         {'p', "principal", "Principal (username) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
         {'c', "credentials", "Credentials (password) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
         {'i', "sessionid", "Session ID of the client. If not specified, get properties for this session.", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
@@ -45,6 +51,9 @@ ARG_OPTS_T arg_opts[] = {
         END_OF_ARG_OPTS
 };
 
+/*
+ * Callback invoked when session properties are received.
+ */
 int
 on_session_properties(SESSION_T *session, const SVC_GET_SESSION_PROPERTIES_RESPONSE_T *response, void *context)
 {
@@ -65,11 +74,13 @@ on_session_properties(SESSION_T *session, const SVC_GET_SESSION_PROPERTIES_RESPO
 int
 main(int argc, char **argv)
 {
-        // Standard command line parsing.
+        /*
+         * Standard command-line parsing.
+         */
         const HASH_T *options = parse_cmdline(argc, argv, arg_opts);
         if(options == NULL || hash_get(options, "help") != NULL) {
                 show_usage(argc, argv, arg_opts);
-                return 1;
+                return EXIT_FAILURE;
         }
 
         const char *url = hash_get(options, "url");
@@ -80,14 +91,18 @@ main(int argc, char **argv)
                 credentials = credentials_create_password(password);
         }
 
-        // Setup for condition variable.
+        /*
+         * Setup for condition variable.
+         */
         apr_initialize();
         apr_pool_create(&pool, NULL);
         apr_thread_mutex_create(&mutex, APR_THREAD_MUTEX_UNNESTED, pool);
         apr_thread_cond_create(&cond, pool);
 
-        // Create a session with Diffusion.
-        DIFFUSION_ERROR_T error;
+        /*
+         * Create a session with Diffusion.
+         */
+        DIFFUSION_ERROR_T error = { 0 };
         SESSION_T *session = session_create(url, principal, credentials, NULL, NULL, &error);
         if(session == NULL) {
                 fprintf(stderr, "Failed to create session: %s\n", error.message);
@@ -119,16 +134,25 @@ main(int argc, char **argv)
                 .on_session_properties = on_session_properties
         };
 
+        /*
+         * Request the session properties, and wait for the response.
+         */
         apr_thread_mutex_lock(mutex);
-
         get_session_properties(session, params);
-
-        // Wait for response and exit.
         apr_thread_cond_wait(cond, mutex);
         apr_thread_mutex_unlock(mutex);
 
-        set_free(properties);
-        
+        /*
+         * Close the session and clean up.
+         */
         session_close(session, NULL);
         session_free(session);
+
+        set_free(properties);
+        apr_thread_mutex_destroy(mutex);
+        apr_thread_cond_destroy(cond);
+        apr_pool_destroy(pool);
+        apr_terminate();
+
+        return EXIT_SUCCESS;
 }

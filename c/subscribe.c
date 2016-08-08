@@ -1,5 +1,5 @@
 /**
- * Copyright © 2014, 2015 Push Technology Ltd.
+ * Copyright © 2014, 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,14 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * This example is written in C99. Please use an appropriate C99 capable compiler
+ *
  * @author Push Technology Limited
  * @since 5.0
  */
 
 /*
- * This is a sample client which connects to Diffusion v5 and subscribes to
- * topics using a user-specified selector. Any messages received on those topics
- * are then displayed to standard output.
+ * This is a sample client which connects to Diffusion and subscribes
+ * to topics using a user-specified selector. Any messages received on
+ * those topics are then displayed to standard output.
  */
 
 #include <stdio.h>
@@ -30,7 +32,7 @@
 
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
-        {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "dpt://localhost:8080"},
+        {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "ws://localhost:8080"},
         {'t', "topic_selector", "Topic selector", ARG_REQUIRED, ARG_HAS_VALUE, NULL},
         END_OF_ARG_OPTS
 };
@@ -129,62 +131,82 @@ on_notify_unsubscription(SESSION_T *session, const SVC_NOTIFY_UNSUBSCRIPTION_REQ
 int
 main(int argc, char **argv)
 {
-        // Standard command line parsing
+        /*
+         * Standard command-line parsing
+         */
         HASH_T *options = parse_cmdline(argc, argv, arg_opts);
         if(options == NULL || hash_get(options, "help") != NULL) {
                 show_usage(argc, argv, arg_opts);
-                return 1;
+                return EXIT_FAILURE;
         }
 
         char *url = hash_get(options, "url");
         char *topic = hash_get(options, "topic_selector");
 
-        // A SESSION_LISTENER_T holds callbacks to inform the client
-        // about changes to the state. Used here for informational
-        // purposes only.
-        SESSION_LISTENER_T session_listener;
+        /*
+         * A SESSION_LISTENER_T holds callbacks to inform the client
+         * about changes to the state. Used here for informational
+         * purposes only.
+         */
+        SESSION_LISTENER_T session_listener = { 0 };
         session_listener.on_state_changed = &on_session_state_changed;
 
-        // Creating a session requires at least a URL. Creating a session
-        // initiates a connection with Diffusion.
-        DIFFUSION_ERROR_T error;
+        /*
+         * Creating a session requires at least a URL. Creating a
+         * session initiates a connection with Diffusion.
+         */
+        DIFFUSION_ERROR_T error = { 0 };
         SESSION_T *session = NULL;
         session = session_create(url, NULL, NULL, &session_listener, NULL, &error);
         if(session == NULL) {
                 fprintf(stderr, "TEST: Failed to create session\n");
                 fprintf(stderr, "ERR : %s\n", error.message);
-                return 1;
+                return EXIT_FAILURE;
         }
 
-        // When issuing commands to Diffusion (in this case, subscribe to
-        // a topic), it's typical that more than one message may be
-        // received in response and a handler can be installed for each
-        // message type. In the case of subscription, we can install
-        // handlers for:
-        // 1. The topic message data (on_topic_message).
-        // 2. Notification that the subscription has been received (on_subscribe).
-        // 3. Topic details (on_topic_details).
-
-        notify_subscription_register(session, (NOTIFY_SUBSCRIPTION_PARAMS_T) { .on_notify_subscription = on_notify_subscription });
+        /*
+         * When issuing commands to Diffusion (in this case, subscribe
+         * to a topic), it's typical that more than one message may be
+         * received in response and a handler can be installed for
+         * each message type. In the case of subscription, we can
+         * install handlers for:
+         * 1. The topic message data (on_topic_message).
+         * 2. Notification that the subscription has been received
+         *    (on_subscribe).
+         * 3. Topic details (on_topic_details).
+         */
+        notify_subscription_register(session,(NOTIFY_SUBSCRIPTION_PARAMS_T) { .on_notify_subscription = on_notify_subscription });
         notify_unsubscription_register(session, (NOTIFY_UNSUBSCRIPTION_PARAMS_T) { .on_notify_unsubscription = on_notify_unsubscription });
 
         subscribe(session, (SUBSCRIPTION_PARAMS_T) { .topic_selector = topic, .on_topic_message = on_topic_message, .on_subscribe = on_subscribe });
 
-        // Install a global topic handler to capture messages for topics we haven't
-        // explicitly subscribed to, and therefore don't have a specific handler for.
+        /*
+         * Install a global topic handler to capture messages for
+         * topics we haven't explicitly subscribed to, and therefore
+         * don't have a specific handler for.
+         */
         session->global_topic_handler = on_unexpected_topic_message;
 
-        // Keep receiving messages for 5 seconds.
+        /*
+         * Receive messages for 5 seconds.
+         */
         sleep(5);
 
-        // Unsubscribe from the topic
+        /*
+         * Unsubscribe from the topic
+         */
         unsubscribe(session, (UNSUBSCRIPTION_PARAMS_T) {.topic_selector = topic, .on_unsubscribe = on_unsubscribe} );
 
-        // Wait for any unsubscription notifications to be received.
+        /*
+         * Wait for any unsubscription notifications to be received.
+         */
         sleep(5);
 
-        // Politely tell Diffusion we're closing down.
-        session_close(session, &error);
+        /*
+         * Politely tell Diffusion we're closing down.
+         */
+        session_close(session, NULL);
+        session_free(session);
 
-        return 0;
+        return EXIT_SUCCESS;
 }

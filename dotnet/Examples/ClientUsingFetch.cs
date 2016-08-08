@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2014, 2015 Push Technology Ltd.
+ * Copyright © 2014, 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,37 +16,23 @@
 using PushTechnology.ClientInterface.Client.Factories;
 using PushTechnology.ClientInterface.Client.Features;
 using PushTechnology.ClientInterface.Client.Session;
-using PushTechnology.DiffusionCore.Messaging.Topic;
 
-namespace Examples
-{
+namespace Examples {
     /// <summary>
     /// This is a simple example of a client that fetches the state of topics but does not subscribe to them.
-    /// 
+    ///
     /// This makes use of the <see cref="ITopics"/> feature only.
     /// </summary>
-    public class ClientUsingFetch
-    {
-        #region Fields
-
+    public class ClientUsingFetch {
         private readonly ISession session;
         private readonly ITopics topics;
 
-        #endregion Fields
-
-        #region Constructor
-
-        public ClientUsingFetch()
-        {
+        public ClientUsingFetch() {
             session = Diffusion.Sessions.Principal( "client" ).Password( "password" )
                 .Open( "ws://diffusion.example.com:80" );
 
             topics = session.GetTopicsFeature();
         }
-
-        #endregion Constructor
-
-        #region Public Methods
 
         /// <summary>
         /// Issues a fetch request for a topic or selection of topics.
@@ -54,19 +40,15 @@ namespace Examples
         /// <param name="topicSelector">A <see cref="TopicSelector"/> expression.</param>
         /// <param name="fetchContext">The context string to be returned with the fetch response(s).</param>
         /// <param name="stream">The callback for fetch responses.</param>
-        public void Fetch( string topicSelector, string fetchContext, IFetchContextStream<string> stream )
-        {
+        public void Fetch( string topicSelector, string fetchContext, IFetchContextStream<string> stream ) {
             topics.Fetch( topicSelector, fetchContext, stream );
         }
 
         /// <summary>
         /// Close the session.
         /// </summary>
-        public void Close()
-        {
+        public void Close() {
             session.Close();
         }
-
-        #endregion Public Methods
     }
 }

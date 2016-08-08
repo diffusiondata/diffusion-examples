@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2014, 2015 Push Technology Ltd.
+ * Copyright © 2014, 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,83 +20,51 @@ using PushTechnology.ClientInterface.Client.Factories;
 using PushTechnology.ClientInterface.Client.Features.Control.Clients.SecurityControl;
 using PushTechnology.ClientInterface.Client.Types;
 
-namespace Examples
-{
+namespace Examples {
     /// <summary>
     /// An example of using a control client to alter the security configuration.
-    /// 
+    ///
     /// This uses the <see cref="ISecurityControl"/> feature only.
     /// </summary>
-    public class ControlClientChangingSecurity
-    {
-        #region Fields
-
+    public class ControlClientChangingSecurity {
         private readonly ISecurityControl securityControl;
 
-        #endregion Fields
-
-        #region Constructor
-
-        public ControlClientChangingSecurity()
-        {
-            var session = Diffusion.Sessions
-                // Authenticate with a user that has the VIEW_SECURITY and MODIFY_SECURITY permissions.
-                .Principal( "admin" ).Password( "password" )
+        public ControlClientChangingSecurity() {
+            // Authenticate with a user that has the VIEW_SECURITY and MODIFY_SECURITY permissions.
+            var session = Diffusion.Sessions.Principal( "admin" ).Password( "password" )
                 // Use a secure channel because we're transferring sensitive information.
-                .Open( "wss://diffusion.example.com:80" );
+                .Open( "wss://diffusion.example.com:8443" );
 
             securityControl = session.GetSecurityControlFeature();
         }
 
-        #endregion Constructor
-
-        #region Public Methods
-
-        public void DoCapitalizeRoles( IUpdateStoreCallback callback )
-        {
+        public void DoCapitalizeRoles( IUpdateStoreCallback callback ) {
             securityControl.GetSecurity( new CapitalizeRoles( securityControl, callback ) );
         }
 
-        #endregion Public Methods
-
-        #region Private Classes
-
-        private class CapitalizeRoles : IConfigurationCallback
-        {
-            #region Fields
-
+        private class CapitalizeRoles : IConfigurationCallback {
             private readonly ISecurityControl theSecurityControl;
             private readonly IUpdateStoreCallback theCallback;
-
-            #endregion Fields
-
-            #region Constructor
 
             /// <summary>
             /// Constructor.
             /// </summary>
             /// <param name="securityControl">The security control object.</param>
             /// <param name="callback">The callback object.</param>
-            public CapitalizeRoles( ISecurityControl securityControl, IUpdateStoreCallback callback )
-            {
+            public CapitalizeRoles( ISecurityControl securityControl, IUpdateStoreCallback callback ) {
                 theSecurityControl = securityControl;
                 theCallback = callback;
             }
 
-            #endregion Constructor
-
             /// <summary>
-            /// Notification of a contextual error related to this callback. This is
-            /// analogous to an exception being raised. Situations in which
-            /// <code>OnError</code> is called include the session being closed, a
-            /// communication timeout, or a problem with the provided parameters. No
-            /// further calls will be made to this callback.
+            /// Notification of a contextual error related to this callback. This is analogous to an exception being
+            /// raised. Situations in which <code>OnError</code> is called include the session being closed, a
+            /// communication timeout, or a problem with the provided parameters. No further calls will be made to this
+            /// callback.
             /// </summary>
-            /// <param name="errorReason">errorReason a value representing the error; this can be one of
-            /// constants defined in <see cref="ErrorReason" />, or a feature-specific
-            /// reason.</param>
-            public void OnError( ErrorReason errorReason )
-            {
+            /// <param name="errorReason">errorReason a value representing the error; this can be one of constants
+            /// defined in <see cref="ErrorReason" />, or a feature-specific reason.</param>
+            public void OnError( ErrorReason errorReason ) {
                 // This might fail if the session lacks the required permissions.
                 theCallback.OnError( errorReason );
             }
@@ -105,41 +73,36 @@ namespace Examples
             /// This is called to return the requested security configuration.
             /// </summary>
             /// <param name="configuration">The snapshot of information from the security store.</param>
-            public void OnReply( ISecurityConfiguration configuration )
-            {
+            public void OnReply( ISecurityConfiguration configuration ) {
                 var builder = theSecurityControl.ScriptBuilder();
 
-                builder = builder.SetRolesForAnonymousSessions( 
+                builder = builder.SetRolesForAnonymousSessions(
                     Capitalize( configuration.RolesForAnonymousSessions ) );
 
                 builder = builder.SetRolesForNamedSessions(
                     Capitalize( configuration.RolesForNamedSessions ) );
 
-                foreach( var role in configuration.Roles )
-                {
+                foreach ( var role in configuration.Roles ) {
                     var oldName = role.Name;
                     var newName = Capitalize( oldName );
 
                     // Only if new name is different
-                    if( !oldName.Equals( newName ) )
-                    {
+                    if ( !oldName.Equals( newName ) ) {
                         // Global permissions
                         var globalPermissions = role.GlobalPermissions;
 
-                        if( globalPermissions.Count > 0 )
-                        {
+                        if ( globalPermissions.Count > 0 ) {
                             // Remove global permissions for old role
                             builder = builder.SetGlobalPermissions( oldName, new List<GlobalPermission>() );
 
                             // Set global permissions for new role
-                            builder = builder.SetGlobalPermissions( newName, 
+                            builder = builder.SetGlobalPermissions( newName,
                                 new List<GlobalPermission>( role.GlobalPermissions ) );
                         }
 
                         var defaultTopicPermissions = role.DefaultTopicPermissions;
 
-                        if( defaultTopicPermissions.Count > 0 )
-                        {
+                        if ( defaultTopicPermissions.Count > 0 ) {
                             // Remove default topic permissions for old role
                             builder = builder.SetDefaultTopicPermissions( oldName, new List<TopicPermission>() );
 
@@ -150,10 +113,8 @@ namespace Examples
 
                         var topicPermissions = role.TopicPermissions;
 
-                        if( topicPermissions.Count > 0 )
-                        {
-                            foreach( var entry in topicPermissions )
-                            {
+                        if ( topicPermissions.Count > 0 ) {
+                            foreach ( var entry in topicPermissions ) {
                                 var topicPath = entry.Key;
 
                                 // Remove old topic permissions
@@ -167,8 +128,7 @@ namespace Examples
 
                     var oldIncludedRoles = role.IncludedRoles;
 
-                    if( oldIncludedRoles.Count > 0 )
-                    {
+                    if ( oldIncludedRoles.Count > 0 ) {
                         // Remove old included roles
                         builder = builder.SetRoleIncludes( oldName, new List<string>() );
                     }
@@ -180,21 +140,13 @@ namespace Examples
                 }
             }
 
-            #region Private Methods
-
-            private static List<string> Capitalize( IEnumerable<string> roles )
-            {
+            private static List<string> Capitalize( IEnumerable<string> roles ) {
                 return roles.Select( Capitalize ).ToList();
             }
 
-            private static string Capitalize( string role )
-            {
-                return char.ToUpper( role[0] ) + role.Substring( 1 );
+            private static string Capitalize( string role ) {
+                return char.ToUpper( role[ 0 ] ) + role.Substring( 1 );
             }
-
-            #endregion Private Methods
         }
-
-        #endregion Private Classes
     }
 }

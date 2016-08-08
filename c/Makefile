@@ -1,9 +1,27 @@
-include makefile.defs
+# The following two variables must be set.
+#
+# Directory containing the C client include files.
+# DIFFUSION_C_CLIENT_INCDIR	=
+#
+# Directory containing libdiffusion.a
+# DIFFUSION_C_CLIENT_LIBDIR	=
 
-DEPS_BASE	= ../dependencies/$(PLATFORM)
+ifndef DIFFUSION_C_CLIENT_INCDIR
+$(error DIFFUSION_C_CLIENT_INCDIR is not set)
+endif
 
-CFLAGS		+= -c -fPIC -I/usr/include/apr-1 -I/usr/include/apr-1.0 -I$(DEPS_BASE)/libwebsockets/include
-LDFLAGS		+= -lapr-1 -laprutil-1 -lpcre -lssl -lcrypto $(DEPS_BASE)/libwebsockets/lib/libwebsockets.a
+ifndef DIFFUSION_C_CLIENT_LIBDIR
+$(error DIFFUSION_C_CLIENT_LIBDIR is not set)
+endif
+
+CC		= gcc
+
+# Extra definitions from parent directory, if they exist.
+-include ../makefile.defs
+
+CFLAGS		+= -g -Wall -Werror -std=c99 -D_POSIX_C_SOURCE=200112L -D_XOPEN_SOURCE=700 -c -I$(DIFFUSION_C_CLIENT_INCDIR)
+LDFLAGS		+= $(LIBS) $(DIFFUSION_C_CLIENT_LIBDIR)/libdiffusion.a -lpthread -lpcre -lssl -lcrypto
+
 ARFLAGS		+=
 SOURCES = subscribe.c fetch.c rc-state.c rc-fortune.c fortune-client.c	\
 		  send-msg.c send-msg-to-session.c send-msg-to-filter.c	\
@@ -11,11 +29,11 @@ SOURCES = subscribe.c fetch.c rc-state.c rc-fortune.c fortune-client.c	\
 		  change-principal.c add-topics.c update-topic.c	\
 		  subscribe-multiple.c update-record.c connect.c	\
 		  connect-async.c system-auth-control.c                 \
-		  msg-handler.c msg-listener.c			 	\
+		  msg-handler.c msg-listener.c				\
 		  session-properties-listener.c                         \
 		  get-session-properties.c                              \
 	 	  missing-topic-notification.c				\
-		  subscription-control.c
+		  subscription-control.c reconnect.c
 
 TARGETDIR	= target
 OBJDIR		= $(TARGETDIR)/objs
@@ -30,7 +48,7 @@ TARGETS = subscribe fetch rc-state rc-fortune fortune-client            \
 		  session-properties-listener				\
 		  get-session-properties                                \
                   missing-topic-notification				\
-		  subscription-control
+		  subscription-control reconnect
 
 all:		prepare $(TARGETS)
 .PHONY:		all
@@ -108,6 +126,9 @@ missing-topic-notification:	$(OBJDIR)/missing-topic-notification.o
 		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
 
 subscription-control:	$(OBJDIR)/subscription-control.o
+		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
+
+reconnect:	$(OBJDIR)/reconnect.o
 		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
 
 clean:

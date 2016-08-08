@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2015 Push Technology Ltd.
+ * Copyright (C) 2014, 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public class ControlClientDynamicTopics {
         // Add a handler that, upon receiving subscriptions or fetches for any
         // topic under the 'topicroot', creates a topic. If the topic name
         // starts with SV, it creates a single value topic otherwise a
-        // delegated topic.
+        // stateless topic.
         tc.addMissingTopicHandler(
             "topicroot",
             new MissingTopicHandler.Default() {
@@ -71,7 +71,7 @@ public class ControlClientDynamicTopics {
                     else {
                         tc.addTopic(
                             topicPath,
-                            TopicType.DELEGATED,
+                            TopicType.STATELESS,
                             request,
                             proceedCallback);
                     }

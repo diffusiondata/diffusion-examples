@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2014, 2015 Push Technology Ltd.
+ * Copyright © 2014, 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,46 +21,32 @@ using PushTechnology.ClientInterface.Client.Factories;
 using PushTechnology.ClientInterface.Client.Features.Control.Topics;
 using PushTechnology.ClientInterface.Client.Session;
 using PushTechnology.ClientInterface.Client.Topics;
-using PushTechnology.ClientInterface.Client.Types;
 
-namespace Examples
-{
+namespace Examples {
     /// <summary>
     /// An example of using a control client to add topics.
-    /// 
+    ///
     /// This uses the <see cref="ITopicControl"/> feature only.
-    /// 
+    ///
     /// To add or remove topics, the client session must have the <see cref="TopicPermission.MODIFY_TOPIC"/> permission
     /// for that branch of the topic tree.
     /// </summary>
-    public class ControlClientAddingTopics
-    {
-        #region Fields
-
+    public class ControlClientAddingTopics {
         private readonly ISession session;
         private readonly ITopicControl topicControl;
 
-        #endregion Fields
-
-        #region Constructor
-
-        public ControlClientAddingTopics()
-        {
+        public ControlClientAddingTopics() {
             session = Diffusion.Sessions.Principal( "control" ).Password( "password" )
                 .Open( "ws://diffusion.example.com:80" );
 
             topicControl = session.GetTopicControlFeature();
         }
 
-        #endregion Constructor
-
-        #region Public Methods
-
         /// <summary>
         /// Adds a topic with the type derived from the value.
-        /// 
+        ///
         /// This uses the simple convenience method for adding topics where the topic type and metadata are derived
-        /// from a supplied value which can be any object.  For example, an integer would result in a single value topic
+        /// from a supplied value which can be any object. For example, an integer would result in a single value topic
         /// of type 'integer'.
         /// </summary>
         /// <typeparam name="T">The value type.</typeparam>
@@ -70,18 +56,14 @@ namespace Examples
         /// topic add.</param>
         /// <param name="callback">To notify the result of the operation.</param>
         /// <returns>The topic details used to add the topic.</returns>
-        public ITopicDetails AddTopicForValue<T>(
-            string topicPath,
-            T initialValue,
-            string context,
-            ITopicControlAddContextCallback<string> callback )
-        {
+        public ITopicDetails AddTopicForValue<T>( string topicPath, T initialValue, string context,
+            ITopicControlAddContextCallback<string> callback ) {
             return topicControl.AddTopicFromValue( topicPath, initialValue, context, callback );
         }
 
         /// <summary>
         /// Add a record topic from a list of initial values.
-        /// 
+        ///
         /// This demonstrates the simplest mechanism for adding a record topic by supplying values that both the
         /// metadata and the initial values are derived from.
         /// </summary>
@@ -92,22 +74,16 @@ namespace Examples
         /// topic add.</param>
         /// <param name="callback">To notify the result of the operation.</param>
         /// <returns></returns>
-        public ITopicDetails AddRecordTopic(
-            string topicPath,
-            List<string> initialValues,
-            string context,
-            ITopicControlAddContextCallback<string> callback )
-        {
-            return topicControl.AddTopicFromValue(
-                topicPath,
+        public ITopicDetails AddRecordTopic( string topicPath, List<string> initialValues, string context,
+            ITopicControlAddContextCallback<string> callback ) {
+            return topicControl.AddTopicFromValue( topicPath,
                 Diffusion.Content.NewBuilder<IRecordContentBuilder>().PutFields( initialValues.ToArray() ).Build(),
-                context,
-                callback );
+                context, callback );
         }
 
         /// <summary>
         /// Adds a record topic with supplied metadata and optional initial content.
-        /// 
+        ///
         /// This example shows details being created and would be fine when creating topics that are all different, but
         /// if creating many record topics with the same details, then it is far more efficient to pre-create the
         /// details.
@@ -118,13 +94,8 @@ namespace Examples
         /// the supplied metadata.</param>
         /// <param name="context">The context passed back to the callback when the topic is created.</param>
         /// <param name="callback">To notify the result of the operation.</param>
-        public void AddRecordTopic(
-            string topicPath,
-            IMContent metadata,
-            IContent initialValue,
-            string context,
-            ITopicControlAddContextCallback<string> callback )
-        {
+        public void AddRecordTopic( string topicPath, IMContent metadata, IContent initialValue, string context,
+            ITopicControlAddContextCallback<string> callback ) {
             var details = topicControl.CreateDetailsBuilder<IRecordTopicDetailsBuilder>().Metadata( metadata ).Build();
 
             topicControl.AddTopic( topicPath, details, initialValue, context, callback );
@@ -135,8 +106,7 @@ namespace Examples
         /// </summary>
         /// <param name="topicPath">The topic path.</param>
         /// <param name="callback">Notifies the result of the operation.</param>
-        public void RemoveTopic( string topicPath, ITopicControlRemoveCallback callback )
-        {
+        public void RemoveTopic( string topicPath, ITopicControlRemoveCallback callback ) {
             topicControl.RemoveTopics( ">" + topicPath, callback );
         }
 
@@ -145,33 +115,28 @@ namespace Examples
         /// </summary>
         /// <param name="topicSelector">The selector expression.</param>
         /// <param name="callback">Notifies the result of the operation.</param>
-        public void RemoveTopics( string topicSelector, ITopicControlRemoveCallback callback )
-        {
+        public void RemoveTopics( string topicSelector, ITopicControlRemoveCallback callback ) {
             topicControl.RemoveTopics( topicSelector, callback );
         }
 
         /// <summary>
         /// Request that the topic path and its descendants be removed when the session is closed (either explicitly
-        /// using <see cref="ISession.Close"/>, or by the server).  If more than one session calls this method for the
+        /// using <see cref="ISession.Close"/>, or by the server). If more than one session calls this method for the
         /// same topic path, the topics will be removed when the last session is closed.
-        /// 
+        ///
         /// Different sessions may call this method for the same topic path, but not for topic paths above or below
         /// existing registrations on the same branch of the topic tree.
         /// </summary>
         /// <param name="topicPath">The part of the topic tree to remove when the last session is closed.</param>
-        public void RemoveTopicsWithSession( string topicPath )
-        {
+        public void RemoveTopicsWithSession( string topicPath ) {
             topicControl.RemoveTopicsWithSession( topicPath, new DefaultTopicTreeHandler() );
         }
 
         /// <summary>
         /// Close the session.
         /// </summary>
-        public void Close()
-        {
+        public void Close() {
             session.Close();
         }
-
-        #endregion Public Methods
     }
 }

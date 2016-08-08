@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2014, 2015 Push Technology Ltd.
+ * Copyright © 2014, 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,22 +21,16 @@ using PushTechnology.ClientInterface.Client.Factories;
 using PushTechnology.ClientInterface.Client.Features.Control.Topics;
 using PushTechnology.ClientInterface.Client.Topics;
 
-namespace UCIStack.GettingStarted
-{
+namespace GettingStarted {
     /// <summary>
     /// A client that publishes an incrementing count to the topic "foo/counter".
     /// </summary>
-    class PublishingClient
-    {
-        static void Main( string[] args )
-        {
+    class PublishingClient {
+        static void Main( string[] args ) {
             StartPublishing();
         }
 
-        #region Public Methods
-
-        private static async void StartPublishing()
-        {
+        private static async void StartPublishing() {
             // Connect using a principal with 'modify_topic' and 'update_topic' permissions
             var session = Diffusion.Sessions.Principal( "principal" ).Password( "password" ).Open( "ws://host:80" );
 
@@ -51,18 +45,14 @@ namespace UCIStack.GettingStarted
             topicControl.AddTopic( "foo/counter", TopicType.SINGLE_VALUE, new AddCallback( tcs ) );
 
             // Wait for the OnTopicAdded callback, or a failure
-            try
-            {
+            try {
                 await tcs.Task;
-            }
-            catch( Exception )
-            {
+            } catch ( Exception ) {
                 // Handle the failure
             }
 
             // Update the topic
-            for( var i = 0; i < 1000; ++i )
-            {
+            for ( var i = 0; i < 1000; ++i ) {
                 // Use the non-exclusive updater to update the topic without locking it
                 updateControl.Updater.Update( "foo/counter", Convert.ToString( i ), new UpdateCallback() );
 
@@ -70,33 +60,18 @@ namespace UCIStack.GettingStarted
             }
         }
 
-        #endregion Public Methods
-
-        #region Private Classes
-
-        private class AddCallback : ITopicControlAddCallback
-        {
-            #region Fields
-
+        private class AddCallback : ITopicControlAddCallback {
             private readonly TaskCompletionSource<string> theCompletionSource;
 
-            #endregion Fields
-
-            #region Constructor
-
-            public AddCallback( TaskCompletionSource<string> completionSource )
-            {
+            public AddCallback( TaskCompletionSource<string> completionSource ) {
                 theCompletionSource = completionSource;
             }
 
-            #endregion Constructor
-
             /// <summary>
-            /// This is called to notify that a call context was closed prematurely, typically due to a timeout or the 
-            /// session being closed.  No further calls will be made for the context.
+            /// This is called to notify that a call context was closed prematurely, typically due to a timeout or the
+            /// session being closed. No further calls will be made for the context.
             /// </summary>
-            public void OnDiscard()
-            {
+            public void OnDiscard() {
                 theCompletionSource.SetException( new Exception( "This context was closed prematurely." ) );
             }
 
@@ -104,51 +79,41 @@ namespace UCIStack.GettingStarted
             /// Topic has been added.
             /// </summary>
             /// <param name="topicPath">The full path of the topic that was added.</param>
-            public void OnTopicAdded( string topicPath )
-            {
+            public void OnTopicAdded( string topicPath ) {
                 theCompletionSource.SetResult( topicPath );
             }
 
             /// <summary>
             /// An attempt to add a topic has failed.
             /// </summary>
-            /// <param name="topicPath">The topic path as supplied to the add request.</param><param name="reason">The reason for failure.</param>
-            public void OnTopicAddFailed( string topicPath, TopicAddFailReason reason )
-            {
-                theCompletionSource.SetException( 
-                    new Exception( string.Format( "Failed to add topic {0} because of '{1}", topicPath, reason )) );
+            /// <param name="topicPath">The topic path as supplied to the add request.</param>
+            /// <param name="reason">The reason for failure.</param>
+            public void OnTopicAddFailed( string topicPath, TopicAddFailReason reason ) {
+                theCompletionSource.SetException(
+                    new Exception( string.Format( "Failed to add topic {0} because of '{1}", topicPath, reason ) ) );
             }
         }
 
-        private class UpdateCallback : ITopicUpdaterUpdateCallback
-        {
+        private class UpdateCallback : ITopicUpdaterUpdateCallback {
             /// <summary>
-            /// Notification of a contextual error related to this callback. This is
-            /// analogous to an exception being raised. Situations in which
-            /// <code>
-            /// OnError
-            /// </code>
-            ///  is called include the session being closed, a
-            ///  communication timeout, or a problem with the provided parameters. No
-            ///  further calls will be made to this callback.
+            /// Notification of a contextual error related to this callback. This is analogous to an exception being
+            /// raised. Situations in which <code>OnError</code> is called include the session being closed, a
+            /// communication timeout, or a problem with the provided parameters. No further calls will be made to this
+            /// callback.
             /// </summary>
             /// <param name="errorReason">errorReason a value representing the error; this can be one of
-            ///  constants defined in <see cref="T:PushTechnology.ClientInterface.Client.Callbacks.ErrorReason"/>, or a feature-specific
-            ///  reason.</param>
-            public void OnError( ErrorReason errorReason )
-            {
+            /// constants defined in <see cref="T:PushTechnology.ClientInterface.Client.Callbacks.ErrorReason"/>, or a
+            /// feature-specific reason.</param>
+            public void OnError( ErrorReason errorReason ) {
                 // Handle any errors here
             }
 
             /// <summary>
             /// Indicates a successful update.
             /// </summary>
-            public void OnSuccess()
-            {
+            public void OnSuccess() {
                 // Handle the success here
             }
         }
-
-        #endregion Private Classes
     }
 }

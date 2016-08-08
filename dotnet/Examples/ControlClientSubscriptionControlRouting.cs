@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2014, 2015 Push Technology Ltd.
+ * Copyright © 2014, 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,29 +17,20 @@ using PushTechnology.ClientInterface.Client.Factories;
 using PushTechnology.ClientInterface.Client.Features.Control.Topics;
 using PushTechnology.ClientInterface.Client.Session;
 
-namespace Examples
-{
+namespace Examples {
     /// <summary>
     /// This demonstrates using a control client to be notified of subscription requests to routing topics.
-    /// 
+    ///
     /// This uses the <see cref="ISubscriptionControl"/> feature.
     /// </summary>
-    public class ControlClientSubscriptionControlRouting
-    {
-        #region Fields
-
+    public class ControlClientSubscriptionControlRouting {
         private readonly ISession session;
-
-        #endregion Fields
-
-        #region Constructor
 
         /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="routingCallback">The callback for routing subscription requests.</param>
-        public ControlClientSubscriptionControlRouting( ISubscriptionCallback routingCallback )
-        {
+        public ControlClientSubscriptionControlRouting( ISubscriptionCallback routingCallback ) {
             session = Diffusion.Sessions.Principal( "control" ).Password( "password" )
                 .Open( "ws://diffusion.example.com:80" );
 
@@ -51,53 +42,27 @@ namespace Examples
             subscriptionControl.AddRoutingSubscriptionHandler( "a/b", new SubscriptionHandler( routingCallback ) );
         }
 
-        #endregion Constructor
-
-        #region Public Methods
-
         /// <summary>
         /// Close the session.
         /// </summary>
-        public void Close()
-        {
+        public void Close() {
             session.Close();
         }
 
-        #endregion Public Methods
-
-        #region Private Classes
-
-        private class SubscriptionHandler : RoutingSubscriptionRequestHandlerDefault
-        {
-            #region Fields
-
+        private class SubscriptionHandler : RoutingSubscriptionRequestHandlerDefault {
             private readonly ISubscriptionCallback theRoutingCallback;
 
-            #endregion Fields
-
-            #region Constructor
-
-            public SubscriptionHandler( ISubscriptionCallback callback )
-            {
+            public SubscriptionHandler( ISubscriptionCallback callback ) {
                 theRoutingCallback = callback;
             }
-
-            #endregion Constructor
-
-            #region Overrides
 
             /// <summary>
             /// A request to subscribe to a specific routing topic.
             /// </summary>
             /// <param name="request"></param>
-            public override void OnSubscriptionRequest( IRoutingSubscriptionRequest request )
-            {
+            public override void OnSubscriptionRequest( IRoutingSubscriptionRequest request ) {
                 request.Route( "routing/target/topic", theRoutingCallback );
             }
-
-            #endregion Overrides
         }
-
-        #endregion Private Classes
     }
 }
