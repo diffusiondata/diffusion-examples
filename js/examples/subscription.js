@@ -40,15 +40,15 @@ diffusion.connect({
 
     // Callbacks can also be registered after the subscription has occurred
     subscription.on({
-        update : function(value, topic, sub) {
+        update : function(value, topic) {
             console.log('Update for topic: ' + topic, value);
         },
-        subscribe : function(details, topic, sub) {
+        subscribe : function(details, topic) {
             console.log('Subscribed to topic: ' + topic);
         },
-        unsubscribe : function(reason, topic, sub) {
+        unsubscribe : function(reason, topic) {
             console.log('Unsubscribed from topic:' + topic);
-            sub.close();
+            subscription.close();
         }
     });
 
