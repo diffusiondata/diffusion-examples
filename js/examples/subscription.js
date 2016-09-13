@@ -25,9 +25,9 @@ diffusion.connect({
     secure : true
 }).then(function(session) {
 
-    // 1. Subscriptions are how sessions receive streams of data from the server. 
-    
-    // When subscribing, a topic selector is used to select which topics to subscribe to. Topics do not need to exist 
+    // 1. Subscriptions are how sessions receive streams of data from the server.
+
+    // When subscribing, a topic selector is used to select which topics to subscribe to. Topics do not need to exist
     // at the time of subscription - the server dynamically resolves subscriptions as topics are added or removed.
 
     // Subscribe to the "foo" topic with an inline callback function
@@ -53,20 +53,20 @@ diffusion.connect({
     });
 
     // 2. Sessions may unsubscribe from any topic to stop receiving data
-    
+
     // Unsubscribe from the "foo" topic. Sessions do not need to have previously been subscribed to the topics they are
     // unsubscribing from. Unsubscribing from a topic will result in the 'unsubscribe' callback registered above being
     // called.
     session.unsubscribe('foo');
 
     // 3. Subscriptions / Unsubscriptions can select multiple topics using Topic Selectors
-    
+
     // Topic Selectors provide regex-like capabilities for subscribing to topics. These are resolved dynamically, much
     // like subscribing to a single topic.
     var subscription2 = session.subscribe('?foo/.*/[a-z]');
-    
+
     // 4. Subscriptions can use transformers to convert update values
-    
+
     // Subscribe to a topic and then convert all received values to JSON. Transforming a subscription creates a new
     // subscription stream, rather than modifying the original.
     session.subscribe('bar').transform(JSON.parse).on('update', function(value, topic) {
@@ -74,7 +74,7 @@ diffusion.connect({
     });
 
     // 5. Metadata can be used within transformers to parse data
-   
+
     // Create a simple metadata instance
     var meta = new diffusion.metadata.RecordContent();
 
