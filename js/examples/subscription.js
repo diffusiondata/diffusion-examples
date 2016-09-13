@@ -68,7 +68,8 @@ diffusion.connect({
     // 4. Subscriptions can use transformers to convert update values
 
     // Subscribe to a topic and then convert all received values to JSON. Transforming a subscription creates a new
-    // subscription stream, rather than modifying the original.
+    // subscription stream, rather than modifying the original. This assumes that the topic is a single value topic
+    // receiving stringified JSON and is not a JSON topic.
     session.subscribe('bar').transform(JSON.parse).on('update', function(value, topic) {
         console.log('Got JSON update for topic: ' + topic, value);
     });
