@@ -27,8 +27,8 @@ diffusion.connect({
 
     // 1. TypedSubscriptions are the best way to receive values from JSON and Binary topics.
 
-    // Streams to notifications can be registered separately to subscribing to a topic. Registering a stream is a local
-    // operation and does not change the data the client receives.
+    // Streams for notifications can be registered separately from subscribing to a topic. Registering a stream is a
+    // local operation and does not change the data the client receives.
     // Like subscribing, streams are registered using a topic selection. Each stream will only receive notifications
     // from topics that match the topic selector it is registered with.
     // A stream can be converted to a TypedSubscriptions by a call to asType passing in the DataType for the type of
