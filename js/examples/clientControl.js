@@ -36,29 +36,41 @@ diffusion.connect({
         });
 
     // Register a listener for session properties
-    session.clients.registerSessionPropertiesListener(diffusion.clients.PropertyKeys.ALL_FIXED_PROPERTIES)
-        .then(function() {
-            console.log('Session properties listener request sent');
+    session.clients.setSessionPropertiesListener(diffusion.clients.PropertyKeys.ALL_FIXED_PROPERTIES, {
+        onActive : function(deregister) {
+            console.log("Session properties listener opened");
 
-            var listener = session.clients.getSessionPropertiesListener();
-            listener
-                .on('onSessionOpen', function(event) {
-                    console.log('onSessionOpen (' + event.sessionId + ')');
-                    console.log('  properties=' + JSON.stringify(event.properties, null, 2));
-                })
-                .on('onSessionUpdate', function(event) {
-                    console.log('onSessionUpdate (' + event.sessionId + ')');
-                    console.log('  type=' + event.type);
-                    console.log('  old properties=' + JSON.stringify(event.oldProperties, null, 2));
-                    console.log('  new properties=' + JSON.stringify(event.newProperties, null, 2));
-                })
-                .on('onSessionClose', function(event) {
-                    console.log('onSessionClose (' + event.sessionId + ')');
-                    console.log('  reason=' + event.reason);
-                    console.log('  properties=' + JSON.stringify(event.properties, null, 2));
-                });
-        }, function(err) {
-            console.log('An error has occurred:', err);
-        });
-
+            // Call deregister() to close this listener
+        },
+        onClose : function() {
+            console.log("Session properties listener closed"); 
+        },
+        onSessionOpen : function(session, properties) {
+            // Notification that a session has been opened
+            console.log("Session opened: " + session, JSON.stringify(properties));
+        },
+        onSessionEvent : function(session, event, properties) {
+            // Notification that a session's properties have changed
+            switch (event) {
+                case session.clients.SessionEventType.UPDATED :
+                    console.log("Session updated: " + session, JSON.stringify(properties));
+                    break;
+                case session.clients.SessionEventType.DISCONNECTED :
+                    console.log("Session disconnected: " + session, JSON.stringify(properties));
+                    break;
+                case session.clients.SessionEventType.RECONNECTED :
+                    console.log("Session reconnected: " + session, JSON.stringify(properties));
+                    break;
+                case session.clients.SessionEventType.FAILED_OVER :
+                    console.log("Session failed over: " + session, JSON.stringify(properties));
+            }
+        },
+        onSessionClose : function(session, properties, reason) {
+            console.log("Session closed: " + session + " reason: " + reason, JSON.stringify(properties));
+        }
+    }).then(function() {
+        console.log("Session listener succesfully registered");
+    }, function(err) {
+        console.log('An error occurred registering a session listener:', err);
+    });
 });

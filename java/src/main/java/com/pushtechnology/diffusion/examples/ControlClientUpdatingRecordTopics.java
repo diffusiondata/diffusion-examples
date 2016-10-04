@@ -14,12 +14,9 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
 import com.pushtechnology.diffusion.client.Diffusion;
-import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.callbacks.Registration;
+import com.pushtechnology.diffusion.client.callbacks.TopicTreeHandler;
 import com.pushtechnology.diffusion.client.content.Content;
 import com.pushtechnology.diffusion.client.content.ContentFactory;
 import com.pushtechnology.diffusion.client.content.Record;
@@ -30,8 +27,7 @@ import com.pushtechnology.diffusion.client.content.metadata.MetadataFactory;
 import com.pushtechnology.diffusion.client.content.update.ContentUpdateFactory;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddContextCallback;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.RemoveCallback;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.RemoveContextCallback;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.RemovalContextCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateContextCallback;
 import com.pushtechnology.diffusion.client.session.Session;
@@ -69,7 +65,6 @@ public final class ControlClientUpdatingRecordTopics {
 
     private static final String ROOT_TOPIC = "FX";
 
-    private final CountDownLatch closeLatch = new CountDownLatch(2);
     private final Session session;
     private final TopicControl topicControl;
     private final MRecord recordMetadata;
@@ -99,11 +94,9 @@ public final class ControlClientUpdatingRecordTopics {
         // values
         recordMetadata =
             mf.recordBuilder("Rates")
-                .add(
-                    mf.decimalBuilder("Bid").scale(5).allowsEmpty(true).build())
-                .add(
-                    mf.decimalBuilder("Ask").scale(5).allowsEmpty(true).build())
-                .build();
+            .add(mf.decimalBuilder("Bid").scale(5).allowsEmpty(true).build())
+            .add(mf.decimalBuilder("Ask").scale(5).allowsEmpty(true).build())
+            .build();
 
         // Create the topic details to be used for all rates topics
         topicDetails =
@@ -114,8 +107,8 @@ public final class ControlClientUpdatingRecordTopics {
 
         // Create a delta builder that can be reused for bid only changes
         deltaRecordBuilder =
-            Diffusion.content().newDeltaRecordBuilder(recordMetadata).
-                emptyFieldValue(Record.EMPTY_FIELD_STRING);
+            Diffusion.content().newDeltaRecordBuilder(recordMetadata)
+                .emptyFieldValue(Record.EMPTY_FIELD_STRING);
 
         final TopicUpdateControl updateControl =
             session.feature(TopicUpdateControl.class);
@@ -127,24 +120,19 @@ public final class ControlClientUpdatingRecordTopics {
             ROOT_TOPIC,
             new TopicUpdateControl.UpdateSource.Default() {
                 @Override
-                public void onRegistered(String topicPath, Registration registration) {
+                public void onRegistered(
+                    String topicPath,
+                    Registration registration) {
+                    topicControl.removeTopicsWithSession(
+                        ROOT_TOPIC,
+                        new TopicTreeHandler.Default());
                     updateSourceRegistration = registration;
                 }
 
                 @Override
-                public void onActive(String topicPath, TopicUpdateControl.Updater updater) {
+                public void onActive(String topicPath,
+                    TopicUpdateControl.Updater updater) {
                     topicUpdater = updater;
-                }
-
-                @Override
-                public void onClose(String topicPath) {
-                    closeLatch.countDown();
-                }
-
-                @Override
-                public void onError(String topicPath, ErrorReason errorReason) {
-                    super.onError(topicPath, errorReason);
-                    closeLatch.countDown();
                 }
             });
 
@@ -288,9 +276,9 @@ public final class ControlClientUpdatingRecordTopics {
     public void removeRate(
         String currency,
         String targetCurrency,
-        RemoveContextCallback<String> callback) {
+        RemovalContextCallback<String> callback) {
 
-        topicControl.removeTopics(
+        topicControl.remove(
             rateTopicName(currency, targetCurrency),
             String.format("%s/%s", currency, targetCurrency),
             callback);
@@ -305,10 +293,10 @@ public final class ControlClientUpdatingRecordTopics {
      */
     public void removeCurrency(
         String currency,
-        RemoveContextCallback<String> callback) {
+        RemovalContextCallback<String> callback) {
 
-        topicControl.removeTopics(
-            String.format("%s/%s", ROOT_TOPIC, currency),
+        topicControl.remove(
+            String.format("?%s/%s//", ROOT_TOPIC, currency),
             currency,
             callback);
     }
@@ -322,28 +310,7 @@ public final class ControlClientUpdatingRecordTopics {
         if (registration != null) {
             registration.close();
         }
-
-        // Remove our topics and close session when done
-        topicControl.removeTopics(
-            ROOT_TOPIC,
-            new RemoveCallback() {
-                @Override
-                public void onDiscard() {
-                    closeLatch.countDown();
-                }
-
-                @Override
-                public void onTopicsRemoved() {
-                    closeLatch.countDown();
-                }
-            });
-
-        try {
-            closeLatch.await(5, TimeUnit.SECONDS);
-        }
-        finally {
-            session.close();
-        }
+        session.close();
     }
 
     /**
@@ -355,7 +322,8 @@ public final class ControlClientUpdatingRecordTopics {
      * @param targetCurrency the target currency
      * @return the topic name
      */
-    private static String rateTopicName(String currency, String targetCurrency) {
+    private static String rateTopicName(String currency,
+        String targetCurrency) {
         return String.format("%s/%s/%s", ROOT_TOPIC, currency, targetCurrency);
     }
 

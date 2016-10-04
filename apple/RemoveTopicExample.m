@@ -21,7 +21,8 @@
     PTDiffusionSession* _session;
 }
 
--(void)start {
+-(void)startWithURL:(NSURL*)url {
+
     PTDiffusionCredentials *const credentials =
         [[PTDiffusionCredentials alloc] initWithPassword:@"password"];
 
@@ -31,7 +32,7 @@
 
     NSLog(@"Connecting...");
 
-    [PTDiffusionSession openWithURL:_url
+    [PTDiffusionSession openWithURL:url
                       configuration:sessionConfiguration
                   completionHandler:^(PTDiffusionSession *session, NSError *error)
     {
@@ -48,8 +49,8 @@
 
         // Remove topic.
         NSString *const topicPath = @"Example/Stateless";
-        [session.topicControl removeWithTopicSelectorExpression:topicPath
-                                              completionHandler:^(NSError *const error)
+        [session.topicControl removeDiscreteWithTopicSelectorExpression:topicPath
+                                                      completionHandler:^(NSError *const error)
         {
             if (error) {
                 NSLog(@"Failed to remove topic. Error: %@", error);

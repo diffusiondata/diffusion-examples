@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2015 Push Technology Ltd.
+ * Copyright (C) 2014, 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
 package com.pushtechnology.diffusion.examples;
 
 import com.pushtechnology.diffusion.client.Diffusion;
+import com.pushtechnology.diffusion.client.callbacks.TopicTreeHandler;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddCallback;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.RemoveCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateCallback;
 import com.pushtechnology.diffusion.client.session.Session;
@@ -57,11 +57,19 @@ public final class ControlClientUpdatingSingleValueTopic {
         topicControl = session.feature(TopicControl.class);
         updateControl = session.feature(TopicUpdateControl.class);
 
-        // Create a single value topic
+        // Create the topic and request that it is removed when the session
+        // closes
         topicControl.addTopic(
             TOPIC,
             TopicType.SINGLE_VALUE,
-            new AddCallback.Default());
+            new AddCallback.Default() {
+                @Override
+                public void onTopicAdded(String topicPath) {
+                    topicControl.removeTopicsWithSession(
+                        TOPIC,
+                        new TopicTreeHandler.Default());
+                }
+            });
 
     }
 
@@ -79,20 +87,6 @@ public final class ControlClientUpdatingSingleValueTopic {
      * Close the session.
      */
     public void close() {
-        // Remove our topic and close session when done
-        topicControl.removeTopics(
-            ">" + TOPIC,
-            new RemoveCallback() {
-                @Override
-                public void onDiscard() {
-                    session.close();
-                }
-
-                @Override
-                public void onTopicsRemoved() {
-                    session.close();
-                }
-            });
-
+        session.close();
     }
 }

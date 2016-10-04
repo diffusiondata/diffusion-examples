@@ -21,13 +21,16 @@
     PTDiffusionSession* _session;
 }
 
--(void)start {
+-(void)startWithURL:(NSURL*)url {
+
     PTDiffusionCredentials *const credentials = [[PTDiffusionCredentials alloc] initWithPassword:@"password"];
-    PTDiffusionSessionConfiguration *const sessionConfiguration = [[PTDiffusionSessionConfiguration alloc] initWithPrincipal:@"client" credentials:credentials];
+    PTDiffusionSessionConfiguration *const sessionConfiguration = [[PTDiffusionSessionConfiguration alloc]
+                                                                   initWithPrincipal:@"client"
+                                                                   credentials:credentials];
 
     NSLog(@"Connecting...");
 
-    [PTDiffusionSession openWithURL:_url
+    [PTDiffusionSession openWithURL:url
                       configuration:sessionConfiguration
                   completionHandler:^(PTDiffusionSession *session, NSError *error)
      {

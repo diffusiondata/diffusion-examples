@@ -22,11 +22,13 @@
     NSUInteger _nextValue;
 }
 
--(void)start {
+-(void)  startWithURL:(NSURL*)url
+ sessionConfiguration:(PTDiffusionSessionConfiguration*)sessionConfiguration {
+
     NSLog(@"Connecting...");
 
-    [PTDiffusionSession openWithURL:_url
-                      configuration:_sessionConfiguration
+    [PTDiffusionSession openWithURL:url
+                      configuration:sessionConfiguration
                   completionHandler:^(PTDiffusionSession *session, NSError *error)
      {
          if (!session) {
@@ -59,7 +61,7 @@
 
     NSLog(@"Sending %lu...", (long)value);
     [session.messaging sendWithTopicPath:@"foo/bar"
-                                 content:content
+                                   value:content
                                  options:[PTDiffusionSendOptions new]
                        completionHandler:^(NSError *const error)
     {

@@ -23,7 +23,7 @@ import com.pushtechnology.diffusion.client.content.RecordContentBuilder;
 import com.pushtechnology.diffusion.client.content.metadata.MContent;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddContextCallback;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.RemoveCallback;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.RemovalCallback;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.RecordTopicDetails;
 import com.pushtechnology.diffusion.client.topics.details.TopicDetails;
@@ -64,7 +64,8 @@ public class ControlClientAddingTopics {
      * This uses the simple convenience method for adding topics where the topic
      * type (and metadata, if appropriate) are derived from a supplied value
      * which can be any object. For example, an Integer would result in a single
-     * value topic of type integer or a JSON object would result in a JSON topic.
+     * value topic of type integer or a JSON object would result in a JSON
+     * topic.
      *
      * @param topicPath full topic path
      * @param initialValue an initial value for the topic
@@ -156,10 +157,18 @@ public class ControlClientAddingTopics {
      * @param topicPath the topic path
      * @param callback notifies result of operation
      */
-    public void removeTopic(String topicPath, RemoveCallback callback) {
-        topicControl.removeTopics(
-            ">" + topicPath, // convert to a topic path selector
-            callback);
+    public void removeTopic(String topicPath, RemovalCallback callback) {
+        topicControl.remove(topicPath, callback);
+    }
+
+    /**
+     * Remove a topic and all of its descendants.
+     *
+     * @param topicPath the topic path
+     * @param callback notifies result of operation
+     */
+    public void removeTopicBranch(String topicPath, RemovalCallback callback) {
+        topicControl.remove("?" + topicPath + "//", callback);
     }
 
     /**
@@ -168,10 +177,8 @@ public class ControlClientAddingTopics {
      * @param topicSelector the selector expression
      * @param callback notifies result of operation
      */
-    public void removeTopics(String topicSelector, RemoveCallback callback) {
-        topicControl.removeTopics(
-            topicSelector,
-            callback);
+    public void removeTopics(String topicSelector, RemovalCallback callback) {
+        topicControl.remove(topicSelector, callback);
     }
 
     /**

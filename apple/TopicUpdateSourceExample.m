@@ -24,7 +24,7 @@
     PTDiffusionSession* _session;
 }
 
--(void)start {
+-(void)startWithURL:(NSURL*)url {
     PTDiffusionCredentials *const credentials =
         [[PTDiffusionCredentials alloc] initWithPassword:@"password"];
 
@@ -34,7 +34,7 @@
 
     NSLog(@"Connecting...");
 
-    [PTDiffusionSession openWithURL:_url
+    [PTDiffusionSession openWithURL:url
                       configuration:sessionConfiguration
                   completionHandler:^(PTDiffusionSession *session, NSError *error)
     {
@@ -60,7 +60,7 @@ static NSString *const _TopicPath = @"Example/Exclusively Updating";
     // Add a single value topic without an initial value.
     [session.topicControl addWithTopicPath:_TopicPath
                                       type:PTDiffusionTopicType_SingleValue
-                                   content:nil
+                                     value:nil
                          completionHandler:^(NSError * _Nullable error)
     {
         if (error) {
@@ -98,7 +98,7 @@ static NSString *const _TopicPath = @"Example/Exclusively Updating";
 
     // Update the topic.
     [updater updateWithTopicPath:_TopicPath
-                         content:content
+                           value:content
                completionHandler:^(NSError *const error)
     {
         if (error) {

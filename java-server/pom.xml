@@ -1,0 +1,86 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.pushtechnology.sample</groupId>
+        <artifactId>sample-parent</artifactId>
+        <version>1.4</version>
+    </parent>
+
+    <groupId>com.pushtechnology.diffusion</groupId>
+    <artifactId>diffusion-api-publisher-examples</artifactId>
+    <version>5.9.0</version>
+    <packaging>jar</packaging>
+    <description>Diffusion Publisher public API examples.</description>
+
+    <repositories>
+        <repository>
+            <id>push-repository</id>
+            <url>https://download.pushtechnology.com/maven/</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>1.4.1</version>
+                <executions>
+                    <execution>
+                        <id>enforce-environment-variable-is-set</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireEnvironmentVariable>
+                                    <variableName>DIFFUSION_HOME</variableName>
+                                </requireEnvironmentVariable>
+                            </rules>
+                            <fail>true</fail>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <!-- The Publisher API is not available as a separate Maven artifact.
+                 The user must set DIFFUSION_HOME. -->
+            <activation>
+                <property>
+                    <name>env.DIFFUSION_HOME</name>
+                </property>
+            </activation>
+
+            <dependencies>
+                <dependency>
+                    <groupId>com.pushtechnology.diffusion</groupId>
+                    <artifactId>diffusion</artifactId>
+                    <version>local-installation</version>
+                    <scope>system</scope>
+                    <systemPath>${DIFFUSION_HOME}/lib/diffusion.jar</systemPath>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
+</project>

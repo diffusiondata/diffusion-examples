@@ -21,7 +21,8 @@
     PTDiffusionSession* _session;
 }
 
--(void)start {
+-(void)startWithURL:(NSURL*)url {
+
     PTDiffusionCredentials *const credentials =
         [[PTDiffusionCredentials alloc] initWithPassword:@"password"];
 
@@ -31,7 +32,7 @@
 
     NSLog(@"Connecting...");
 
-    [PTDiffusionSession openWithURL:_url
+    [PTDiffusionSession openWithURL:url
                       configuration:sessionConfiguration
                   completionHandler:^(PTDiffusionSession *session, NSError *error)
     {
@@ -55,7 +56,7 @@
     // Add a stateless topic.
     [session.topicControl addWithTopicPath:@"Example/Stateless"
                                       type:PTDiffusionTopicType_Stateless
-                                   content:nil
+                                     value:nil
                          completionHandler:^(NSError *const error)
     {
         if (error) {
@@ -71,7 +72,7 @@
         [[PTDiffusionContent alloc] initWithData:data];
     [session.topicControl addWithTopicPath:@"Example/SingleValue"
                                       type:PTDiffusionTopicType_SingleValue
-                                   content:initialValue
+                                     value:initialValue
                          completionHandler:^(NSError * _Nullable error)
     {
         if (error) {

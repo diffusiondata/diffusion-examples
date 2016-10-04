@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2015 Push Technology Ltd.
+ * Copyright (C) 2014, 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ diffusion.connect({
     credentials : 'password'
 }).then(function(session) {
     // 1. Topics can be created with a specified topic path and value. If the path contains multiple levels, any
-    // intermediary topics that do not exist will be created automatically with a stateless topic type.
+    // intermediary topic path that do not already have topics remain unchanged.
 
     // Create a topic with string values, and an initial value of "xyz".
     session.topics.add('topic/string', 'xyz');

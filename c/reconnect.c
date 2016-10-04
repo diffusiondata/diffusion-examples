@@ -19,7 +19,7 @@
  */
 
 /*
- * This examples shows how to make a synchronous connection to
+ * This example shows how to make a synchronous connection to
  * Diffusion, with user-provided reconnection logic.
  */
 #include <stdio.h>
@@ -90,7 +90,7 @@ backoff_success(SESSION_T *session, void *args)
 static void
 backoff_failure(SESSION_T *session, void *args)
 {
-        printf("Reconnection failed\n");
+        printf("Reconnection failed (%s)\n", session_state_as_string(session->state));
 
         BACKOFF_STRATEGY_ARGS_T *backoff_args = args;
 
@@ -170,6 +170,10 @@ main(int argc, char **argv)
                 free(error.message);
         }
 
+        // With the exception of backoff_args, the reconnection strategy is
+        // copied withing session_create() and may be freed now.
+        free(reconnection_strategy);
+
         /*
          * Sleep for a while.
          */
@@ -180,6 +184,11 @@ main(int argc, char **argv)
          */
         session_close(session, NULL);
         session_free(session);
+
+        free(backoff_args);
+
+        credentials_free(credentials);
+        hash_free(options, NULL, free);
 
         return EXIT_SUCCESS;
 }

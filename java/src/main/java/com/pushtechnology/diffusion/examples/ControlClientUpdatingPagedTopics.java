@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2015 Push Technology Ltd.
+ * Copyright (C) 2014, 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package com.pushtechnology.diffusion.examples;
 import java.util.Collection;
 
 import com.pushtechnology.diffusion.client.Diffusion;
+import com.pushtechnology.diffusion.client.callbacks.TopicTreeHandler;
 import com.pushtechnology.diffusion.client.content.metadata.MRecord;
 import com.pushtechnology.diffusion.client.content.metadata.MetadataFactory;
 import com.pushtechnology.diffusion.client.content.update.PagedRecordOrderedUpdateFactory;
@@ -24,7 +25,6 @@ import com.pushtechnology.diffusion.client.content.update.PagedStringUnorderedUp
 import com.pushtechnology.diffusion.client.content.update.Update;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddCallback;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.RemoveCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.UpdateSource;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
@@ -43,8 +43,8 @@ import com.pushtechnology.diffusion.client.topics.details.TopicType;
  * This demonstrates some simple examples of paged topic updates but not all of
  * the possible ways in which they can be done.
  * <P>
- * To send updates to a topic, the client session requires the
- * 'update_topic' permission for that branch of the topic tree.
+ * To send updates to a topic, the client session requires the 'update_topic'
+ * permission for that branch of the topic tree.
  *
  * @author Push Technology Limited
  * @since 5.0
@@ -74,11 +74,11 @@ public class ControlClientUpdatingPagedTopics {
         updateControl = session.feature(TopicUpdateControl.class);
 
         orderedUpdateFactory =
-            updateControl
-                .updateFactory(PagedRecordOrderedUpdateFactory.class);
+            updateControl.updateFactory(
+                PagedRecordOrderedUpdateFactory.class);
         unorderedUpdateFactory =
-            updateControl
-                .updateFactory(PagedStringUnorderedUpdateFactory.class);
+            updateControl.updateFactory(
+                PagedStringUnorderedUpdateFactory.class);
 
         final MetadataFactory metadata = Diffusion.metadata();
 
@@ -86,7 +86,15 @@ public class ControlClientUpdatingPagedTopics {
         topicControl.addTopic(
             UNORDERED_TOPIC,
             topicControl.newDetails(TopicType.PAGED_STRING),
-            new AddCallback.Default());
+            new AddCallback.Default() {
+                @Override
+                public void onTopicAdded(String topicPath) {
+                    // Request removal of topics when session closes
+                    topicControl.removeTopicsWithSession(
+                        "Paged",
+                        new TopicTreeHandler.Default());
+                }
+            });
 
         // Create an ordered paged record topic
         final MRecord recordMetadata =
@@ -97,10 +105,9 @@ public class ControlClientUpdatingPagedTopics {
 
         topicControl.addTopic(
             ORDERED_TOPIC,
-            topicControl.
-                newDetailsBuilder(PagedRecordTopicDetails.Builder.class).
-                metadata(recordMetadata).
-                order(new OrderKey("Name")).build(),
+            topicControl
+                .newDetailsBuilder(PagedRecordTopicDetails.Builder.class)
+                .metadata(recordMetadata).order(new OrderKey("Name")).build(),
             new AddCallback.Default());
 
         // Register as updater for topics under the 'Paged' branch
@@ -243,20 +250,6 @@ public class ControlClientUpdatingPagedTopics {
      * Close the session.
      */
     public void close() {
-        // Remove our topic and close session when done
-        topicControl.removeTopics(
-            ">Paged",
-            new RemoveCallback() {
-                @Override
-                public void onDiscard() {
-                    session.close();
-                }
-
-                @Override
-                public void onTopicsRemoved() {
-                    session.close();
-                }
-            });
-
+        session.close();
     }
 }

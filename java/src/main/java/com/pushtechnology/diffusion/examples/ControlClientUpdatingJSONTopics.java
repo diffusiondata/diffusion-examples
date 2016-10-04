@@ -24,10 +24,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
 import com.pushtechnology.diffusion.client.Diffusion;
+import com.pushtechnology.diffusion.client.callbacks.Registration;
+import com.pushtechnology.diffusion.client.callbacks.TopicTreeHandler;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddContextCallback;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.RemoveCallback;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.RemoveContextCallback;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.RemovalContextCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.UpdateSource;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
@@ -47,8 +48,8 @@ import com.pushtechnology.diffusion.datatype.json.JSONDataType;
  * contain a map of all rate conversions from the base GBP currency. The rates
  * are represented as string decimal values (e.g. "12.457").
  * <P>
- * The {@code addRates} method shows how to create a new rates topic,
- * specifying its initial map of values.
+ * The {@code addRates} method shows how to create a new rates topic, specifying
+ * its initial map of values.
  * <P>
  * The {@code changeRates} method which takes a map shows how to completely
  * replace the set of rates for a currency with a new map of rates.
@@ -71,6 +72,7 @@ public final class ControlClientUpdatingJSONTopics {
     private final Session session;
     private final TopicControl topicControl;
     private volatile TopicUpdateControl.ValueUpdater<JSON> valueUpdater;
+    private volatile Registration updateSourceRegistration;
     private final CBORFactory cborFactory = new CBORFactory();
     private final JSONDataType jsonDataType = Diffusion.dataTypes().json();
 
@@ -89,13 +91,29 @@ public final class ControlClientUpdatingJSONTopics {
 
         topicControl = session.feature(TopicControl.class);
 
-        // Register as an updater for all topics under the root
+        // Register as an updater for all topics under the root and request
+        // that all topics created are removed when the session closes
         session.feature(TopicUpdateControl.class).registerUpdateSource(
             ROOT_TOPIC,
             new UpdateSource.Default() {
                 @Override
+                public void onRegistered(
+                    String topicPath,
+                    Registration registration) {
+                    updateSourceRegistration = registration;
+                }
+
+                @Override
                 public void onActive(String topicPath, Updater updater) {
+                    topicControl.removeTopicsWithSession(
+                        ROOT_TOPIC,
+                        new TopicTreeHandler.Default());
                     valueUpdater = updater.valueUpdater(JSON.class);
+                }
+
+                @Override
+                public void onClose(String topicPath) {
+                    session.close();
                 }
             });
 
@@ -197,7 +215,7 @@ public final class ControlClientUpdatingJSONTopics {
      */
     public void removeRates(
         String currency,
-        RemoveContextCallback<String> callback) {
+        RemovalContextCallback<String> callback) {
 
         final String topicName = rateTopicName(currency);
 
@@ -205,31 +223,14 @@ public final class ControlClientUpdatingJSONTopics {
             valueUpdater.removeCachedValues(topicName);
         }
 
-        topicControl.removeTopics(
-            rateTopicName(currency),
-            currency,
-            callback);
+        topicControl.remove(topicName, currency, callback);
     }
 
     /**
      * Close the session.
      */
     public void close() {
-        // Remove our topics and close session when done
-        topicControl.removeTopics(
-            ROOT_TOPIC,
-            new RemoveCallback() {
-                @Override
-                public void onDiscard() {
-                    session.close();
-                }
-
-                @Override
-                public void onTopicsRemoved() {
-                    session.close();
-                }
-            });
-
+        updateSourceRegistration.close();
     }
 
     /**

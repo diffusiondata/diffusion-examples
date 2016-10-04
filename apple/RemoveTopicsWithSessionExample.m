@@ -24,7 +24,7 @@
     PTDiffusionSession* _session;
 }
 
--(void)start {
+-(void)startWithURL:(NSURL*)url {
     PTDiffusionCredentials *const credentials =
         [[PTDiffusionCredentials alloc] initWithPassword:@"password"];
 
@@ -34,7 +34,7 @@
 
     NSLog(@"Connecting...");
 
-    [PTDiffusionSession openWithURL:_url
+    [PTDiffusionSession openWithURL:url
                       configuration:sessionConfiguration
                   completionHandler:^(PTDiffusionSession *session, NSError *error)
     {
@@ -54,7 +54,7 @@
         // Add a topic so we can register it for removal on session close.
         [tc addWithTopicPath:@"Example/Auto Removed"
                         type:PTDiffusionTopicType_Stateless
-                     content:nil
+                       value:nil
            completionHandler:^(NSError * _Nullable error)
         {
             if (error) {

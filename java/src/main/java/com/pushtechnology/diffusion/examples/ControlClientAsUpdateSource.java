@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2015 Push Technology Ltd.
+ * Copyright (C) 2014, 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import com.pushtechnology.diffusion.client.Diffusion;
+import com.pushtechnology.diffusion.client.callbacks.TopicTreeHandler;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddCallback;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.RemoveCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.UpdateSource;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
@@ -36,8 +36,8 @@ import com.pushtechnology.diffusion.client.topics.details.TopicDetails;
  * This uses the 'TopicControl' feature to create a topic and the
  * 'TopicUpdateControl' feature to send updates to it.
  * <P>
- * To send updates to a topic, the client session requires the
- * 'update_topic' permission for that branch of the topic tree.
+ * To send updates to a topic, the client session requires the 'update_topic'
+ * permission for that branch of the topic tree.
  *
  * @author Push Technology Limited
  * @since 5.0
@@ -79,8 +79,9 @@ public class ControlClientAsUpdateSource {
 
         // Set up topic details
         final SingleValueTopicDetails.Builder builder =
-            topicControl
-                .newDetailsBuilder(SingleValueTopicDetails.Builder.class);
+            topicControl.newDetailsBuilder(
+                SingleValueTopicDetails.Builder.class);
+
         final TopicDetails details =
             builder.metadata(Diffusion.metadata().decimal("Price")).build();
 
@@ -107,13 +108,17 @@ public class ControlClientAsUpdateSource {
         };
 
         // Create the topic. When the callback indicates that the topic has been
-        // created then register the topic source for the topic.
+        // created then register the topic source for the topic and request
+        // that it is removed when the session closes.
         topicControl.addTopic(
             TOPIC_NAME,
             details,
             new AddCallback.Default() {
                 @Override
                 public void onTopicAdded(String topic) {
+                    topicControl.removeTopicsWithSession(
+                        topic,
+                        new TopicTreeHandler.Default());
                     updateControl.registerUpdateSource(topic, source);
                 }
             });
@@ -124,21 +129,7 @@ public class ControlClientAsUpdateSource {
      * Close the session.
      */
     public void close() {
-        // Remove our topic and close session when done
-        topicControl.removeTopics(
-            ">" + TOPIC_NAME,
-            new RemoveCallback() {
-                @Override
-                public void onDiscard() {
-                    session.close();
-                }
-
-                @Override
-                public void onTopicsRemoved() {
-                    session.close();
-                }
-            });
-
+        session.close();
     }
 
     /**
