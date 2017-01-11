@@ -22,13 +22,10 @@
     NSUInteger _nextValue;
 }
 
--(void)  startWithURL:(NSURL*)url
- sessionConfiguration:(PTDiffusionSessionConfiguration*)sessionConfiguration {
-
+-(void)startWithURL:(NSURL*)url {
     NSLog(@"Connecting...");
 
     [PTDiffusionSession openWithURL:url
-                      configuration:sessionConfiguration
                   completionHandler:^(PTDiffusionSession *session, NSError *error)
      {
          if (!session) {

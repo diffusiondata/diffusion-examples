@@ -20,7 +20,11 @@ CC		= gcc
 -include ../makefile.defs
 
 CFLAGS		+= -g -Wall -Werror -std=c99 -D_POSIX_C_SOURCE=200112L -D_XOPEN_SOURCE=700 -c -I$(DIFFUSION_C_CLIENT_INCDIR)
-LDFLAGS		+= $(LIBS) $(DIFFUSION_C_CLIENT_LIBDIR)/libdiffusion.a -lpthread -lpcre -lssl -lcrypto
+LDFLAGS		+= $(LIBS) $(DIFFUSION_C_CLIENT_LIBDIR)/libdiffusion.a -lpthread -lpcre
+# If you have openssl installed then you can uncomment these.
+ifdef HAVE_OPEN_SSL
+LDFLAGS     += -lssl -lcrypto
+endif
 
 ARFLAGS		+=
 SOURCES = subscribe.c fetch.c rc-state.c rc-fortune.c fortune-client.c	\

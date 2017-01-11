@@ -49,6 +49,7 @@ import com.pushtechnology.diffusion.client.topics.details.TopicType;
  * @author Push Technology Limited
  * @since 5.0
  */
+@SuppressWarnings("deprecation")
 public class ControlClientUpdatingPagedTopics {
 
     private static final String ORDERED_TOPIC = "Paged/Ordered";

@@ -14,14 +14,21 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.content.Content;
+import com.pushtechnology.diffusion.client.features.Messaging;
 import com.pushtechnology.diffusion.client.features.control.topics.MessagingControl;
 import com.pushtechnology.diffusion.client.features.control.topics.MessagingControl.MessageHandler;
 import com.pushtechnology.diffusion.client.features.control.topics.MessagingControl.SendCallback;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionId;
 import com.pushtechnology.diffusion.client.types.ReceiveContext;
+import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
  * This is an example of a control client using the 'MessagingControl' feature
@@ -36,9 +43,14 @@ import com.pushtechnology.diffusion.client.types.ReceiveContext;
  */
 public class ControlClientReceivingMessages {
 
-    private final Session session;
-    private final MessagingControl messagingControl;
+    private final Session echoingSession;
+    private final Session sendingSession;
+    private final MessagingControl echoingSessionMessagingControl;
+    private final MessagingControl sendingSessionMessagingControl;
     private final SendCallback sendCallback;
+
+    private static final Logger LOG =
+        LoggerFactory.getLogger(ControlClientReceivingMessages.class);
 
     /**
      * Constructor.
@@ -49,21 +61,28 @@ public class ControlClientReceivingMessages {
 
         sendCallback = callback;
 
-        session =
+        echoingSession =
             Diffusion.sessions().principal("control").password("password")
                 .open("ws://diffusion.example.com:80");
-        messagingControl = session.feature(MessagingControl.class);
+
+        sendingSession =
+            Diffusion.sessions().principal("control").password("password")
+                .open("ws://diffusion.example.com:80");
+
+        echoingSessionMessagingControl = echoingSession.feature(MessagingControl.class);
+        sendingSessionMessagingControl = sendingSession.feature(MessagingControl.class);
 
         // Register to receive all messages sent by clients on the "foo" branch
         // To do this, the client session must have the 'register_handler' permission.
-        messagingControl.addMessageHandler("foo", new EchoHandler());
+        echoingSessionMessagingControl.addMessageHandler("foo", new EchoHandler());
     }
 
     /**
      * Close the session.
      */
     public void close() {
-        session.close();
+        echoingSession.close();
+        sendingSession.close();
     }
 
     /**
@@ -78,18 +97,48 @@ public class ControlClientReceivingMessages {
             Content content,
             ReceiveContext context) {
 
+            try {
+                final JSONObject jsonObject = new JSONObject(content.asString());
+                final String value = (String) jsonObject.get("hello");
+                LOG.info("JSON content with key: 'hello' and value: '{}'", value);
+            }
+            catch (JSONException e) {
+                //Non-JSON message so just carry on and echo the message
+            }
+
             // To send a message to a client, this client session must have
             // the 'view_session' and 'send_to_session' permissions.
-            messagingControl.send(
+            echoingSessionMessagingControl.send(
                 sessionId,
                 topicPath,
                 content,
-                messagingControl.sendOptionsBuilder()
+                echoingSessionMessagingControl.sendOptionsBuilder()
                     .headers(context.getHeaderList())
                     .build(),
                 sendCallback);
 
         }
+    }
+
+    /**
+     * Add a message stream to observe echoed messages.
+     *
+     * @param stream stream to be added
+     */
+    public void addSendingSessionMessageStream(Messaging.MessageStream stream) {
+        sendingSession.feature(Messaging.class).addMessageStream("foo", stream);
+    }
+
+    /**
+     * Sends messages "hello:world" and "{"hello":"world"}".
+     */
+    public void sendHelloWorld() {
+        final Content helloWorldContent = Diffusion.content().newContent("hello:world");
+        final JSON helloWorldJson = Diffusion.dataTypes().json().fromJsonString("{\"hello\":\"world\"}");
+
+        //To do this, the client session must have the 'view_session' and 'send_to_session' permissions.
+        sendingSessionMessagingControl.send(echoingSession.getSessionId(), "foo", helloWorldContent, sendCallback);
+        sendingSessionMessagingControl.send(echoingSession.getSessionId(), "foo", helloWorldJson, sendCallback);
     }
 
 }

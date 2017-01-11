@@ -58,9 +58,7 @@ static RecordDescriber _ExchangeRatesRecordDescriber = ^ NSString* (PTDiffusionR
     return [s copy];
 };
 
--(void)startWithURL:(NSURL*)url
- sessionConfiguration:(PTDiffusionSessionConfiguration*)sessionConfiguration {
-
+-(void)startWithURL:(NSURL*)url {
     PTDiffusionRecordContentSchema * const exchangeRatesSchema = [[PTDiffusionRecordContentSchema alloc] initWithRecordMetadata:@[
         [[PTDiffusionRecordMetadata alloc] initWithName:_FromKey
                                           fieldMetadata:@[
@@ -79,7 +77,6 @@ static RecordDescriber _ExchangeRatesRecordDescriber = ^ NSString* (PTDiffusionR
 
     NSLog(@"Connecting...");
     [PTDiffusionSession openWithURL:url
-                      configuration:sessionConfiguration
                   completionHandler:^(PTDiffusionSession * const session, NSError * const error)
      {
          if (!session) {

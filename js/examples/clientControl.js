@@ -69,7 +69,7 @@ diffusion.connect({
             console.log("Session closed: " + session + " reason: " + reason, JSON.stringify(properties));
         }
     }).then(function() {
-        console.log("Session listener succesfully registered");
+        console.log("Session listener successfully registered");
     }, function(err) {
         console.log('An error occurred registering a session listener:', err);
     });
