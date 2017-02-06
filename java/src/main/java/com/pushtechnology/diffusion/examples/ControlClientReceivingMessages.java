@@ -130,15 +130,23 @@ public class ControlClientReceivingMessages {
     }
 
     /**
-     * Sends messages "hello:world" and "{"hello":"world"}".
+     * Sends message "{"hello":"world"}" as {@link JSON}.
      */
-    public void sendHelloWorld() {
-        final Content helloWorldContent = Diffusion.content().newContent("hello:world");
+    public void sendHelloWorldAsJSON() {
         final JSON helloWorldJson = Diffusion.dataTypes().json().fromJsonString("{\"hello\":\"world\"}");
-
         //To do this, the client session must have the 'view_session' and 'send_to_session' permissions.
-        sendingSessionMessagingControl.send(echoingSession.getSessionId(), "foo", helloWorldContent, sendCallback);
-        sendingSessionMessagingControl.send(echoingSession.getSessionId(), "foo", helloWorldJson, sendCallback);
+        sendingSessionMessagingControl.send(
+            echoingSession.getSessionId(), "foo/JSON", helloWorldJson, sendCallback);
+    }
+
+    /**
+     * Send message "hello:world" as {@link Content}.
+     */
+    public void sendHelloWorldAsContent() {
+        final Content helloWorldContent = Diffusion.content().newContent("hello:world");
+        //To do this, the client session must have the 'view_session' and 'send_to_session' permissions.
+        sendingSessionMessagingControl.send(
+            echoingSession.getSessionId(), "foo/Content", helloWorldContent, sendCallback);
     }
 
 }

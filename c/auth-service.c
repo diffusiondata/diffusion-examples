@@ -28,7 +28,7 @@
  * Authentication handlers are registered with a name, which is typically specified in
  * Server.xml
  *
- * Two handler names are provided by Diffusion and Reappt by default;
+ * Two handler names are provided by Diffusion and Diffusion Cloud by default;
  * before-system-handler and after-system-handler, and additional
  * handlers may be specified for Diffusion through the Server.xml file
  * and an accompanying Java class that implements the
