@@ -1,7 +1,7 @@
-# JavaScript Examples for the Diffusion and Reappt APIs
+# JavaScript Examples for the Diffusion APIs
 
 This directory contains examples showing the use of the JavaScript API
-for Diffusion and Reappt.
+for Diffusion and Diffusion Cloud.
 
 
 ## Client libraries
@@ -13,9 +13,9 @@ You can install the Node version of the JavaScript client library with the follo
 
 You can download the browser version of the JavaScript client library from the following locations:
 
-*   For Reappt: [http://developer.reappt.io/clients/js/](http://developer.reappt.io/clients/js/)
+*   Download from [our website](http://download.pushtechnology.com/cloud/latest/sdks.html#js)
 
-*   For Diffusion: [http://download.pushtechnology.com/](http://download.pushtechnology.com/)
-    In Diffusion, the client libraries are available in the `clients` directory of the Diffusion server installation.
+*   The client libraries are also available in the `clients` directory of the Diffusion server installation.
+
 
 

@@ -1,6 +1,6 @@
-# C Examples for the Diffusion and Reappt APIs
+# C Examples for the Diffusion APIs
 
-This directory contains examples showing the use of the C API for Diffusion and Reappt.
+This directory contains examples showing the use of the C API for Diffusion and Diffusion Cloud.
 
 To use these examples, download the C client library for your operating system from the links below.
 The C API is available for the following operating systems:
@@ -14,10 +14,9 @@ The C API is available for the following operating systems:
 
 You can download the C client libraries from the following locations:
 
-*   For Reappt: [http://developer.reappt.io/clients/c/](http://developer.reappt.io/clients/c/)
+*   Download from [our website](http://download.pushtechnology.com/cloud/latest/sdks.html#c)
 
-*   For Diffusion: [http://download.pushtechnology.com/](http://download.pushtechnology.com/)
-    In Diffusion, the client libraries are available in the `clients` directory of the Diffusion server installation.
+*   The client libraries are also available in the `clients` directory of the Diffusion server installation.
 
 
 ## Dependencies

@@ -11,7 +11,7 @@
 
     <groupId>com.pushtechnology.diffusion</groupId>
     <artifactId>diffusion-api-java-examples</artifactId>
-    <version>5.9.4</version>
+    <version>5.9.5</version>
     <packaging>jar</packaging>
     <description>Diffusion public API examples.</description>
 
@@ -49,8 +49,14 @@
         <dependency>
             <groupId>com.pushtechnology.diffusion</groupId>
             <artifactId>diffusion-client</artifactId>
-            <version>5.9.4</version>
+            <version>5.9.5</version>
             <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20160810</version>
         </dependency>
 
         <!-- Use the Logback logging framework. This may be replaced

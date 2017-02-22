@@ -1,6 +1,6 @@
-# .NET Examples for the Diffusion and Reappt APIs
+# .NET Examples for the Diffusion APIs
 
-This directory contains examples showing the use of the .NET API for Diffusion and Reappt.
+This directory contains examples showing the use of the .NET API for Diffusion and Diffusion Cloud.
 
 These examples are all bundled in a Visual Studio 2015 solution file. For the examples to work,
 you need to download and reference the ClientInterface assembly. Please download the following files and move 
@@ -21,8 +21,7 @@ You can download the required files from the following locations:
 
 *   Using NUget: [https://www.nuget.org/packages/PushTechnology.UnifiedClientInterface/](https://www.nuget.org/packages/PushTechnology.UnifiedClientInterface/)
 
-*   For Reappt: [http://developer.reappt.io/clients/dotnet/](http://developer.reappt.io/clients/dotnet/)
+*   Download from [our website](http://download.pushtechnology.com/cloud/latest/sdks.html#dotnet)
 
-*   For Diffusion: [http://download.pushtechnology.com/](http://download.pushtechnology.com/)
-    In Diffusion, the client libraries are available in the `clients` directory of the Diffusion server installation.
+*   The client libraries are also available in the `clients` directory of the Diffusion server installation.
 

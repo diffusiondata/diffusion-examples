@@ -2,13 +2,13 @@
 
 ## Subscribing client
 
-The file `index.html` is a browser client that connects to Reappt or your Diffusion server and subscribes to a topic. When the topic is updated, the web page displays the updated value of the topic.
+The file `index.html` is a browser client that connects to a Diffusion server or Diffusion Cloud service and subscribes to a topic. When the topic is updated, the web page displays the updated value of the topic.
 
 #### Using this client
 
-To use this client with a Reappt service, make the following edits:
+To use this client with a Diffusion Cloud service, make the following edits:
 
-1. Change the URL in the `diffusion.connect` method to that of your Reappt service.
+1. Change the URL in the `diffusion.connect` method to that of your Diffusion Cloud service.
 
         diffusion.connect({
              host : 'service_url',
@@ -34,7 +34,7 @@ To use this client with a Diffusion server, make the following edits:
 
 
 
-Open `index.html` in a browser, it makes a connection to your Reappt service or Diffusion server and subscribes to the topic `foo/counter`.
+Open `index.html` in a browser, it makes a connection to your Diffusion Cloud service or Diffusion server and subscribes to the topic `foo/counter`.
 
 #### Testing this client
 
@@ -43,19 +43,19 @@ To see the client working you must publish updates to `foo\counter`. You can upd
 
 * The publishing client example in this GitHub project
 * A test client
-    + For Reappt, a test client is provided on the Dashboard
+    + For Diffusion Cloud, a test client is provided on the Dashboard
     + For Diffusion, test clients are provided in the `tools` directory of your installation
 
 #### Further information
 
 [Diffusion user guide](http://docs.pushtechnology.com/docs/latest/manual/html/developerguide/apis/javascript/getting_started.html/)
 
-[Reappt user guide](http://developer.reappt.io/docs/manual/html/developerguide/apis/javascript/getting_started.html/)
+[Diffusion Cloud user guide](http://docs.pushtechnology.com/cloud/latest/manual/html/developerguide/apis/javascript/getting_started.html/)
 
 
 ## Publishing client
 
-The file `publishing.js` is a Node client that connects to Reappt or your Diffusion server, creates a topic `foo/counter`, and publishes an incrementing count to the topic.
+The file `publishing.js` is a Node client that connects to Diffusion Cloud or your Diffusion server, creates a topic `foo/counter`, and publishes an incrementing count to the topic.
 
 #### Prerequisites
 
@@ -66,9 +66,9 @@ The file `publishing.js` is a Node client that connects to Reappt or your Diffus
         npm install diffusion
 
 #### Using this client
-To use this client with a Reappt service or Diffusion server, make the following edits:
+To use this client with a Diffusion Cloud service or Diffusion server, make the following edits:
 
-1. Change the URL in the `diffusion.connect` method to that of your Reappt service or Diffusion server.
+1. Change the URL in the `diffusion.connect` method to that of your Diffusion Cloud service or Diffusion server.
 
         diffusion.connect({
              host : 'url',
@@ -91,12 +91,12 @@ To see the client working you must subscribe to the topic to receive the updates
 
 * The subscribing client example in this GitHub project
 * A test client
-    * For Reappt, a test client is provided on the Dashboard
+    * For Diffusion Cloud, a test client is provided on the Dashboard
     * For Diffusion, test clients are provided in the `tools` directory of your installation
 
 #### Further information
 
 [Diffusion user guide](http://docs.pushtechnology.com/docs/latest/manual/html/developerguide/apis/javascript/getting_started_publisher.html/)
 
-[Reappt user guide](http://developer.reappt.io/docs/manual/html/developerguide/apis/javascript/getting_started_publisher.html/)
+[Diffusion Cloud user guide](http://docs.pushtechnology.com/cloud/latest/manual/html/developerguide/apis/javascript/getting_started_publisher.html/)
 

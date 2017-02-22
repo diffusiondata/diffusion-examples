@@ -18,8 +18,8 @@
 <DOCTYPE html>
 <html>
     <head>
-        <!-- Add Reappt/Diffusion library -->
-        <script src="http://developer.reappt.io/clients/js/diffusion.js"></script>
+        <!-- Add Diffusion library -->
+        <script src="http://download.pushtechnology.com/clients/js/diffusion.js"></script>
     </head>
     
     <body>
@@ -27,11 +27,11 @@
 
     <script>
         diffusion.connect({
-            // Change to your Reappt 'TopicControl' user name and password
+            // Change to your 'TopicControl' user name and password
             principal : 'control-client',
             credentials : 'password',
 
-            // Change to your Reappt instance name
+            // Change to your Diffusion Cloud instance name
             host : 'HOSTNAME',
         }).then(function (session) { 
             // Create a counter with an initial value of 0.
