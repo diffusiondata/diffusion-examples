@@ -11,7 +11,7 @@
 
     <groupId>com.pushtechnology.diffusion</groupId>
     <artifactId>diffusion-api-publisher-examples</artifactId>
-    <version>5.9.8</version>
+    <version>5.9.9</version>
     <packaging>jar</packaging>
     <description>Diffusion Publisher public API examples.</description>
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2016 Push Technology Ltd.
+ * Copyright (C) 2014, 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,14 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
  * This is a simple example of a client that uses the 'Messaging' feature to
- * send messages to a topic path.
+ * send JSON messages to a topic path.
  * <P>
  * To send a message on a topic path, the client session requires the
  * 'send_to_message_handler' permission.
  *
  * @author Push Technology Limited
  * @since 5.0
+ * @see ControlClientReceivingMessages
  */
 public final class ClientSendingMessages {
 
@@ -49,25 +50,16 @@ public final class ClientSendingMessages {
     }
 
     /**
-     * Sends a simple string message to a specified topic path.
+     * Sends a JSON message to a specified topic path.
      * <P>
-     * There will be no context with the message so callback will be directed to
-     * the no context callback.
+     * A JSON value can be created from a string using:
+     * {@code Diffusion.dataTypes().json().fromString(aString)}
+     * <P>
+     * JSON values can also be obtained from subscriptions
+     * to JSON topics.
      *
      * @param topicPath the topic path
-     * @param message the message to send
-     * @param callback notifies message sent
-     */
-    public void send(String topicPath, String message, SendCallback callback) {
-        messaging.send(topicPath, message, callback);
-    }
-
-    /**
-     * Sends a JSON object to a specified topic path.
-     * <P>
-     *
-     * @param topicPath the topic path
-     * @param message the JSON object to send
+     * @param message the JSON message to send
      * @param callback notifies message sent
      */
     public void send(String topicPath, JSON message, SendCallback callback) {
@@ -75,19 +67,25 @@ public final class ClientSendingMessages {
     }
 
     /**
-     * Sends a simple string message to a specified topic path with context string.
+     * Sends a JSON message to a specified topic path with context string.
+     * <P>
+     * A JSON value can be created from a string using:
+     * {@code Diffusion.dataTypes().json().fromString(aString)}
+     * <P>
+     * JSON values can also be obtained from subscriptions
+     * to JSON topics.
      * <P>
      * Callback will be directed to the contextual callback with the string
      * provided.
      *
      * @param topicPath the topic path
-     * @param message the message to send
+     * @param message the JSON message to send
      * @param context the context string to return with the callback
      * @param callback notifies message sent
      */
     public void send(
         String topicPath,
-        String message,
+        JSON message,
         String context,
         SendContextCallback<String> callback) {
 
@@ -95,25 +93,31 @@ public final class ClientSendingMessages {
     }
 
     /**
-     * Sends a string message to a specified topic path with headers.
+     * Sends a JSON message to a specified topic path with headers.
+     * <P>
+     * A JSON value can be created from a string using:
+     * {@code Diffusion.dataTypes().json().fromString(aString)}
+     * <P>
+     * JSON values can also be obtained from subscriptions
+     * to JSON topics.
      * <P>
      * There will be no context with the message so callback will be directed to
      * the no context callback.
      *
      * @param topicPath the topic path
-     * @param message the message to send
+     * @param message the JSON message to send
      * @param headers the headers to send with the message
      * @param callback notifies message sent
      */
     public void sendWithHeaders(
         String topicPath,
-        String message,
+        JSON message,
         List<String> headers,
         SendCallback callback) {
 
         messaging.send(
             topicPath,
-            Diffusion.content().newContent(message),
+            message,
             messaging.sendOptionsBuilder().headers(headers).build(),
             callback);
     }
