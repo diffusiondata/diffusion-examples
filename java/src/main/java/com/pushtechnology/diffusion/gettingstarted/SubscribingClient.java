@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2016 Push Technology Ltd.
+ * Copyright (C) 2014, 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,13 @@ import com.pushtechnology.diffusion.client.features.Topics;
 import com.pushtechnology.diffusion.client.features.Topics.ValueStream;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
+import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
- * A client that subscribes to the topic 'foo/counter.
+ * A client that subscribes to the JSON topic 'foo/counter.
  *
  * @author Push Technology Limited
- * @since 5.5
+ * @since 5.9
  */
 public class SubscribingClient {
 
@@ -36,14 +37,25 @@ public class SubscribingClient {
 
         // Connect anonymously
         // Replace 'host' with your hostname
-        final Session session = Diffusion.sessions().open("ws://host:80");
+        final Session session = Diffusion.sessions()
+						                .open("ws://host:8080");
 
         // Get the Topics feature to subscribe to topics
         final Topics topics = session.feature(Topics.class);
 
         // Add a new stream for 'foo/counter'
-        topics.addStream(">foo/counter", Content.class, new ValueStreamPrintLn());
+        topics.addStream("foo/counter", JSON.class, new Topics.ValueStream.Default<JSON>() {
+            @Override
+            public void onSubscription(String topicPath, TopicSpecification specification) {
+                System.out.println("Subscribed to: " + topicPath);
+            }
 
+            @Override
+            public void onValue(String topicPath, TopicSpecification specification, JSON oldValue, JSON newValue) {
+                System.out.println(topicPath + " : " + newValue.toJsonString());
+            }
+        });
+        
         // Subscribe to the topic 'foo/counter'
         topics.subscribe("foo/counter", new Topics.CompletionCallback.Default());
 

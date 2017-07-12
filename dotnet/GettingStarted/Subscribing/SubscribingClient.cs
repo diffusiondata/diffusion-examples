@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2016 Push Technology Ltd.
+ * Copyright © 2016, 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 using System;
 using System.Threading;
 using PushTechnology.ClientInterface.Client.Callbacks;
-using PushTechnology.ClientInterface.Client.Content;
 using PushTechnology.ClientInterface.Client.Factories;
 using PushTechnology.ClientInterface.Client.Features;
 using PushTechnology.ClientInterface.Client.Features.Topics;
 using PushTechnology.ClientInterface.Client.Topics.Details;
+using PushTechnology.ClientInterface.Data.JSON;
 
 namespace PushTechnology.ClientInterface.GettingStarted {
     /// <summary>
@@ -28,35 +28,37 @@ namespace PushTechnology.ClientInterface.GettingStarted {
     /// </summary>
     public sealed class SubscribingClient {
         public static void Main( string[] args ) {
-
             // Connect anonymously
             var session = Diffusion.Sessions.Open( "ws://localhost:8080" );
 
             // Get the Topics feature to subscribe to topics
             var topics = session.GetTopicsFeature();
 
+            var topic = ">foo/counter";
             // Add a topic stream for 'foo/counter' and request subscription
-            topics.AddStream( ">foo/counter", new CounterTopicStream() );
+            var jsonStream = new JSONStream();
+            topics.AddStream( topic, jsonStream );
+            topics.Subscribe( topic, new TopicsCompletionCallbackDefault() );
 
-            topics.Subscribe( ">foo/counter", new TopicsCompletionCallbackDefault() );
-
-            //Stay connected for 1 minute
-            Thread.Sleep( TimeSpan.FromMinutes( 1 ) );
+            //Stay connected for 10 minutes
+            Thread.Sleep( TimeSpan.FromMinutes( 10 ) );
 
             session.Close();
         }
     }
 
     /// <summary>
-    /// A simple IValueStream implementation.
+    /// Basic implementation of the IValueStream<TValue> for JSON topics.
     /// </summary>
-    internal sealed class CounterTopicStream : IValueStream<IContent> {
+    internal sealed class JSONStream : IValueStream<IJSON> {
+
         /// <summary>
         /// Notification of stream being closed normally.
         /// </summary>
         public void OnClose() {
-            Console.WriteLine( "The subscrption stream is now closed." );
+            Console.WriteLine( "The subscription stream is now closed." );
         }
+
         /// <summary>
         /// Notification of a contextual error related to this callback.
         /// </summary>
@@ -64,24 +66,26 @@ namespace PushTechnology.ClientInterface.GettingStarted {
         /// Situations in which <code>OnError</code> is called include the session being closed, a communication
         /// timeout, or a problem with the provided parameters. No further calls will be made to this callback.
         /// </remarks>
-        /// <param name="errorReason"></param>
+        /// <param name="errorReason">Error reason.</param>
         public void OnError( ErrorReason errorReason ) {
-            Console.WriteLine( "An error has occured  : {0}", errorReason );
+            Console.WriteLine( "An error has occured : {0}", errorReason );
         }
+
         /// <summary>
-        /// Notification of a succesfull subscription.
+        /// Notification of a successful subscription.
         /// </summary>
-        /// <param name="topicPath"></param>
-        /// <param name="specification"></param>
+        /// <param name="topicPath">Topic path.</param>
+        /// <param name="specification">Topic specification.</param>
         public void OnSubscription( string topicPath, ITopicSpecification specification ) {
             Console.WriteLine( "Client subscribed to {0} ", topicPath );
         }
+
         /// <summary>
-        /// Notification of a succesfull unsubscription.
+        /// Notification of a successful unsubscription.
         /// </summary>
-        /// <param name="topicPath">topic</param>
-        /// <param name="specification">the specification of the topic</param>
-        /// <param name="reason">error reason</param>
+        /// <param name="topicPath">Topic path.</param>
+        /// <param name="specification">Topic specification.</param>
+        /// <param name="reason">Error reason.</param>
         public void OnUnsubscription( string topicPath, ITopicSpecification specification, TopicUnsubscribeReason reason ) {
             Console.WriteLine( "Client unsubscribed from {0} : {1}", topicPath, reason );
         }
@@ -89,12 +93,12 @@ namespace PushTechnology.ClientInterface.GettingStarted {
         /// <summary>
         /// Topic update received.
         /// </summary>
-        /// <param name="topicPath">topic</param>
-        /// <param name="specification">the specification of the topic</param>
-        /// <param name="oldValue">value prior to update</param>
-        /// <param name="newValue">value after update</param>
-        public void OnValue( string topicPath, ITopicSpecification specification, IContent oldValue, IContent newValue ) {
-            Console.WriteLine( "New value of {0} is {1}", topicPath, newValue.AsString() );
+        /// <param name="topicPath">Topic path.</param>
+        /// <param name="specification">Topic specification.</param>
+        /// <param name="oldValue">Value prior to update.</param>
+        /// <param name="newValue">Value after update.</param>
+        public void OnValue( string topicPath, ITopicSpecification specification, IJSON oldValue, IJSON newValue ) {
+            Console.WriteLine( "New value of {0} is {1}", topicPath, newValue.ToJSONString() );
         }
     }
 }

@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2016 Push Technology Ltd.
+ * Copyright © 2016, 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@ using System.Threading;
 using PushTechnology.ClientInterface.Client.Callbacks;
 using PushTechnology.ClientInterface.Client.Factories;
 using PushTechnology.ClientInterface.Client.Features.Control.Topics;
-using PushTechnology.ClientInterface.Client.Topics;
+using PushTechnology.ClientInterface.Data.JSON;
 
 namespace PushTechnology.ClientInterface.GettingStarted {
     /// <summary>
-    /// A client that publishes an incrementing count to the topic "foo/counter".
+    /// A client that publishes an incrementing count to the JSON topic "foo/counter".
     /// </summary>
     public sealed class PublishingClient {
         public static void Main( string[] args ) {
@@ -31,29 +31,36 @@ namespace PushTechnology.ClientInterface.GettingStarted {
 
             // Get the TopicControl and TopicUpdateControl features
             var topicControl = session.GetTopicControlFeature();
-
             var updateControl = session.GetTopicUpdateControlFeature();
 
-            // Create a single-value topic 'foo/counter'
+            // Create a JSON topic 'foo/counter'
             var topic = "foo/counter";
             var addCallback = new AddCallback();
-            topicControl.AddTopic( topic, TopicType.SINGLE_VALUE, addCallback );
+            topicControl.AddTopicFromValue(
+                topic,
+                Diffusion.DataTypes.JSON.FromJSONString( "{\"date\":\"To be updated\",\"time\":\"To be updated\"}" ),
+                addCallback );
 
             // Wait for the OnTopicAdded callback, or a failure
             if ( !addCallback.Wait( TimeSpan.FromSeconds( 5 ) ) ) {
                 Console.WriteLine( "Callback not received within timeout." );
+                session.Close();
                 return;
             } else if ( addCallback.Error != null ) {
                 Console.WriteLine( "Error : {0}", addCallback.Error.ToString() );
+                session.Close();
                 return;
             }
 
+            // Update topic every 300 ms for 30 minutes
             var updateCallback = new UpdateCallback( topic );
-            // Update the topic for 16 minutes
-            for ( var i = 0; i < 1000; ++i ) {
-                updateControl.Updater.Update( topic, i.ToString(), updateCallback );
+            for ( var i = 0; i < 3600; ++i ) {
+                var newValue = Diffusion.DataTypes.JSON.FromJSONString(
+                    "{\"date\":\"" + DateTime.Today.Date.ToString( "D" ) + "\"," +
+                    "\"time\":\"" + DateTime.Now.TimeOfDay.ToString( "g" ) + "\"}" );
+                updateControl.Updater.ValueUpdater<IJSON>().Update( topic, newValue, updateCallback );
 
-                Thread.Sleep( 1000 );
+                Thread.Sleep( 300 );
             }
 
             // Close session
@@ -75,14 +82,20 @@ namespace PushTechnology.ClientInterface.GettingStarted {
             private set;
         }
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
         public AddCallback() {
             Error = null;
         }
 
         /// <summary>
         /// This is called to notify that a call context was closed prematurely, typically due to a timeout or the
-        /// session being closed. No further calls will be made for the context.
+        /// session being closed.
         /// </summary>
+        /// <remarks>
+        /// No further calls will be made for the context.
+        /// </remarks>
         public void OnDiscard() {
             Error = new Exception( "This context was closed prematurely." );
             resetEvent.Set();
@@ -93,6 +106,7 @@ namespace PushTechnology.ClientInterface.GettingStarted {
         /// </summary>
         /// <param name="topicPath">The full path of the topic that was added.</param>
         public void OnTopicAdded( string topicPath ) {
+            Console.WriteLine( "Topic {0} added.", topicPath );
             resetEvent.Set();
         }
 
@@ -102,10 +116,15 @@ namespace PushTechnology.ClientInterface.GettingStarted {
         /// <param name="topicPath">The topic path as supplied to the add request.</param>
         /// <param name="reason">The reason for failure.</param>
         public void OnTopicAddFailed( string topicPath, TopicAddFailReason reason ) {
-            Error = new Exception( string.Format( "Failed to add topic {0} : '{1}", topicPath, reason ) );
+            Error = new Exception( string.Format( "Failed to add topic {0} : {1}", topicPath, reason ) );
             resetEvent.Set();
         }
 
+        /// <summary>
+        /// Wait for one of the callbacks for a given time.
+        /// </summary>
+        /// <param name="timeout">Time to wait for the callback.</param>
+        /// <returns><c>true</c> if either of the callbacks has been triggered. Otherwise <c>false</c>.</returns>
         public bool Wait( TimeSpan timeout ) {
             return resetEvent.WaitOne( timeout );
         }
@@ -115,34 +134,33 @@ namespace PushTechnology.ClientInterface.GettingStarted {
     /// A simple ITopicUpdaterUpdateCallback implementation that prints confimation of the actions completed.
     /// </summary>
     internal sealed class UpdateCallback : ITopicUpdaterUpdateCallback {
-        private readonly string topic;
+        private readonly string topicPath;
 
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="topic">The topic path</param>
-        public UpdateCallback( string topic ) {
-            this.topic = topic;
+        /// <param name="topicPath">The topic path.</param>
+        public UpdateCallback( string topicPath ) {
+            this.topicPath = topicPath;
         }
 
         /// <summary>
         /// Notification of a contextual error related to this callback.
         /// </summary>
         /// <remarks>
-        /// Situations in which <code>OnError</code> is called include the session being closed, a
-        /// communication timeout, or a problem with the provided parameters. No further calls will be made to this
-        /// callback.
+        /// Situations in which <code>OnError</code> is called include the session being closed, a communication
+        /// timeout, or a problem with the provided parameters. No further calls will be made to this callback.
         /// </remarks>
-        /// <param name="errorReason">A value representing the error</param>
+        /// <param name="errorReason">A value representing the error.</param>
         public void OnError( ErrorReason errorReason ) {
-            Console.WriteLine( "Topic {0} could not be updated : {1}", topic, errorReason );
+            Console.WriteLine( "Topic {0} could not be updated : {1}", topicPath, errorReason );
         }
 
         /// <summary>
         /// Indicates a successful update.
         /// </summary>
         public void OnSuccess() {
-            Console.WriteLine( "Topic {0} updated successfully.", topic );
+            Console.WriteLine( "Topic {0} updated successfully.", topicPath );
         }
     }
 }
