@@ -109,10 +109,6 @@ on_topic_message(SESSION_T *session, const TOPIC_MESSAGE_T *msg)
         printf("Received message for topic %s\n", msg->name);
         printf("Payload: %.*s\n", (int)msg->payload->len, msg->payload->data);
 
-#ifdef DEBUG
-                topic_message_debug(response->payload);
-#endif
-
         return HANDLER_SUCCESS;
 }
 
