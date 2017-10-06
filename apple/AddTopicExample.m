@@ -1,6 +1,6 @@
-//  Diffusion Client Library for iOS and OS X - Examples
+//  Diffusion Client Library for iOS, tvOS and OS X / macOS - Examples
 //
-//  Copyright (C) 2016 Push Technology Ltd.
+//  Copyright (C) 2016, 2017 Push Technology Ltd.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@
 
     [PTDiffusionSession openWithURL:url
                       configuration:sessionConfiguration
-                  completionHandler:^(PTDiffusionSession *session, NSError *error)
+                  completionHandler:^(PTDiffusionSession *const session, NSError *const error)
     {
         if (!session) {
             NSLog(@"Failed to open session: %@", error);
@@ -53,27 +53,10 @@
 }
 
 -(void)addTopicsForSession:(PTDiffusionSession *const)session {
-    // Add a stateless topic.
-    [session.topicControl addWithTopicPath:@"Example/Stateless"
-                                      type:PTDiffusionTopicType_Stateless
-                                     value:nil
+    // Add a JSON topic.
+    [session.topicControl addWithTopicPath:@"Example/JSON"
+                                      type:PTDiffusionTopicType_JSON
                          completionHandler:^(NSError *const error)
-    {
-        if (error) {
-            NSLog(@"Failed to add stateless topic. Error: %@", error);
-        } else {
-            NSLog(@"Stateless topic created.");
-        }
-    }];
-
-    // Add a single value topic with an initial value.
-    NSData *const data = [@"Hello" dataUsingEncoding:NSUTF8StringEncoding];
-    PTDiffusionContent *const initialValue =
-        [[PTDiffusionContent alloc] initWithData:data];
-    [session.topicControl addWithTopicPath:@"Example/SingleValue"
-                                      type:PTDiffusionTopicType_SingleValue
-                                     value:initialValue
-                         completionHandler:^(NSError * _Nullable error)
     {
         if (error) {
             NSLog(@"Failed to add single value topic. Error: %@", error);

@@ -22,17 +22,21 @@
  * This example shows how to receive messages, rather than topic
  * updates, as part of MessagingControl.
  *
- * You may register a handler against an endpoint, which will
- * become the only destination for messages to that endpoint (where
+ * You may register a handler against a path, which will
+ * become the only destination for messages to that path (where
  * the control client which is considered "active" is determined by
  * the server).
  *
- * See send-msg.c for an example of how to send messages to an
- * endpoint from a client.
+ * See send-msg.c for an example of how to send messages to a
+ * path from a client.
  */
 
 #include <stdio.h>
+#ifndef WIN32
 #include <unistd.h>
+#else
+#define sleep(x) Sleep(1000 * x)
+#endif
 
 #include "diffusion.h"
 #include "conversation.h"
@@ -61,7 +65,7 @@ on_registered(SESSION_T *session, void *context)
  * Function called on receipt of a message from a client.
  *
  * We print the following information:
- *   1. The topic path on which the message was received.
+ *   1. The message path on which the message was received.
  *   2. A hexdump of the message content.
  *   3. The headers associated with the message.
  *   4. The session properties that were requested when the handler was
@@ -71,7 +75,7 @@ on_registered(SESSION_T *session, void *context)
 int
 on_msg(SESSION_T *session, const SVC_SEND_RECEIVER_CLIENT_REQUEST_T *request, void *context)
 {
-        printf("Received message on topic path %s\n", request->topic_path);
+        printf("Received message on path %s\n", request->topic_path);
         hexdump_buf(request->content->data);
         printf("Headers:\n");
         if(request->send_options.headers->first == NULL) {

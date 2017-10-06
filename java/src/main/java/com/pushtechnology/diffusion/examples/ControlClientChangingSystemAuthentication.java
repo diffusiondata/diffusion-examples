@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2015 Push Technology Ltd.
+ * Copyright (C) 2014, 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,15 @@ package com.pushtechnology.diffusion.examples;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.diffusion.client.Diffusion;
-import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.features.control.clients.SystemAuthenticationControl;
-import com.pushtechnology.diffusion.client.features.control.clients.SystemAuthenticationControl.ConfigurationCallback;
 import com.pushtechnology.diffusion.client.features.control.clients.SystemAuthenticationControl.ScriptBuilder;
-import com.pushtechnology.diffusion.client.features.control.clients.SystemAuthenticationControl.SystemAuthenticationConfiguration;
-import com.pushtechnology.diffusion.client.features.control.clients.SystemAuthenticationControl.SystemPrincipal;
 import com.pushtechnology.diffusion.client.features.control.clients.SecurityStoreFeature.UpdateStoreCallback;
 import com.pushtechnology.diffusion.client.session.Session;
 
@@ -46,6 +44,7 @@ public class ControlClientChangingSystemAuthentication {
             ControlClientChangingSystemAuthentication.class);
 
     private final SystemAuthenticationControl systemAuthenticationControl;
+    private final ScriptBuilder emptyScript;
 
     /**
      * Constructor.
@@ -62,69 +61,64 @@ public class ControlClientChangingSystemAuthentication {
 
         systemAuthenticationControl =
             session.feature(SystemAuthenticationControl.class);
+        emptyScript = systemAuthenticationControl.scriptBuilder();
     }
 
     /**
      * For all system users, update the assigned roles to replace the
      * "SUPERUSER" role and with "ADMINISTRATOR".
      *
-     * @param callback result callback
+     * @return a CompletableFuture that completes when the operation succeeds or
+     *         fails.
+     *
+     *         <p>
+     *         If the operation was successful, the CompletableFuture will
+     *         complete successfully.
+     *
+     *         <p>
+     *         Otherwise, the CompletableFuture will complete exceptionally with
+     *         an {@link ExecutionException}. See
+     *         {@link SystemAuthenticationControl#getSystemAuthentication()} and
+     *         {@link SystemAuthenticationControl#updateStore(String)} for
+     *         common failure reasons.
      */
-    public void changeSuperUsersToAdministrators(UpdateStoreCallback callback) {
+    public CompletableFuture<Void>
+        changeSuperUsersToAdministrators(UpdateStoreCallback callback) {
 
-        systemAuthenticationControl.getSystemAuthentication(
-            new ChangeSuperUsersToAdministrators(callback));
-    }
+        return systemAuthenticationControl
+            .getSystemAuthentication()
+            .thenCompose(configuration -> {
 
-    private final class ChangeSuperUsersToAdministrators
-        implements ConfigurationCallback {
+                final String script = configuration
 
-        private final UpdateStoreCallback callback;
+                    // For each principal ...
+                    .getPrincipals().stream()
 
-        ChangeSuperUsersToAdministrators(UpdateStoreCallback callback) {
-            this.callback = callback;
-        }
+                    // ... that has the SUPERUSER assigned role ...
+                    .filter(p -> p.getAssignedRoles().contains("SUPERUSER"))
 
-        @Override
-        public void onReply(SystemAuthenticationConfiguration configuration) {
+                    // ... create a script that updates the assigned roles to
+                    // replace SUPERUSER with ADMINISTRATOR ...
+                    .map(p -> {
+                        final Set<String> newRoles =
+                            new HashSet<>(p.getAssignedRoles());
+                        newRoles.remove("SUPERUSER");
+                        newRoles.add("ADMINISTRATOR");
+                        return emptyScript.assignRoles(p.getName(), newRoles);
+                    })
 
-            ScriptBuilder builder =
-                systemAuthenticationControl.scriptBuilder();
+                    // ... create a single combined script.
+                    .reduce(emptyScript, (sb1, sb2) -> sb1.append(sb2))
+                    .script();
 
-            // For all system users ...
-            for (SystemPrincipal principal : configuration.getPrincipals()) {
+                LOG.info("Sending the following script to the server:\n{}",
+                    script);
 
-                final Set<String> assignedRoles = principal.getAssignedRoles();
-
-                // ... that have the SUPERUSER assigned role ...
-                if (assignedRoles.contains("SUPERUSER")) {
-                    final Set<String> newRoles = new HashSet<>(assignedRoles);
-                    newRoles.remove("SUPERUSER");
-                    newRoles.add("ADMINISTRATOR");
-
-                    // ... add a command to the script that updates the user's
-                    // assigned roles, replacing SUPERUSER with "ADMINISTRATOR".
-                    builder =
-                        builder.assignRoles(principal.getName(), newRoles);
-                }
-            }
-
-            final String script = builder.script();
-
-            LOG.info(
-                "Sending the following script to the server:\n{}",
-                script);
-
-            systemAuthenticationControl.updateStore(
-                script,
-                callback);
-        }
-
-        @Override
-        public void onError(ErrorReason errorReason) {
-            // This might fail if the session lacks the required permissions.
-            callback.onError(errorReason);
-        }
+                return systemAuthenticationControl.updateStore(script)
+                    // Convert CompletableFuture<Object> to
+                    // CompletableFuture<Void>.
+                    .thenAccept(ignored -> { });
+            });
     }
 
     /**

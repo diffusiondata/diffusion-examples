@@ -25,7 +25,11 @@
  */
 
 #include <stdio.h>
+#ifndef WIN32
 #include <unistd.h>
+#else
+#define sleep(x) Sleep(1000 * x)
+#endif
 
 #include "diffusion.h"
 #include "args.h"
@@ -58,8 +62,27 @@ on_session_state_changed(SESSION_T *session,
 static int
 on_topic_message(SESSION_T *session, const TOPIC_MESSAGE_T *msg)
 {
-        printf("Received message for topic %s\n", msg->name);
-        printf("Payload: %.*s\n", (int)msg->payload->len, msg->payload->data);
+        printf("Received message for topic %s (%ld bytes)\n", msg->name, msg->payload->len);
+
+        if(msg->details != NULL) {
+                if(msg->details->topic_type == TOPIC_TYPE_JSON) {
+                        // Convert payload to a JSON string
+                        BUF_T *json = cbor_to_json(msg->payload->data, msg->payload->len);
+                        printf("As JSON: %.*s\n", (int)json->len, json->data);
+                        buf_free(json);
+
+                }
+                else {
+                        printf("Hexdump of binary data:\n");
+                        hexdump_buf(msg->payload);
+                }
+        }
+        else {
+                printf("Payload: %.*s\n",
+                       (int)msg->payload->len,
+                       msg->payload->data);
+        }
+
         return HANDLER_SUCCESS;
 }
 
@@ -190,7 +213,7 @@ main(int argc, char **argv)
         /*
          * Receive messages for 5 seconds.
          */
-        sleep(5);
+        sleep(60);
 
         /*
          * Unsubscribe from the topic
@@ -207,6 +230,8 @@ main(int argc, char **argv)
          */
         session_close(session, NULL);
         session_free(session);
+
+        hash_free(options, NULL, free);
 
         return EXIT_SUCCESS;
 }

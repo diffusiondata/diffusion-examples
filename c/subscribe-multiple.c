@@ -29,7 +29,11 @@
  */
 
 #include <stdio.h>
+#ifndef WIN32
 #include <unistd.h>
+#else
+#define sleep(x) Sleep(1000 * x)
+#endif
 
 #include "diffusion.h"
 #include "args.h"

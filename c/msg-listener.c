@@ -22,17 +22,21 @@
  * This example shows how to receive messages, rather than topic
  * updates.
  *
- * Message streams may be received via a topic endpoint. We can
- * register a listener against a specific endpoint to process the
+ * Message streams may be received via a message path. We can
+ * register a listener against a specific path to process the
  * messages, and we can register a listener for all messages not
  * otherwise handled.
  *
- * See send-msg.c for an example of how to send messages to an
- * endpoint from a client.
+ * See send-msg.c for an example of how to send messages to a
+ * path from a client.
  */
 
 #include <stdio.h>
+#ifndef WIN32
 #include <unistd.h>
+#else
+#define sleep(x) Sleep(1000 * x)
+#endif
 
 #include "diffusion.h"
 #include "conversation.h"
@@ -63,7 +67,7 @@ on_registered(SESSION_T *session, void *context)
 int
 on_msg(SESSION_T *session, const SVC_SEND_RECEIVER_CLIENT_REQUEST_T *request, void *context)
 {
-        printf("Received message on topic path %s\n", request->topic_path);
+        printf("Received message on path %s\n", request->topic_path);
         hexdump_buf(request->content->data);
         printf("Headers:\n");
         if(request->send_options.headers->first == NULL) {
@@ -103,7 +107,7 @@ on_msg(SESSION_T *session, const SVC_SEND_RECEIVER_CLIENT_REQUEST_T *request, vo
 int
 on_stream_message(SESSION_T *session, const STREAM_MESSAGE_T *message, void *context)
 {
-        printf("Received stream message on listener for topic path %s\n", message->topic_path);
+        printf("Received stream message on listener for path %s\n", message->topic_path);
         hexdump_buf(message->content.data);
 
         if(context != NULL) {
@@ -151,7 +155,7 @@ main(int argc, char **argv)
         free(session_id);
 
         /*
-         * Register a listener for messages on the given topic path.
+         * Register a listener for messages on the given path.
          */
         MSG_LISTENER_REGISTRATION_PARAMS_T listener_params = {
                 .topic_path = topic,
@@ -178,12 +182,16 @@ main(int argc, char **argv)
         /*
          * Deregister explicit listener.
          */
-        deregister_msg_listener(session, (MSG_LISTENER_DEREGISTRATION_PARAMS_T){.topic_path = topic});
+        MSG_LISTENER_DEREGISTRATION_PARAMS_T explicit_params = {
+            .topic_path = topic
+        };
+        deregister_msg_listener(session, explicit_params);
 
         /*
          * Deregister global listener.
          */
-        deregister_msg_listener(session, (MSG_LISTENER_DEREGISTRATION_PARAMS_T){});
+        MSG_LISTENER_DEREGISTRATION_PARAMS_T global_params = { 0 };
+        deregister_msg_listener(session, global_params);
 
         /*
          * Close session and clean up.

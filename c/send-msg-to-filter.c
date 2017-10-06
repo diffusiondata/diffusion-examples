@@ -27,7 +27,9 @@
  */
 
 #include <stdio.h>
+#ifndef WIN32
 #include <unistd.h>
+#endif
 
 #include <apr.h>
 #include <apr_thread_mutex.h>

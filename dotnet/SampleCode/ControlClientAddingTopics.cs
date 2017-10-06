@@ -39,7 +39,7 @@ namespace Examples {
             session = Diffusion.Sessions.Principal( "control" ).Password( "password" )
                 .Open( "ws://diffusion.example.com:80" );
 
-            topicControl = session.GetTopicControlFeature();
+            topicControl = session.TopicControl;
         }
 
         /// <summary>
@@ -106,8 +106,8 @@ namespace Examples {
         /// </summary>
         /// <param name="topicPath">The topic path.</param>
         /// <param name="callback">Notifies the result of the operation.</param>
-        public void RemoveTopic( string topicPath, ITopicControlRemoveCallback callback ) {
-            topicControl.RemoveTopics( ">" + topicPath, callback );
+        public void RemoveTopic( string topicPath, ITopicControlRemovalCallback callback ) {
+            topicControl.Remove( "?" + topicPath + "//", callback );
         }
 
         /// <summary>
@@ -115,8 +115,8 @@ namespace Examples {
         /// </summary>
         /// <param name="topicSelector">The selector expression.</param>
         /// <param name="callback">Notifies the result of the operation.</param>
-        public void RemoveTopics( string topicSelector, ITopicControlRemoveCallback callback ) {
-            topicControl.RemoveTopics( topicSelector, callback );
+        public void RemoveTopics( string topicSelector, ITopicControlRemovalCallback callback ) {
+            topicControl.Remove( topicSelector, callback );
         }
 
         /// <summary>

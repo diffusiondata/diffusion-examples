@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,19 +25,24 @@ diffusion.connect({
     secure : true
 }).then(function(session) {
 
-    // 1. TypedSubscriptions are the best way to receive values from JSON and Binary topics.
+    // 1. ValueStreams are the best way to receive values from JSON and Binary topics.
 
     // Streams for notifications can be registered separately from subscribing to a topic. Registering a stream is a
     // local operation and does not change the data the client receives.
+
     // Like subscribing, streams are registered using a topic selection. Each stream will only receive notifications
     // from topics that match the topic selector it is registered with.
-    // A stream can be converted to a TypedSubscriptions by a call to asType passing in the DataType for the type of
+
+    // A stream can be converted to a ValueStream by a call to asType passing in the DataType for the type of
     // values it is interested in.
-    // A TypedSubscription will only receive notifications from topics that match the topic selector it is registered
+
+    // A ValueStream will only receive notifications from topics that match the topic selector it is registered
     // with and that match its DataType.
-    // A TypedSubscription emits a 'value' notification, listeners for 'value' events will be passed the topic path,
+
+    // A ValueStream emits a 'value' notification, listeners for 'value' events will be passed the topic path,
     // topic specification, the new value of the topic and the previous value.
-    // A TypedSubscription also emits 'open', 'close', 'subscribe' and 'unsubscribe' events.
+
+    // A ValueStream also emits 'open', 'close', 'subscribe' and 'unsubscribe' events.
 
     session
         .stream('foo')

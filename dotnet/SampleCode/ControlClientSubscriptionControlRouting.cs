@@ -34,7 +34,7 @@ namespace Examples {
             session = Diffusion.Sessions.Principal( "control" ).Password( "password" )
                 .Open( "ws://diffusion.example.com:80" );
 
-            var subscriptionControl = session.GetSubscriptionControlFeature();
+            var subscriptionControl = session.SubscriptionControl;
 
             // Sets up a handler so that all subscriptions to topic 'a/b' are routed to the routing/target topic.
             // To do this, the client session requires the VIEW_SESSION, MODIFY_SESSION and REGISTER_HANDLER

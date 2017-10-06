@@ -20,14 +20,16 @@
 
 /*
  * This example shows how a message can be sent from a client to a
- * message handler via a topic path.
+ * message handler via a message path.
  *
  * See msg-handler.c for an example of how to receive these messages
  * in a control client.
  */
 
 #include <stdio.h>
+#ifndef WIN32
 #include <unistd.h>
+#endif
 
 #include <apr.h>
 #include <apr_thread_mutex.h>

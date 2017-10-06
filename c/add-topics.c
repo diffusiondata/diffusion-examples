@@ -25,7 +25,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#ifndef WIN32
 #include <unistd.h>
+#else
+#define sleep(x) Sleep(1000 * x)
+#endif
 
 #include <apr.h>
 #include <apr_thread_mutex.h>
@@ -34,6 +38,21 @@
 #include "diffusion.h"
 #include "args.h"
 #include "utils.h"
+
+// Topic selector, selector set delimiter
+#define DELIM "////"
+
+
+#define BUILD_TOPIC_PARAMS(TOPIC_NAME, DETAILS) {\
+    .on_topic_added = on_topic_added, \
+    .on_topic_add_failed = on_topic_add_failed, \
+    .on_discard = on_topic_add_discard, \
+    .topic_path = (TOPIC_NAME), \
+    .details = (DETAILS), \
+    .context = (void *)(TOPIC_NAME) \
+}
+
+
 
 /*
  * We use a mutex and a condition variable to help synchronize the
@@ -55,7 +74,7 @@ ARG_OPTS_T arg_opts[] = {
 static int
 on_topic_added(SESSION_T *session, const SVC_ADD_TOPIC_RESPONSE_T *response, void *context)
 {
-        puts("on_topic_added");
+        printf("on_topic_added: %s\n", (const char *)context);
         apr_thread_mutex_lock(mutex);
         apr_thread_cond_broadcast(cond);
         apr_thread_mutex_unlock(mutex);
@@ -65,7 +84,7 @@ on_topic_added(SESSION_T *session, const SVC_ADD_TOPIC_RESPONSE_T *response, voi
 static int
 on_topic_add_failed(SESSION_T *session, const SVC_ADD_TOPIC_RESPONSE_T *response, void *context)
 {
-        printf("on_topic_add_failed: %d\n", response->response_code);
+        printf("on_topic_add_failed: %s -> %d\n", (const char *)context, response->response_code);
         apr_thread_mutex_lock(mutex);
         apr_thread_cond_broadcast(cond);
         apr_thread_mutex_unlock(mutex);
@@ -115,7 +134,7 @@ int main(int argc, char** argv)
                 return EXIT_FAILURE;
         }
 
-        char *url = hash_get(options, "url");
+        const char *url = hash_get(options, "url");
         const char *principal = hash_get(options, "principal");
         CREDENTIALS_T *credentials = NULL;
         const char *password = hash_get(options, "credentials");
@@ -139,121 +158,33 @@ int main(int argc, char** argv)
                 return EXIT_FAILURE;
         }
 
-        // Common params for all add_topic() functions.
-        ADD_TOPIC_PARAMS_T common_params = {
-                .on_topic_added = on_topic_added,
-                .on_topic_add_failed = on_topic_add_failed,
-                .on_discard = on_topic_add_discard
-        };
-
         /*
-         * Create a stateless topic.
+         * Create a JSON topic.
          */
-        TOPIC_DETAILS_T *topic_details = create_topic_details_stateless();
-        ADD_TOPIC_PARAMS_T stateless_params = common_params;
-        stateless_params.topic_path = "stateless";
-        stateless_params.details = topic_details;
+        {
+            TOPIC_DETAILS_T *json_topic_details = create_topic_details_json();
+            ADD_TOPIC_PARAMS_T json_params = BUILD_TOPIC_PARAMS("json", json_topic_details);
 
-        apr_thread_mutex_lock(mutex);
-        add_topic(session, stateless_params);
-        apr_thread_cond_wait(cond, mutex);
-        apr_thread_mutex_unlock(mutex);
+            CBOR_GENERATOR_T *cbor_generator = cbor_generator_create();
+            const char *json_message_str = "Hello world, this is a JSON string.";
+            cbor_write_text_string(cbor_generator, json_message_str, strlen(json_message_str));
+            BUF_T *cbor_buf = buf_create();
+            buf_write_bytes(cbor_buf, cbor_generator->data, cbor_generator->len);
 
-        /*
-         * Create a topic with single value string data, but with
-         * containing no default data.
-         */
-        TOPIC_DETAILS_T *string_topic_details = create_topic_details_single_value(M_DATA_TYPE_STRING);
-        ADD_TOPIC_PARAMS_T string_params = common_params;
-        string_params.topic_path = "string";
-        string_params.details = string_topic_details;
+            CONTENT_T *json_content = content_create(CONTENT_ENCODING_NONE, cbor_buf);
+            json_params.content = json_content;
 
-        apr_thread_mutex_lock(mutex);
-        add_topic(session, string_params);
-        apr_thread_cond_wait(cond, mutex);
-        apr_thread_mutex_unlock(mutex);
+            apr_thread_mutex_lock(mutex);
+            add_topic(session, json_params);
+            apr_thread_cond_wait(cond, mutex);
+            apr_thread_mutex_unlock(mutex);
 
-        /*
-         * Create a topic with single value string data and containing
-         * some default data.
-         */
-        ADD_TOPIC_PARAMS_T string_data_params = common_params;
-        string_data_params.topic_path = "string-data";
-        string_data_params.details = string_topic_details;
-        BUF_T *sample_data_buf = buf_create();
-        buf_write_string(sample_data_buf, "Hello, world");
-        string_data_params.content = content_create(CONTENT_ENCODING_NONE, sample_data_buf);
+            content_free(json_content);
+            cbor_generator_free(cbor_generator);
+            buf_free(cbor_buf);
+            topic_details_free(json_topic_details);
+        }
 
-        apr_thread_mutex_lock(mutex);
-        add_topic(session, string_data_params);
-        apr_thread_cond_wait(cond, mutex);
-        apr_thread_mutex_unlock(mutex);
-
-        /*
-         * Create a topic with single value integer data, and with a
-         * default value.
-         */
-        TOPIC_DETAILS_T *integer_topic_details = create_topic_details_single_value(M_DATA_TYPE_INTEGER_STRING);
-        integer_topic_details->topic_details_params.integer.default_value = 999;
-
-        ADD_TOPIC_PARAMS_T integer_params = common_params;
-        integer_params.topic_path = "integer";
-        integer_params.details = integer_topic_details;
-
-        apr_thread_mutex_lock(mutex);
-        add_topic(session, integer_params);
-        apr_thread_cond_wait(cond, mutex);
-        apr_thread_mutex_unlock(mutex);
-
-        /*
-         * Create a topic with integer data, but using a CONTENT_T to
-         * specify the initial data.
-         */
-        ADD_TOPIC_PARAMS_T integer_data_params = common_params;
-        integer_data_params.topic_path = "integer-data";
-        integer_data_params.details = integer_topic_details;
-        BUF_T *integer_data_buf = buf_create();
-        buf_sprintf(integer_data_buf, "%d", 123);
-        integer_data_params.content = content_create(CONTENT_ENCODING_NONE, integer_data_buf);
-
-        apr_thread_mutex_lock(mutex);
-        add_topic(session, integer_data_params);
-        apr_thread_cond_wait(cond, mutex);
-        apr_thread_mutex_unlock(mutex);
-
-        /*
-         * Create a topic with single value decimal data, with a
-         * default value and specifying the scale (i.e. positions
-         * after the decimal place).
-         */
-        TOPIC_DETAILS_T *decimal_topic_details = create_topic_details_single_value(M_DATA_TYPE_DECIMAL_STRING);
-        decimal_topic_details->topic_details_params.decimal.default_value = 123.456;
-        decimal_topic_details->topic_details_params.decimal.scale = 4;
-
-        ADD_TOPIC_PARAMS_T decimal_params = common_params;
-        decimal_params.topic_path = "decimal";
-        decimal_params.details = decimal_topic_details;
-
-        apr_thread_mutex_lock(mutex);
-        add_topic(session, decimal_params);
-        apr_thread_cond_wait(cond, mutex);
-        apr_thread_mutex_unlock(mutex);
-
-        /*
-         * Create a topic with decimal data, using a CONTENT_T to
-         * specify the initial data.
-         */
-        ADD_TOPIC_PARAMS_T decimal_data_params = common_params;
-        decimal_data_params.topic_path = "decimal-data";
-        decimal_data_params.details = decimal_topic_details;
-        BUF_T *decimal_data_buf = buf_create();
-        buf_sprintf(decimal_data_buf, "%f", 987.654);
-        decimal_data_params.content = content_create(CONTENT_ENCODING_NONE, decimal_data_buf);
-
-        apr_thread_mutex_lock(mutex);
-        add_topic(session, decimal_data_params);
-        apr_thread_cond_wait(cond, mutex);
-        apr_thread_mutex_unlock(mutex);
 
         /*
          * Record topic data.
@@ -264,95 +195,74 @@ int main(int argc, char** argv)
          * messages.
          */
 
-        /*
-         * First of all, this adds a topic equivalent to single-value
-         * strings, but defined with XML.
-         */
-        BUF_T *manual_schema = buf_create();
-        buf_write_string(manual_schema,
-                "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n");
-        buf_write_string(manual_schema,
-                "<field name=\"x\" type=\"string\" default=\"xyzzy\" allowsEmpty=\"true\"/>");
-        TOPIC_DETAILS_T *manual_topic_details = create_topic_details_single_value(M_DATA_TYPE_STRING);
-        manual_topic_details->user_defined_schema = manual_schema;
-
-        ADD_TOPIC_PARAMS_T string_manual_params = common_params;
-        string_manual_params.topic_path = "string-manual";
-        string_manual_params.details = manual_topic_details;
-
-        apr_thread_mutex_lock(mutex);
-        add_topic(session, string_manual_params);
-        apr_thread_cond_wait(cond, mutex);
-        apr_thread_mutex_unlock(mutex);
 
         /*
          * This adds a topic with a record containing multiple fields
          * of different types.
          */
-        BUF_T *record_schema = buf_create();
-        buf_write_string(record_schema,
-                "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
-        buf_write_string(record_schema,
-                "<message topicDataType=\"record\" name=\"MyContent\">");
-        buf_write_string(record_schema,
-                "<record name=\"Record1\">");
-        buf_write_string(record_schema,
-                "<field type=\"string\" default=\"\" allowsEmpty=\"true\" name=\"Field1\"/>");
-        buf_write_string(record_schema,
-                "<field type=\"integerString\" default=\"0\" allowsEmpty=\"false\" name=\"Field2\"/>");
-        buf_write_string(record_schema,
-                "<field type=\"decimalString\" default=\"0.00\" scale=\"2\" allowsEmpty=\"false\" name=\"Field3\"/>");
-        buf_write_string(record_schema,
-                "</record>");
-        buf_write_string(record_schema,
+        {
+            BUF_T *record_schema = buf_create();
+            buf_write_string(record_schema,
+                "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
+                "<message topicDataType=\"record\" name=\"MyContent\">"
+                "<record name=\"Record1\">"
+                "<field type=\"string\" default=\"\" allowsEmpty=\"true\" name=\"Field1\"/>"
+                "<field type=\"integerString\" default=\"0\" allowsEmpty=\"false\" name=\"Field2\"/>"
+                "<field type=\"decimalString\" default=\"0.00\" scale=\"2\" allowsEmpty=\"false\" name=\"Field3\"/>"
+                "</record>"
                 "</message>");
-        TOPIC_DETAILS_T *record_topic_details = create_topic_details_record();
-        record_topic_details->user_defined_schema = record_schema;
+            TOPIC_DETAILS_T *record_topic_details = create_topic_details_record();
+            record_topic_details->user_defined_schema = record_schema;
 
-        ADD_TOPIC_PARAMS_T record_params = common_params;
-        record_params.topic_path = "record";
-        record_params.details = record_topic_details;
+            ADD_TOPIC_PARAMS_T record_params = BUILD_TOPIC_PARAMS("record", record_topic_details);
 
-        apr_thread_mutex_lock(mutex);
-        add_topic(session, record_params);
-        apr_thread_cond_wait(cond, mutex);
-        apr_thread_mutex_unlock(mutex);
+            apr_thread_mutex_lock(mutex);
+            add_topic(session, record_params);
+            apr_thread_cond_wait(cond, mutex);
+            apr_thread_mutex_unlock(mutex);
+            topic_details_free(record_topic_details);
+        }
 
         /*
-         * We can also remove topics. First, add a couple of topics
-         * and then remove their parent topic. All child topics are
-         * removed with the parent.
+         * Create a topic with binary data
          */
-        puts("Adding topics remove_me/1 and remove_me/2");
+        {
+            TOPIC_DETAILS_T *binary_topic_details = create_topic_details_binary();
+            ADD_TOPIC_PARAMS_T binary_params = BUILD_TOPIC_PARAMS("binary-data", binary_topic_details);
 
-        ADD_TOPIC_PARAMS_T topic_params = common_params;
-        topic_params.details = topic_details;
-        topic_params.topic_path = "remove_me/1";
+            char binary_bytes[] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05 };
 
-        apr_thread_mutex_lock(mutex);
-        add_topic(session, topic_params);
-        apr_thread_cond_wait(cond, mutex);
-        apr_thread_mutex_unlock(mutex);
+            BUF_T *binary_data_buf = buf_create();
+            buf_write_bytes(binary_data_buf, binary_bytes, sizeof(binary_bytes));
+            CONTENT_T *binary_content = content_create(CONTENT_ENCODING_NONE, binary_data_buf);
+            binary_params.content = binary_content;
 
-        topic_params.topic_path = "remove_me/2";
-        apr_thread_mutex_lock(mutex);
-        add_topic(session, topic_params);
-        apr_thread_cond_wait(cond, mutex);
-        apr_thread_mutex_unlock(mutex);
+            apr_thread_mutex_lock(mutex);
+            add_topic(session, binary_params);
+            apr_thread_cond_wait(cond, mutex);
+            apr_thread_mutex_unlock(mutex);
+            content_free(binary_content);
+            topic_details_free(binary_topic_details);
+        }
 
-        puts("Removing topics in 5 seconds...");
-        sleep(5);
+        /*
+         * We can also remove topics.
+         */
+        {
+            puts("Removing topics in 5 seconds...");
+            sleep(5);
 
-        REMOVE_TOPICS_PARAMS_T remove_params = {
-                .on_removed = on_topic_removed,
-                .on_discard = on_topic_remove_discard,
-                .topic_selector = ">remove_me"
-        };
+            REMOVE_TOPICS_PARAMS_T remove_params = {
+                    .on_removed = on_topic_removed,
+                    .on_discard = on_topic_remove_discard,
+                    .topic_selector = "#json" DELIM "record" DELIM "binary-data"
+            };
 
-        apr_thread_mutex_lock(mutex);
-        remove_topics(session, remove_params);
-        apr_thread_cond_wait(cond, mutex);
-        apr_thread_mutex_unlock(mutex);
+            apr_thread_mutex_lock(mutex);
+            remove_topics(session, remove_params);
+            apr_thread_cond_wait(cond, mutex);
+            apr_thread_mutex_unlock(mutex);
+        }
 
         /*
          * Close our session, and release resources and memory.

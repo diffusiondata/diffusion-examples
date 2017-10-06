@@ -29,7 +29,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#ifndef WIN32
 #include <unistd.h>
+#else
+#define sleep(x) Sleep(1000 * x)
+#endif
 
 #include <apr.h>
 #include <apr_thread_mutex.h>
