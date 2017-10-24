@@ -115,7 +115,7 @@ public class ControlClientChangingSystemAuthentication {
                     script);
 
                 return systemAuthenticationControl.updateStore(script)
-                    // Convert CompletableFuture<Object> to
+                    // Convert CompletableFuture<?> to
                     // CompletableFuture<Void>.
                     .thenAccept(ignored -> { });
             });

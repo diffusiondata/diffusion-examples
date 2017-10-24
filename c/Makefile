@@ -39,7 +39,7 @@ SOURCES = subscribe.c fetch.c 	\
 		  get-session-properties.c                              \
 	 	  missing-topic-notification.c				\
 		  subscription-control.c reconnect.c			\
-		  json/cjson-publishing-example.c json/proc-unix.c      \
+		  json/cjson-publishing-example.c      \
 		  json/cjson-subscribing-example.c
 
 TARGETDIR	= target
@@ -134,7 +134,7 @@ subscription-control:	$(OBJDIR)/subscription-control.o
 reconnect:	$(OBJDIR)/reconnect.o
 		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
 
-cjson-publishing-example:	json/cjson-publishing-example.c json/proc-unix.c json/cJSON.c
+cjson-publishing-example:	json/cjson-publishing-example.c json/cJSON.c
 		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
 
 cjson-subscribing-example:	json/cjson-subscribing-example.c

@@ -35,6 +35,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 
 #ifdef WIN32
 #define sleep(x) Sleep(1000 * x)
@@ -44,14 +45,11 @@
 
 #include "diffusion.h"
 #include "args.h"
-
 #include "cJSON.h"
-
-static void json_to_cbor(cJSON *item, CBOR_GENERATOR_T *cbor_generator);
-extern cJSON *read_process_list();
 
 // 5 seconds
 #define SYNC_DEFAULT_TIMEOUT 5000 * 1000
+static void json_to_cbor(cJSON *item, CBOR_GENERATOR_T *cbor_generator);
 
 int volatile g_active = 0;
 CONVERSATION_ID_T volatile *g_updater_id;
@@ -63,9 +61,9 @@ apr_thread_cond_t *cond = NULL;
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
         {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "ws://localhost:8080"},
-        {'p', "principal", "Principal (username) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
-        {'c', "credentials", "Credentials (password) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
-        {'t', "topic", "Topic name to create and update", ARG_OPTIONAL, ARG_HAS_VALUE, "processes"},
+        {'p', "principal", "Principal (username) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, "control" },
+        {'c', "credentials", "Credentials (password) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, "password" },
+        {'t', "topic", "Topic name to create and update", ARG_OPTIONAL, ARG_HAS_VALUE, "time" },
         END_OF_ARG_OPTS
 };
 
@@ -224,20 +222,41 @@ main(int argc, char **argv)
                 .on_failure = on_update_failure
         };
 
+        time_t current_time;
+        struct tm *time_info;
+        char json[255];
+        char format_string[] = "{\"day\":\"%d\",\"month\":\"%m\",\"year\":\"%Y\",\"hour\":\"%H\",\"minute\":\"%M\",\"second\":\"%S\"}";
+
         /*
          * Forever, until deactivated.
          */
         while(g_active) {
+                // Get current time
+                current_time = time(NULL);
+                if(current_time == ((time_t)-1)) {
+                        fprintf(stderr, "Failure to obtain the current time\n");
+                        return EXIT_FAILURE;
+                }
 
-                // Read in the process list and convert it to JSON.
-                cJSON *json = read_process_list();
-                char *json_str = cJSON_Print(json);
-                printf("As JSON: %s\n", json_str);
-                free(json_str);
+                // Get UTC time info
+                time_info = gmtime( &current_time );
+                if(time_info == NULL) {
+                        fprintf(stderr, "Failure to obtain UTC time info\n");
+                        return EXIT_FAILURE;
+                }
+
+                // Construct JSON string based on current time
+                if(strftime(json, sizeof(json), format_string, time_info) == 0) {
+                        fprintf(stderr, "Failure to construct JSON value\n");
+                        return EXIT_FAILURE;
+                }
+
+                printf("Updated value: %s\n", json);
 
                 // Convert JSON to CBOR
+                cJSON *json_object = cJSON_Parse(json);
                 CBOR_GENERATOR_T *cbor_generator = cbor_generator_create();
-                json_to_cbor(json, cbor_generator);
+                json_to_cbor(json_object, cbor_generator);
 
                 // Extract the CBOR-encoded data and wrap it in a BUF_T structure.
                 BUF_T *cbor_buf = buf_create();
@@ -252,9 +271,10 @@ main(int argc, char **argv)
 
                 buf_free(cbor_buf);
                 cbor_generator_free(cbor_generator);
-                cJSON_Delete(json);
+                cJSON_Delete(json_object);
 
-                sleep(5);
+                // Sleep for a second
+                sleep(1);
         }
 
         puts("Updater not active, exiting.");

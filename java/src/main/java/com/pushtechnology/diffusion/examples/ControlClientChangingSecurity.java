@@ -113,7 +113,7 @@ public class ControlClientChangingSecurity {
         LOG.info("Sending the following script to the server:\n{}", script);
 
         return securityControl.updateStore(script)
-            // Convert CompletableFuture<Object> to CompletableFuture<Void>.
+            // Convert CompletableFuture<?> to CompletableFuture<Void>.
             .thenAccept(ignored -> { });
     }
 

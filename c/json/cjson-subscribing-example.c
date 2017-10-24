@@ -42,9 +42,9 @@ apr_thread_cond_t *cond = NULL;
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
         {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "ws://localhost:8080"},
-        {'p', "principal", "Principal (username) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
-        {'c', "credentials", "Credentials (password) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
-        {'t', "topic", "Topic name to subscribe", ARG_OPTIONAL, ARG_HAS_VALUE, "processes"},
+        {'p', "principal", "Principal (username) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, "client"},
+        {'c', "credentials", "Credentials (password) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, "password"},
+        {'t', "topic", "Topic name to subscribe", ARG_OPTIONAL, ARG_HAS_VALUE, "time"},
         END_OF_ARG_OPTS
 };
 
@@ -147,7 +147,8 @@ main(int argc, char **argv)
 
         subscribe(session, (SUBSCRIPTION_PARAMS_T) { .topic_selector = topic_name, .on_topic_message = on_topic_message, .on_subscribe = on_subscribe });
 
-        sleep(60);
+        // Receive updates for 2 minutes
+        sleep(120);
 
         session_close(session, NULL);
         session_free(session);

@@ -37,11 +37,11 @@
     <LangVersion>6</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+    <Reference Include="NLog">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\target\NLog.dll</HintPath>
     </Reference>
-    <Reference Include="PushTechnology.ClientInterface, Version=5.9.0.0, Culture=neutral, PublicKeyToken=52cb3a68b6d2d002, processorArchitecture=MSIL">
+    <Reference Include="PushTechnology.ClientInterface">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\target\PushTechnology.ClientInterface.dll</HintPath>
     </Reference>
@@ -62,7 +62,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>
