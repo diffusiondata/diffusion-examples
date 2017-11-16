@@ -187,6 +187,18 @@ int main(int argc, char** argv)
 
 
         /*
+         * Create a slave topic which is an alias for the string-data
+         * topic (its master topic).
+         */
+        TOPIC_DETAILS_T *slave_topic_details = create_topic_details_slave("string-data");
+        ADD_TOPIC_PARAMS_T slave_params = BUILD_TOPIC_PARAMS("slave", slave_topic_details);
+    
+        apr_thread_mutex_lock(mutex);
+        add_topic(session, slave_params);
+        apr_thread_cond_wait(cond, mutex);
+        apr_thread_mutex_unlock(mutex);
+
+        /*
          * Record topic data.
          *
          * The C API does not have the concept of "builders" for

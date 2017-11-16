@@ -16,11 +16,9 @@
 import Foundation
 import Diffusion
 
-let SERVICE_PATH = "push/notifications"
-
 class MessagingToPushNotificationBridgeExample {
-
-    private var session: PTDiffusionSession?
+    static let servicePath = "push/notifications"
+    var session: PTDiffusionSession?
 
     func startWithURL(url: NSURL) throws {
         print("Connecting...")
@@ -70,11 +68,14 @@ class MessagingToPushNotificationBridgeExample {
         // Build a JSON request from that
         let json = try! PTDiffusionJSON(object: requestDict)
 
-        session?.messaging.send(json.request, toPath: SERVICE_PATH, jsonCompletionHandler: {
+        session?.messaging.send(
+            json.request,
+            toPath: MessagingToPushNotificationBridgeExample.servicePath,
+            jsonCompletionHandler: {
             (json, error) -> Void in
 
             if (nil == json) {
-                print("Send to \"\(SERVICE_PATH)\" failed: \(error!)")
+                print("Send to \"\(MessagingToPushNotificationBridgeExample.servicePath)\" failed: \(error!)")
             } else {
                 print("Response: \(json!)")
             }

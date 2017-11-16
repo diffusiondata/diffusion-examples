@@ -35,6 +35,7 @@ import com.pushtechnology.diffusion.datatype.recordv2.RecordV2Delta;
 import com.pushtechnology.diffusion.datatype.recordv2.RecordV2Delta.Change;
 import com.pushtechnology.diffusion.datatype.recordv2.model.RecordModel;
 import com.pushtechnology.diffusion.datatype.recordv2.schema.Schema;
+import com.pushtechnology.diffusion.datatype.recordv2.schema.SchemaParseException;
 
 /**
  * This demonstrates a client consuming RecordV2 topics.
@@ -77,7 +78,7 @@ public final class ClientConsumingRecordV2Topics {
      */
     private final Map<String, Currency> currencies = new ConcurrentHashMap<>();
 
-    private final Schema schema;
+    private Schema schema;
 
     private final RatesListener listener;
 
@@ -89,12 +90,9 @@ public final class ClientConsumingRecordV2Topics {
      * @param serverUrl for example "ws://diffusion.example.com:80"
      * @param listener a listener that will be notified of all rates and rate
      *        changes
-     * @param withSchema indicates whether schema processing should be used or
-     *        not
      */
     public ClientConsumingRecordV2Topics(String serverUrl,
-        RatesListener listener,
-        boolean withSchema) {
+        RatesListener listener) {
 
         this.listener = requireNonNull(listener);
 
@@ -102,20 +100,8 @@ public final class ClientConsumingRecordV2Topics {
             Diffusion.sessions().principal("client").password("password")
                 .open(serverUrl);
 
-        if (withSchema) {
-            // Create the record schema for the rates topic. It has two decimal
-            // fields which are maintained to 5 decimal places
-            schema =
-                Diffusion.dataTypes().recordV2().schemaBuilder()
-                    .record("Rates").decimal("Bid", 5).decimal("Ask", 5)
-                    .build();
-        }
-        else {
-            schema = null;
-        }
-
-        // Use the Topics feature to add a topic stream and subscribe to all
-        // topic under the root
+        // Use the Topics feature to add a record value stream and subscribe to
+        // all topics under the root.
         final Topics topics = session.feature(Topics.class);
         final String topicSelector = String.format("?%s//", ROOT_TOPIC);
 
@@ -200,7 +186,7 @@ public final class ClientConsumingRecordV2Topics {
             listener.onNewRate(currency, targetCurrency, bid, ask);
         }
         else {
-            // A delta is used to determine what has changed
+            // Generate a structural delta to determine what has changed
             final RecordV2Delta delta = newValue.diff(oldValue);
             for (Change change : delta.changes(schema)) {
                 final String fieldName = change.fieldName();
@@ -367,18 +353,34 @@ public final class ClientConsumingRecordV2Topics {
     private final class RatesValueStream
         extends ValueStream.Default<RecordV2> {
 
-        private RatesValueStream() {
+        @Override
+        public void onSubscription(String topicPath, TopicSpecification specification) {
+            final boolean isRatesTopic = Diffusion.topicSelectors().parse("?FX/.*/.*").selects(topicPath);
+            // Only retrieve a schema when subscribing to a rates topic
+            if (isRatesTopic) {
+                final String schemaString = specification.getProperties().get(TopicSpecification.SCHEMA);
+                // If a schema is provided on subscription, retrieve it and set it once
+                // All schemas are identical for rates topics.
+                if (schemaString != null && schema == null) {
+                    try {
+                        schema = Diffusion.dataTypes().recordV2().parseSchema(schemaString);
+                    }
+                    catch (SchemaParseException e) {
+                        LOG.error("Unable to parse recordV2 schema", e);
+                    }
+                }
+            }
         }
 
         @Override
         public void onValue(String topicPath, TopicSpecification specification,
             RecordV2 oldValue, RecordV2 newValue) {
-            final String[] topicElements = topicPath.split("/");
-            // It is only a rate update if topic name has 3 elements in path
-            if (topicElements.length == 3) {
+            final String[] topicElements = elements(topicPath);
+            // It is only a rate update if topic has 2 elements below root path
+            if (topicElements.length == 2) {
                 applyUpdate(
-                    topicElements[1], // The base currency
-                    topicElements[2], // The target currency
+                    topicElements[0], // The base currency
+                    topicElements[1], // The target currency
                     oldValue,
                     newValue);
             }
@@ -387,15 +389,20 @@ public final class ClientConsumingRecordV2Topics {
         @Override
         public void onUnsubscription(String topicPath,
             TopicSpecification specification, UnsubscribeReason reason) {
-            final String[] topicElements = topicPath.split("/");
-            if (topicElements.length == 3) {
-                removeRate(topicElements[1], topicElements[2]);
+            final String[] topicElements = elements(topicPath);
+            if (topicElements.length == 2) {
+                removeRate(topicElements[0], topicElements[1]);
             }
-            else if (topicElements.length == 2) {
-                removeCurrency(topicElements[1]);
+            else if (topicElements.length == 1) {
+                removeCurrency(topicElements[0]);
             }
         }
 
+        private String[] elements(String topicPath) {
+            final String subPath =
+                topicPath.replaceFirst("^" + ROOT_TOPIC + "/", "");
+            return subPath.split("/");
+        }
     }
 
 }
