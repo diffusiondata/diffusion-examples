@@ -42,8 +42,8 @@
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
         {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "ws://localhost:8080"},
-        {'p', "principal", "Principal (username) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, "control"},
-        {'c', "credentials", "Credentials (password) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, "password"},
+        {'p', "principal", "Principal (username) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
+        {'c', "credentials", "Credentials (password) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
         {'r', "topic_root", "Topic root to process missing topic notifications on", ARG_OPTIONAL, ARG_HAS_VALUE, "foo"},
         END_OF_ARG_OPTS
 };
@@ -70,22 +70,6 @@ on_topic_add_discard(SESSION_T *session, void *context)
         return HANDLER_SUCCESS;
 }
 
-static CONTENT_T *
-create_example_json_content()
-{
-        CBOR_GENERATOR_T *cbor_generator = cbor_generator_create();
-        const char *json_message_str = "Hello world, this is a JSON string.";
-        cbor_write_text_string(cbor_generator, json_message_str, strlen(json_message_str));
-        BUF_T *cbor_buf = buf_create();
-        buf_write_bytes(cbor_buf, cbor_generator->data, cbor_generator->len);
-
-        CONTENT_T *result = content_create(CONTENT_ENCODING_NONE, cbor_buf);
-        cbor_generator_free(cbor_generator);
-        buf_free(cbor_buf);
-
-        return result;
-}
-
 /*
  * A request has been made for a topic that doesn't exist; create it
  * and inform Diffusion that the client's subcription request can
@@ -99,21 +83,17 @@ on_missing_topic(SESSION_T *session, const SVC_MISSING_TOPIC_REQUEST_T *request,
         BUF_T *sample_data_buf = buf_create();
         buf_write_string(sample_data_buf, "Hello, world");
 
-        CONTENT_T *json_content = create_example_json_content();
-
         // Add the missing topic.
         ADD_TOPIC_PARAMS_T topic_params = {
                 .on_topic_added = on_topic_added,
                 .on_topic_add_failed = on_topic_add_failed,
                 .on_discard = on_topic_add_discard,
                 .topic_path = strdup(request->topic_selector+1),
-                .details = create_topic_details_json(),
-                .content = json_content
+                .details = create_topic_details_single_value(M_DATA_TYPE_STRING),
+                .content = content_create(CONTENT_ENCODING_NONE, sample_data_buf)
         };
 
         add_topic(session, topic_params);
-
-        content_free(json_content);
 
         // Proceed with the client's subscription to the topic
         missing_topic_proceed(session, (SVC_MISSING_TOPIC_REQUEST_T *) request);

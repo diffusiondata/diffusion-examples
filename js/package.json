@@ -1,7 +1,7 @@
 {
   "name": "diffusion-examples",
   "version": "1.0.0",
-  "description": "Examples for using the Diffusion JavaScript client",
+  "description": "Examples for using the Diffusion Javascript client",
   
   "main": "index.js",
   

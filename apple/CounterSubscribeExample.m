@@ -1,6 +1,6 @@
-//  Diffusion Client Library for iOS, tvOS and OS X / macOS - Examples
+//  Diffusion Client Library for iOS and OS X - Examples
 //
-//  Copyright (C) 2015, 2017 Push Technology Ltd.
+//  Copyright (C) 2015, 2016 Push Technology Ltd.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 
 @import Diffusion;
 
-@interface CounterSubscribeExample (PTDiffusionNumberValueStreamDelegate) <PTDiffusionNumberValueStreamDelegate>
+@interface CounterSubscribeExample (PTDiffusionTopicStreamDelegate) <PTDiffusionTopicStreamDelegate>
 @end
 
 @implementation CounterSubscribeExample {
@@ -43,9 +43,7 @@
         _session = session;
 
         // Register self as the fallback handler for topic updates.
-        PTDiffusionValueStream *const stream =
-            [PTDiffusionPrimitive int64NumberValueStreamWithDelegate:self];
-        [session.topics addFallbackStream:stream];
+        [session.topics addFallbackTopicStreamWithDelegate:self];
 
         NSLog(@"Subscribing...");
         [session.topics subscribeWithTopicSelectorExpression:@"foo/counter"
@@ -62,36 +60,14 @@
 
 @end
 
-@implementation CounterSubscribeExample (PTDiffusionNumberValueStreamDelegate)
+@implementation CounterSubscribeExample (PTDiffusionTopicStreamDelegate)
 
--(void)     diffusionStream:(PTDiffusionStream *const)stream
-    didSubscribeToTopicPath:(NSString *const)topicPath
-              specification:(PTDiffusionTopicSpecification *const)specification {
-    NSLog(@"Subscribed: %@", topicPath);
-}
-
--(void)diffusionStream:(PTDiffusionValueStream *const)stream
-    didUpdateTopicPath:(NSString *const)topicPath
-         specification:(PTDiffusionTopicSpecification *const)specification
-             oldNumber:(NSNumber *const)oldNumber
-             newNumber:(NSNumber *const)newNumber {
-    NSLog(@"The value of %@ is: %@", topicPath, newNumber);
-}
-
--(void)         diffusionStream:(PTDiffusionStream *)stream
-    didUnsubscribeFromTopicPath:(NSString *)topicPath
-                  specification:(PTDiffusionTopicSpecification *)specification
-                         reason:(PTDiffusionTopicUnsubscriptionReason)reason {
-    NSLog(@"Unsubscribed: %@", topicPath);
-}
-
--(void)diffusionDidCloseStream:(PTDiffusionStream *const)stream {
-    NSLog(@"Closed");
-}
-
--(void)diffusionStream:(PTDiffusionStream *const)stream
-      didFailWithError:(NSError *const)error {
-    NSLog(@"Failed: %@", error);
+-(void)diffusionStream:(PTDiffusionStream * const)stream
+    didUpdateTopicPath:(NSString * const)topicPath
+               content:(PTDiffusionContent * const)content
+               context:(PTDiffusionUpdateContext * const)context {
+    NSString *const string = [[NSString alloc] initWithData:content.data encoding:NSUTF8StringEncoding];
+    NSLog(@"The value of %@ is: %@", topicPath, string);
 }
 
 @end

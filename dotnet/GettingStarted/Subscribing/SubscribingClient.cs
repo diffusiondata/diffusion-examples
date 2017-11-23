@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright © 2016, 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,10 +32,10 @@ namespace PushTechnology.ClientInterface.GettingStarted {
             var session = Diffusion.Sessions.Open( "ws://localhost:8080" );
 
             // Get the Topics feature to subscribe to topics
-            var topics = session.Topics;
+            var topics = session.GetTopicsFeature();
 
             var topic = ">foo/counter";
-            // Add a topic stream for 'random/JSON' and request subscription
+            // Add a topic stream for 'foo/counter' and request subscription
             var jsonStream = new JSONStream();
             topics.AddStream( topic, jsonStream );
             topics.Subscribe( topic, new TopicsCompletionCallbackDefault() );

@@ -1,5 +1,5 @@
 ﻿/**
-* Copyright © 2016, 2017 Push Technology Ltd.
+* Copyright © 2016 Push Technology Ltd.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -21,14 +21,6 @@ namespace PushTechnology.ClientInterface.Examples.Runner {
     /// Interface to be used by all examples.
     /// </summary>
     public interface IExample {
-        /// <summary>
-        /// Runs the curent example.
-        /// </summary>
-        /// <remarks>
-        /// This acts as the main method for examples.
-        /// </remarks>
-        /// <param name="cancel">The cancellation token to cancel the current example run.</param>
-        /// <param name="args">The optional example arguments.</param>
-        Task Run( CancellationToken cancel, string[] args );
+        void Run( CancellationToken cancel, string[] args );
     }
 }

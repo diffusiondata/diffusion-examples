@@ -15,6 +15,7 @@
 
 package com.pushtechnology.diffusion.examples.runnable;
 
+import static com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateCallback;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import java.util.concurrent.Executors;
@@ -25,12 +26,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.callbacks.TopicTreeHandler;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateCallback;
 import com.pushtechnology.diffusion.client.session.Session;
-import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
@@ -65,8 +65,13 @@ public final class ProducingJson extends AbstractClient {
         final TopicControl topicControl = session.feature(TopicControl.class);
 
         // Add the JSON topic with an initial value
-        topicControl.addTopic(
-            "json/random", topicControl.newSpecification(TopicType.JSON), ADD_CALLBACK);
+        topicControl
+            .addTopicFromValue(
+                "json/random",
+                // This value cannot be transformed into a map, will invoke
+                // error handling if the client tries to process it
+                Diffusion.dataTypes().json().fromJsonString("\"hello\""),
+                ADD_CALLBACK);
 
         // Remove topics when the session closes
         topicControl.removeTopicsWithSession(

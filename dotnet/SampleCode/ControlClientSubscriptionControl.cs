@@ -34,7 +34,7 @@ namespace Examples {
             session = Diffusion.Sessions.Principal( "control" ).Password( "password" )
                 .Open( "ws://diffusion.example.com:80" );
 
-            subscriptionControl = session.SubscriptionControl;
+            subscriptionControl = session.GetSubscriptionControlFeature();
         }
 
         /// <summary>

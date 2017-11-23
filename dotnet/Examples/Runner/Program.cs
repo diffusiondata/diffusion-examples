@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2016, 2017 Push Technology Ltd.
+ * Copyright © 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,33 +15,31 @@
 
 using PushTechnology.ClientInterface.Examples.Client;
 using PushTechnology.ClientInterface.Examples.Control;
+using PushTechnology.ClientInterface.Examples.Runner;
 
-namespace PushTechnology.ClientInterface.Examples.Runner {
+namespace PushTechnology.ClientInterface.Runner {
 
     /// <summary>
     /// This is used to run the examples.
     /// </summary>
-    public static class Program {
+    public class Program {
+
         /// <summary>
         /// To run an example set, uncomment the corresponding block of code.
         /// </summary>
-        /// <param name="args">The program arguments.</param>
+        /// <param name="args"></param>
         public static void Main( string[] args ) {
-            var url = "ws://localhost:8080";
-            var secureUrl = "wss://localhost:8080";
+            var runner = new ExampleRunner();
 
-            using ( var runner = new ExampleRunner() ) {
-                // Start JSON Topic Examples
-                // runner.Start( new UpdatingJSONTopics(), secureUrl );
-                // runner.Start( new ConsumingJSONTopics(), url );
+            /// Start JSON Topic Examples
+            //runner.StartExample( new UpdatingJSONTopics(), "wss://localhost:8443" );
+            //runner.StartExample( new ConsumingJSONTopics(), "ws://localhost:8080" );
 
-                // Start Record Topic Examples
-                // runner.Start( new UpdatingRecordTopics(), secureUrl );
-                // runner.Start( new ConsumingRecordTopics(), url );
+            /// Start Record Topic Examples
+            runner.StartExample( new UpdatingRecordTopics(), "wss://localhost:8443" );
+            runner.StartExample( new ConsumingRecordTopics(), "ws://localhost:8080" );
 
-                // Start ping examples
-                // runner.Start( new PingServer(), url );
-            }
+            runner.AwaitCancellation();
         }
     }
 }

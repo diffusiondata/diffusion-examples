@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2014, 2017 Push Technology Ltd.
+ * Copyright © 2014, 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
  */
 
 using System.Threading;
-using PushTechnology.ClientInterface.Client.Callbacks;
 using PushTechnology.ClientInterface.Client.Factories;
 using PushTechnology.ClientInterface.Client.Features.Control.Topics;
 using PushTechnology.ClientInterface.Client.Session;
@@ -47,8 +46,8 @@ namespace Examples {
             session = Diffusion.Sessions.Principal( "control" ).Password( "password" )
                 .Open( "ws://diffusion.example.com;80" );
 
-            topicControl = session.TopicControl;
-            updateControl = session.TopicUpdateControl;
+            topicControl = session.GetTopicControlFeature();
+            updateControl = session.GetTopicUpdateControlFeature();
         }
 
         public void Start( IPriceProvider provider ) {
@@ -68,10 +67,10 @@ namespace Examples {
 
         public void Close() {
             // Remove our topic and close the session when done.
-            topicControl.Remove( "?" + TopicName + "//", new RemoveCallback( session ) );
+            topicControl.RemoveTopics( ">" + TopicName, new RemoveCallback( session ) );
         }
 
-        private class RemoveCallback : TopicControlRemovalCallbackDefault {
+        private class RemoveCallback : TopicControlRemoveCallbackDefault {
             private readonly ISession theSession;
 
             public RemoveCallback( ISession session ) {
@@ -82,7 +81,7 @@ namespace Examples {
             /// Notification that a call context was closed prematurely, typically due to a timeout or the session being
             /// closed. No further calls will be made for the context.
             /// </summary>
-            public override void OnError( ErrorReason error ) {
+            public override void OnDiscard() {
                 theSession.Close();
             }
 

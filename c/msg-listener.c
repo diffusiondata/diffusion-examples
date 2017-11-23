@@ -22,13 +22,13 @@
  * This example shows how to receive messages, rather than topic
  * updates.
  *
- * Message streams may be received via a message path. We can
- * register a listener against a specific path to process the
+ * Message streams may be received via a topic endpoint. We can
+ * register a listener against a specific endpoint to process the
  * messages, and we can register a listener for all messages not
  * otherwise handled.
  *
- * See send-msg.c for an example of how to send messages to a
- * path from a client.
+ * See send-msg.c for an example of how to send messages to an
+ * endpoint from a client.
  */
 
 #include <stdio.h>
@@ -45,8 +45,8 @@
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
         {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "ws://localhost:8080"},
-        {'p', "principal", "Principal (username) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, "control"},
-        {'c', "credentials", "Credentials (password) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, "password"},
+        {'p', "principal", "Principal (username) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
+        {'c', "credentials", "Credentials (password) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
         {'t', "topic", "Topic name", ARG_REQUIRED, ARG_HAS_VALUE, "echo"},
         END_OF_ARG_OPTS
 };
@@ -67,7 +67,7 @@ on_registered(SESSION_T *session, void *context)
 int
 on_msg(SESSION_T *session, const SVC_SEND_RECEIVER_CLIENT_REQUEST_T *request, void *context)
 {
-        printf("Received message on path %s\n", request->topic_path);
+        printf("Received message on topic path %s\n", request->topic_path);
         hexdump_buf(request->content->data);
         printf("Headers:\n");
         if(request->send_options.headers->first == NULL) {
@@ -107,7 +107,7 @@ on_msg(SESSION_T *session, const SVC_SEND_RECEIVER_CLIENT_REQUEST_T *request, vo
 int
 on_stream_message(SESSION_T *session, const STREAM_MESSAGE_T *message, void *context)
 {
-        printf("Received stream message on listener for path %s\n", message->topic_path);
+        printf("Received stream message on listener for topic path %s\n", message->topic_path);
         hexdump_buf(message->content.data);
 
         if(context != NULL) {
@@ -155,7 +155,7 @@ main(int argc, char **argv)
         free(session_id);
 
         /*
-         * Register a listener for messages on the given path.
+         * Register a listener for messages on the given topic path.
          */
         MSG_LISTENER_REGISTRATION_PARAMS_T listener_params = {
                 .topic_path = topic,

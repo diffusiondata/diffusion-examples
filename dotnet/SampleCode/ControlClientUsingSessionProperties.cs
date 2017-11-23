@@ -47,8 +47,8 @@ namespace Examples {
             _session = Diffusion.Sessions.Principal( "control" ).Password( "password" )
                 .Open( "ws.//diffusion.example.com:80" );
 
-            _clientControl = _session.ClientControl;
-            _subscriptionControl = _session.SubscriptionControl;
+            _clientControl = _session.GetClientControlFeature();
+            _subscriptionControl = _session.GetSubscriptionControlFeature();
 
             // Configure a listener which will be notified firstly of all open client sessions and then of all that
             // subsequently open. All that are in the Italian accounts department get subscribed to the current topic.

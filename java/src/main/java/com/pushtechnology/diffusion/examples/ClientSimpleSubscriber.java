@@ -59,13 +59,9 @@ public final class ClientSimpleSubscriber {
         final Topics topics = session.feature(Topics.class);
         topics.addStream(">Foo", Content.class, new FooStream());
         topics.addStream(">Bar//", JSON.class, new BarStream());
-
-        topics.subscribe(Diffusion.topicSelectors().anyOf("Foo", "Bar//"))
-            .whenComplete((voidResult, exception) -> {
-                if (exception != null) {
-                    LOG.info("subscription failed", exception);
-                }
-            });
+        topics.subscribe(
+            Diffusion.topicSelectors().anyOf("Foo", "Bar//"),
+            new Topics.CompletionCallback.Default());
     }
 
     /**

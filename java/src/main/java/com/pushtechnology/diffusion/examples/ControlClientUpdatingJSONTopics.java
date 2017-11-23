@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016, 2017 Push Technology Ltd.
+ * Copyright (C) 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,6 @@ import static java.util.Objects.requireNonNull;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
@@ -30,12 +27,14 @@ import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.callbacks.Registration;
 import com.pushtechnology.diffusion.client.callbacks.TopicTreeHandler;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddContextCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.RemovalContextCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.UpdateSource;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateContextCallback;
 import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.client.session.SessionClosedException;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 import com.pushtechnology.diffusion.datatype.json.JSONDataType;
@@ -121,23 +120,24 @@ public final class ControlClientUpdatingJSONTopics {
     }
 
     /**
-     * Add a new rates topic and sets initial values.
+     * Add a new rates topic.
      *
      * @param currency the base currency
      * @param values the full map of initial rates values
      * @param callback reports outcome
+     * @throws IOException if unable to convert rates map
      */
     public void addRates(
         String currency,
         Map<String, String> values,
-        UpdateContextCallback<String> callback)
-        throws InterruptedException, ExecutionException, TimeoutException,
-        IOException {
+        AddContextCallback<String> callback) throws IOException {
 
-        topicControl.addTopic(rateTopicName(currency), TopicType.JSON).
-            get(5, TimeUnit.SECONDS);
-
-        changeRates(currency, values, callback);
+        topicControl.addTopic(
+            rateTopicName(currency),
+            TopicType.JSON,
+            mapToJSON(values),
+            currency,
+            callback);
     }
 
     /**
@@ -178,8 +178,8 @@ public final class ControlClientUpdatingJSONTopics {
     public void changeRates(
         String currency,
         String jsonString,
-        UpdateContextCallback<String> callback)
-        throws IllegalArgumentException, IOException {
+        UpdateContextCallback<String> callback) throws SessionClosedException,
+        IllegalArgumentException, IOException {
 
         if (valueUpdater == null) {
             throw new IllegalStateException("Not registered as updater");

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-using PushTechnology.ClientInterface.Client.Callbacks;
 using PushTechnology.ClientInterface.Client.Factories;
 using PushTechnology.ClientInterface.Client.Features.Control.Topics;
 using PushTechnology.ClientInterface.Client.Session;
@@ -44,8 +43,8 @@ namespace Examples {
             session = Diffusion.Sessions.Principal( "control" ).Password( "password" )
                 .Open( "ws://diffusion.example.com:80" );
 
-            topicControl = session.TopicControl;
-            updateControl = session.TopicUpdateControl;
+            topicControl = session.GetTopicControlFeature();
+            updateControl = session.GetTopicUpdateControlFeature();
 
             // Create a single-value topic.
             topicControl.AddTopicFromValue( Topic, TopicType.SINGLE_VALUE, new TopicControlAddCallbackDefault() );
@@ -65,10 +64,10 @@ namespace Examples {
         /// </summary>
         public void Close() {
             // Remove our topic and close session when done.
-            topicControl.Remove( "?" + Topic + "//", new RemoveCallback( session ) );
+            topicControl.RemoveTopics( ">" + Topic, new RemoveCallback( session ) );
         }
 
-        private class RemoveCallback : TopicControlRemovalCallbackDefault {
+        private class RemoveCallback : TopicControlRemoveCallbackDefault {
             private readonly ISession theSession;
 
             public RemoveCallback( ISession session ) {
@@ -79,7 +78,7 @@ namespace Examples {
             /// Notification that a call context was closed prematurely, typically due to a timeout or the session being
             /// closed. No further calls will be made for the context.
             /// </summary>
-            public override void OnError(ErrorReason errorReason) {
+            public override void OnDiscard() {
                 theSession.Close();
             }
 

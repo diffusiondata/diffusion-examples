@@ -20,7 +20,7 @@
 
 /*
  * This example shows how a message can be sent from a client to a
- * message handler via a message path.
+ * message handler via a topic path.
  *
  * See msg-handler.c for an example of how to receive these messages
  * in a control client.
@@ -45,10 +45,10 @@ apr_thread_cond_t *cond = NULL;
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
         {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "ws://localhost:8080"},
-        {'p', "principal", "Principal (username) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, "client"},
-        {'c', "credentials", "Credentials (password) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, "password"},
+        {'p', "principal", "Principal (username) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
+        {'c', "credentials", "Credentials (password) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
         {'t', "topic", "Topic name", ARG_REQUIRED, ARG_HAS_VALUE, "echo"},
-        {'d', "data", "Data to send", ARG_REQUIRED, ARG_HAS_VALUE, "Hello client!"},
+        {'d', "data", "Data to send", ARG_REQUIRED, ARG_HAS_VALUE, NULL},
         END_OF_ARG_OPTS
 };
 
