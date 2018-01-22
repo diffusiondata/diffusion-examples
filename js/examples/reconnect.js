@@ -59,7 +59,7 @@ diffusion.connect({
     }
 }).then(function(session) {
 
-    session.on('disconnect', function() {
+    session.on('disconnect', function(reason) {
         // This will be called when we lose connection. Because we've specified the 
         // reconnection strategy, it will be called automatically when this event
         // is dispatched
