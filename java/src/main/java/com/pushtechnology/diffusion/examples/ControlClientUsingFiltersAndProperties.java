@@ -85,9 +85,6 @@ public final class ControlClientUsingFiltersAndProperties {
                     "JobTitle is 'Staff'",
                     topicPath,
                     content,
-                    messagingControl.sendOptionsBuilder()
-                        .headers(context.getHeaderList())
-                        .build(),
                     sendToFilterCallback);
             }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016, 2015 Push Technology Ltd.
+ * Copyright (C) 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,12 @@ diffusion.connect({
 
     // 1. Data Types are exposed from the top level Diffusion namespace. It is often easier
     // to assign these directly to a local variable.
+    var stringDataType = diffusion.datatypes.string();
     var jsonDataType = diffusion.datatypes.json();
 
-    // 2. Data Types are currently provided for JSON and Binary topic types.
+
+    // 2. Data Types are currently provided for JSON, Binary, String, Double, Int64 and RecordV2 topic types.
+    session.topics.add('topic/string', diffusion.topics.TopicType.STRING);
     session.topics.add('topic/json', diffusion.topics.TopicType.JSON);
 
     // 3. Values can be created directly from the data type.
@@ -42,19 +45,28 @@ diffusion.connect({
     // Topics are updated using the standard update mechanisms
     session.topics.update('topic/json', jsonValue);
 
-    // Subscriptions are performed normally
-    session.subscribe('topic/json');
+    // For String, Double and Int64 topics, values can be passed directly
+    session.topics.update('topic/string', "This is a new string value");
+
+
+    session.subscribe('topic/.*');
 
     // 4. Streams can be specialised to provide values from a specific datatype.
-    session.stream('topic/json').asType(jsonDataType).on('value', function(topic, specification, newValue, oldValue) {
+    session.stream('topic/json').asType(jsonDataType).on('value', function(topic, spec, newValue, oldValue) {
         // When a JSON or Binary topic is updated, any value handlers on a subscription will be called with both the
         // new value, and the old value.
    
         // The oldValue parameter will be undefined if this is the first value received for a topic.
 
-        // For JSON topics, value#get returns a JavaScript object
-        // For Binary topics, value#get returns a Buffer instance
+        // For JSON topics, value#get returns a JavaScript object.
+        // For Binary topics, value#get returns a Buffer instance.
         console.log("Update for " + topic, newValue.get());
+    });
+
+    session.stream('topic/string').asType(stringDataType).on('value', function(topic, spec, newValue, oldValue) {
+        // Unlike JSON or Binary, String, Double and Int64 datatypes provide values as primitive types.
+        // This means you don't need to call #get to receive the actual data.
+        console.log("Update for string topic: " + newValue);
     });
 
     // 5. Raw values of an appropriate type can also be used for JSON and Binary topics. 

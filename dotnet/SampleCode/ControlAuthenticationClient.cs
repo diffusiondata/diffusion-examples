@@ -31,7 +31,7 @@ namespace Examples {
             var session = Diffusion.Sessions.Principal( "auth" ).Password( "auth_secret" )
                 .Open( "ws://diffusion.example.com:80" );
 
-            session.GetAuthenticationControlFeature().SetAuthenticationHandler( "control-client-auth-handler-example",
+            session.AuthenticationControl.SetAuthenticationHandler( "control-client-auth-handler-example",
                 Enum.GetValues( typeof( DetailType ) ).OfType<DetailType>().ToList(),
                 new ExampleControlAuthenticationHandler() );
 

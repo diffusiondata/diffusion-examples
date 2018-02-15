@@ -1,6 +1,6 @@
-//  Diffusion Client Library for iOS and OS X - Examples
+//  Diffusion Client Library for iOS, tvOS and OS X / macOS - Examples
 //
-//  Copyright (C) 2016 Push Technology Ltd.
+//  Copyright (C) 2016, 2017 Push Technology Ltd.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@
 
     [PTDiffusionSession openWithURL:url
                       configuration:sessionConfiguration
-                  completionHandler:^(PTDiffusionSession *session, NSError *error)
+                  completionHandler:^(PTDiffusionSession *const session, NSError *const error)
     {
         if (!session) {
             NSLog(@"Failed to open session: %@", error);
@@ -57,11 +57,10 @@
 static NSString *const _TopicPath = @"Example/Exclusively Updating";
 
 -(void)addTopicForSession:(PTDiffusionSession *const)session {
-    // Add a single value topic without an initial value.
+    // Add an Int64 primitive topic.
     [session.topicControl addWithTopicPath:_TopicPath
-                                      type:PTDiffusionTopicType_SingleValue
-                                     value:nil
-                         completionHandler:^(NSError * _Nullable error)
+                                      type:PTDiffusionTopicType_Int64
+                         completionHandler:^(NSError *const error)
     {
         if (error) {
             NSLog(@"Failed to add topic. Error: %@", error);
@@ -87,24 +86,17 @@ static NSString *const _TopicPath = @"Example/Exclusively Updating";
     }];
 }
 
--(void)updateTopicWithUpdater:(PTDiffusionTopicUpdater *const)updater
+-(void)updateTopicWithUpdater:(PTDiffusionNumberValueUpdater *const)updater
                         value:(const NSUInteger)value {
-    // Prepare data to update topic with.
-    NSString *const string =
-        [NSString stringWithFormat:@"Update #%lu", (unsigned long)value];
-    NSData *const data = [string dataUsingEncoding:NSUTF8StringEncoding];
-    PTDiffusionContent *const content =
-        [[PTDiffusionContent alloc] initWithData:data];
-
     // Update the topic.
     [updater updateWithTopicPath:_TopicPath
-                           value:content
+                           value:@(value)
                completionHandler:^(NSError *const error)
     {
         if (error) {
             NSLog(@"Failed to update topic. Error: %@", error);
         } else {
-            NSLog(@"Topic updated to \"%@\"", string);
+            NSLog(@"Topic updated to %llu", (unsigned long long)value);
 
             // Update topic after a short wait.
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)),
@@ -125,7 +117,21 @@ static NSString *const _TopicPath = @"Example/Exclusively Updating";
     NSLog(@"Registration is active.");
 
     // Start updating.
-    [self updateTopicWithUpdater:updater value:1];
+    [self updateTopicWithUpdater:updater.int64NumberValueUpdater
+                           value:1];
+}
+
+-(void)diffusionTopicTreeRegistrationIsOnStandbyForUpdates:(PTDiffusionTopicTreeRegistration *)registration {
+    NSLog(@"Registration is on standby.");
+}
+
+-(void)diffusionTopicTreeRegistrationDidClose:(PTDiffusionTopicTreeRegistration *const)registration {
+    NSLog(@"Closed");
+}
+
+-(void)diffusionTopicTreeRegistration:(PTDiffusionTopicTreeRegistration *const)registration
+                     didFailWithError:(NSError *const)error {
+    NSLog(@"Failed: %@", error);
 }
 
 @end

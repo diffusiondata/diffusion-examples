@@ -32,7 +32,7 @@ namespace Examples {
             session = Diffusion.Sessions.Principal( "client" ).Password( "password" )
                 .Open( "ws://diffusion.example.com:80" );
 
-            security = session.GetSecurityFeature();
+            security = session.Security;
         }
 
         /// <summary>
