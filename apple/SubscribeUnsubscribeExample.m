@@ -1,6 +1,6 @@
-//  Diffusion Client Library for iOS, tvOS and OS X / macOS - Examples
+//  Diffusion Client Library for iOS and OS X - Examples
 //
-//  Copyright (C) 2015, 2017 Push Technology Ltd.
+//  Copyright (C) 2015, 2016 Push Technology Ltd.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 
 @import Diffusion;
 
-@interface SubscribeUnsubscribeExample (PTDiffusionJSONValueStreamDelegate) <PTDiffusionJSONValueStreamDelegate>
+@interface SubscribeUnsubscribeExample (PTDiffusionTopicStreamDelegate) <PTDiffusionTopicStreamDelegate>
 @end
 
 @implementation SubscribeUnsubscribeExample {
@@ -42,9 +42,7 @@
         _session = session;
 
         // Register self as the fallback handler for topic updates.
-        PTDiffusionValueStream *const stream =
-            [PTDiffusionJSON valueStreamWithDelegate:self];
-        [session.topics addFallbackStream:stream];
+        [session.topics addFallbackTopicStreamWithDelegate:self];
 
         // Wait 5 seconds and then subscribe.
         [self performSelector:@selector(subscribe:) withObject:session afterDelay:5.0];
@@ -91,36 +89,26 @@ static NSString *const _TopicSelectorExpression = @"*Assets//";
 
 @end
 
-@implementation SubscribeUnsubscribeExample (PTDiffusionJSONValueStreamDelegate)
+@implementation SubscribeUnsubscribeExample (PTDiffusionTopicStreamDelegate)
 
--(void)diffusionStream:(PTDiffusionValueStream *const)stream
-    didUpdateTopicPath:(NSString *const)topicPath
-         specification:(PTDiffusionTopicSpecification *const)specification
-               oldJSON:(PTDiffusionJSON *const)oldJson
-               newJSON:(PTDiffusionJSON *const)newJson {
-    NSLog(@"\t%@ = \"%@\"", topicPath, newJson);
+-(void)diffusionStream:(PTDiffusionStream * const)stream
+    didUpdateTopicPath:(NSString * const)topicPath
+               content:(PTDiffusionContent * const)content
+               context:(PTDiffusionUpdateContext * const)context {
+    NSString *const string = [[NSString alloc] initWithData:content.data encoding:NSUTF8StringEncoding];
+    NSLog(@"\t%@ = \"%@\"", topicPath, string);
 }
 
--(void)     diffusionStream:(PTDiffusionStream *const)stream
-    didSubscribeToTopicPath:(NSString *const)topicPath
-              specification:(PTDiffusionTopicSpecification *const)specification {
-    NSLog(@"Subscribed: \"%@\" (%@)", topicPath, specification);
+-(void)     diffusionStream:(PTDiffusionStream * const)stream
+    didSubscribeToTopicPath:(NSString * const)topicPath
+                    details:(PTDiffusionTopicDetails * const)details {
+    NSLog(@"Subscribed: \"%@\" (%@)", topicPath, details);
 }
 
--(void)         diffusionStream:(PTDiffusionStream *)stream
-    didUnsubscribeFromTopicPath:(NSString *)topicPath
-                  specification:(PTDiffusionTopicSpecification *)specification
-                         reason:(PTDiffusionTopicUnsubscriptionReason)reason {
+-(void)         diffusionStream:(PTDiffusionStream *const)stream
+    didUnsubscribeFromTopicPath:(NSString *const)topicPath
+                         reason:(const PTDiffusionTopicUnsubscriptionReason)reason {
     NSLog(@"Unsubscribed: \"%@\" [Reason: %@]", topicPath, PTDiffusionTopicUnsubscriptionReasonToString(reason));
-}
-
--(void)diffusionDidCloseStream:(PTDiffusionStream *const)stream {
-    NSLog(@"Closed");
-}
-
--(void)diffusionStream:(PTDiffusionStream *const)stream
-      didFailWithError:(NSError *const)error {
-    NSLog(@"Failed: %@", error);
 }
 
 @end

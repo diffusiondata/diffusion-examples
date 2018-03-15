@@ -14,10 +14,9 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
 
-import java.util.concurrent.ExecutionException;
-
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.Security;
+import com.pushtechnology.diffusion.client.features.Security.ChangePrincipalCallback;
 import com.pushtechnology.diffusion.client.session.Session;
 
 /**
@@ -46,29 +45,25 @@ public class ClientUsingCredentials {
     }
 
     /**
-     * Request a change of principal for the session, blocking until a response
-     * is received.
+     * Request a change of principal for the session.
      *
      * @param principal the new principal name
      * @param password the password
-     * @return true if the principal was changed
-     * @throws InterruptedException if interrupted while waiting
-     * @throws ExecutionException if the ping failed. The chained
-     *         {@link ExecutionException#getCause() cause} provides more
-     *         information, e.g. SessionClosedException.
+     * @param callback notifies success or failure
      */
-    public boolean changePrincipal(
+    public void changePrincipal(
         String principal,
-        String password) throws InterruptedException, ExecutionException {
+        String password,
+        ChangePrincipalCallback callback) {
 
-        return security.changePrincipal(
+        security.changePrincipal(
             principal,
-            Diffusion.credentials().password(password))
-            .get();
+            Diffusion.credentials().password(password),
+            callback);
     }
 
     /**
-     * Close the session.
+     * Close.
      */
     public void close() {
         session.close();

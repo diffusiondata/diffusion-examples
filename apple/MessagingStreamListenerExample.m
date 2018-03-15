@@ -1,6 +1,6 @@
-//  Diffusion Client Library for iOS, tvOS and OS X / macOS - Examples
+//  Diffusion Client Library for iOS and OS X - Examples
 //
-//  Copyright (C) 2015, 2017 Push Technology Ltd.
+//  Copyright (C) 2015, 2016 Push Technology Ltd.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -50,20 +50,11 @@
 
 @implementation MessagingStreamListenerExample (PTDiffusionMessageStreamDelegate)
 
--(void)          diffusionStream:(PTDiffusionStream *const)stream
-    didReceiveMessageOnTopicPath:(NSString *const)path
-                         content:(PTDiffusionContent *const)content
-                         context:(PTDiffusionReceiveContext *const)context {
-    NSLog(@"Received on \"%@\": %@ (context: %@)", path, content, context);
-}
-
--(void)diffusionDidCloseStream:(PTDiffusionStream *const)stream {
-    NSLog(@"Closed");
-}
-
--(void)diffusionStream:(PTDiffusionStream *const)stream
-      didFailWithError:(NSError *const)error {
-    NSLog(@"Failed: %@", error);
+-(void)      diffusionStream:(PTDiffusionStream *const)stream
+didReceiveMessageOnTopicPath:(NSString *const)topicPath
+                     content:(PTDiffusionContent *const)content
+                     context:(PTDiffusionReceiveContext *const)context {
+    NSLog(@"Received on \"%@\": %@ (context: %@)", topicPath, content, context);
 }
 
 @end

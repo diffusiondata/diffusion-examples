@@ -39,7 +39,7 @@ namespace Examples {
 
             // Create the client control feature with a handler that sets queue thresholds on new connecting clients
             // and sets a listener for queue events.
-            var clientControl = session.ClientControl;
+            var clientControl = session.GetClientControlFeature();
 
             // To register a queue event handler, the client session must have the REGISTER_HANDLER and VIEW_SESSION
             // permissions.

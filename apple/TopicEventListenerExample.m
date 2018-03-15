@@ -1,6 +1,6 @@
-//  Diffusion Client Library for iOS, tvOS and OS X / macOS - Examples
+//  Diffusion Client Library for iOS and OS X - Examples
 //
-//  Copyright (C) 2016, 2017 Push Technology Ltd.
+//  Copyright (C) 2016 Push Technology Ltd.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -84,15 +84,6 @@
 -(void)diffusionTopicTreeRegistration:(PTDiffusionTopicTreeRegistration *)registration
          hasNoSubscribersForTopicPath:(NSString *)topicPath {
     NSLog(@"Now have no subscribers at: %@", topicPath);
-}
-
--(void)diffusionTopicTreeRegistrationDidClose:(PTDiffusionTopicTreeRegistration *)registration {
-    NSLog(@"Closed");
-}
-
--(void)diffusionTopicTreeRegistration:(PTDiffusionTopicTreeRegistration *)registration
-                     didFailWithError:(NSError *)error {
-    NSLog(@"Failed: %@", error);
 }
 
 @end

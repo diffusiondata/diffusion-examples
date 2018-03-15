@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2017 Push Technology Ltd.
+ * Copyright (C) 2014, 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,21 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
 
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import com.pushtechnology.diffusion.client.Diffusion;
+import com.pushtechnology.diffusion.client.callbacks.TopicTreeHandler;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.UpdateSource;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateCallback;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.ValueUpdater;
 import com.pushtechnology.diffusion.client.session.Session;
-import com.pushtechnology.diffusion.client.topics.details.TopicType;
+import com.pushtechnology.diffusion.client.topics.details.SingleValueTopicDetails;
+import com.pushtechnology.diffusion.client.topics.details.TopicDetails;
 
 /**
  * An example of using a control client as an event feed to a topic.
@@ -47,6 +47,8 @@ public class ControlClientAsUpdateSource {
     private static final String TOPIC_NAME = "Feeder";
 
     private final Session session;
+    private final TopicControl topicControl;
+    private final TopicUpdateControl updateControl;
     private final UpdateCallback updateCallback;
 
     /**
@@ -61,6 +63,8 @@ public class ControlClientAsUpdateSource {
         session =
             Diffusion.sessions().principal("control").password("password")
                 .open("ws://diffusion.example.com:80");
+        topicControl = session.feature(TopicControl.class);
+        updateControl = session.feature(TopicUpdateControl.class);
     }
 
     /**
@@ -68,25 +72,18 @@ public class ControlClientAsUpdateSource {
      *
      * @param provider the provider of prices
      * @param scheduler a scheduler service to schedule a periodic feeder task
-     * @throws TimeoutException if the topic was not created within 5 seconds
-     * @throws ExecutionException if topic creation failed
-     * @throws InterruptedException if the current thread was interrupted whilst
-     *         waiting for the topic to be created
      */
     public void start(
         final PriceProvider provider,
-        final ScheduledExecutorService scheduler)
-        throws InterruptedException, ExecutionException, TimeoutException {
+        final ScheduledExecutorService scheduler) {
 
-        // Add the topic and when created notify the server that the topic
-        // should be removed when the session closes.
-        final TopicControl topicControl = session.feature(TopicControl.class);
+        // Set up topic details
+        final SingleValueTopicDetails.Builder builder =
+            topicControl.newDetailsBuilder(
+                SingleValueTopicDetails.Builder.class);
 
-        topicControl.addTopic(
-            TOPIC_NAME,
-            TopicType.STRING).get(5, TimeUnit.SECONDS);
-
-        topicControl.removeTopicsWithSession(TOPIC_NAME);
+        final TopicDetails details =
+            builder.metadata(Diffusion.metadata().decimal("Price")).build();
 
         // Declare a custom update source implementation. When the source is set
         // as active start a periodic task to poll the provider every second and
@@ -98,8 +95,7 @@ public class ControlClientAsUpdateSource {
             public void onActive(String topicPath, Updater updater) {
                 theFeeder =
                     scheduler.scheduleAtFixedRate(
-                        new FeederTask(provider,
-                            updater.valueUpdater(String.class)),
+                        new FeederTask(provider, updater),
                         1, 1, TimeUnit.SECONDS);
             }
 
@@ -111,10 +107,21 @@ public class ControlClientAsUpdateSource {
             }
         };
 
-        final TopicUpdateControl updateControl =
-            session.feature(TopicUpdateControl.class);
-
-        updateControl.registerUpdateSource(TOPIC_NAME, source);
+        // Create the topic. When the callback indicates that the topic has been
+        // created then register the topic source for the topic and request
+        // that it is removed when the session closes.
+        topicControl.addTopic(
+            TOPIC_NAME,
+            details,
+            new AddCallback.Default() {
+                @Override
+                public void onTopicAdded(String topic) {
+                    topicControl.removeTopicsWithSession(
+                        topic,
+                        new TopicTreeHandler.Default());
+                    updateControl.registerUpdateSource(topic, source);
+                }
+            });
 
     }
 
@@ -131,10 +138,9 @@ public class ControlClientAsUpdateSource {
     private final class FeederTask implements Runnable {
 
         private final PriceProvider priceProvider;
-        private final ValueUpdater<String> priceUpdater;
+        private final Updater priceUpdater;
 
-        private FeederTask(PriceProvider provider,
-            ValueUpdater<String> updater) {
+        private FeederTask(PriceProvider provider, Updater updater) {
             priceProvider = provider;
             priceUpdater = updater;
         }
@@ -143,7 +149,7 @@ public class ControlClientAsUpdateSource {
         public void run() {
             priceUpdater.update(
                 TOPIC_NAME,
-                priceProvider.getPrice(),
+                Diffusion.content().newContent(priceProvider.getPrice()),
                 updateCallback);
         }
 

@@ -1,5 +1,6 @@
 package com.pushtechnology.diffusion.examples.runnable;
 
+import static com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateCallback;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import java.util.concurrent.Executors;
@@ -9,9 +10,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import com.pushtechnology.diffusion.client.callbacks.TopicTreeHandler;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateCallback;
 import com.pushtechnology.diffusion.client.session.Session;
-import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.binary.Binary;
 
 /**
@@ -43,10 +42,12 @@ public final class ProducingBinary extends AbstractClient {
     public void onStarted(Session session) {
         final TopicControl topicControl = session.feature(TopicControl.class);
 
-        topicControl.addTopic(
-            "binary/random",
-            topicControl.newSpecification(TopicType.BINARY),
-            ADD_CALLBACK);
+        // Add the binary topic with an initial value
+        topicControl
+            .addTopicFromValue(
+                "binary/random",
+                RandomData.toBinary(RandomData.next()),
+                ADD_CALLBACK);
 
         // Remove topics when the session closes
         topicControl.removeTopicsWithSession(

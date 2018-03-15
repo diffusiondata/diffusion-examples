@@ -40,7 +40,7 @@ namespace Examples {
             session = Diffusion.Sessions.Principal( "control" ).Password( "password" )
                 .Open( "ws://diffusion.example.com:80" );
 
-            var authenticationControl = session.AuthenticationControl;
+            var authenticationControl = session.GetAuthenticationControlFeature();
 
             // To register the authentication handler, this client session must have the AUTHENTICATE and
             // REGISTER_HANDLER permissions.

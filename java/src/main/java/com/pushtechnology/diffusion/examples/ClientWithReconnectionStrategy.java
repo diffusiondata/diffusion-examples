@@ -24,9 +24,10 @@ import com.pushtechnology.diffusion.client.session.Session.Listener;
 import com.pushtechnology.diffusion.client.session.Session.State;
 import com.pushtechnology.diffusion.client.session.reconnect.ReconnectionStrategy;
 
+
 /**
- * This example class demonstrates the ability to set a custom
- * {@link ReconnectionStrategy} when creating sessions.
+ * This example class demonstrates the ability to set a custom {@link ReconnectionStrategy}
+ * when creating sessions.
  *
  * @author Push Technology Limited
  * @since 5.5
@@ -34,72 +35,55 @@ import com.pushtechnology.diffusion.client.session.reconnect.ReconnectionStrateg
 public class ClientWithReconnectionStrategy {
 
     private volatile int retries = 0;
-
     /**
      * Constructor.
      */
     public ClientWithReconnectionStrategy() {
 
-        // Set the maximum amount of time we'll try and reconnect for to 10
-        // minutes.
+        // Set the maximum amount of time we'll try and reconnect for to 10 minutes.
         final int maximumTimeoutDuration = 1000 * 60 * 10;
 
         // Set the maximum interval between reconnect attempts to 60 seconds.
         final long maximumAttemptInterval = 1000 * 60;
 
-        // Create a new reconnection strategy that applies an exponential
-        // backoff
-        final ReconnectionStrategy reconnectionStrategy =
-            new ReconnectionStrategy() {
+        // Create a new reconnection strategy that applies an exponential backoff
+        final ReconnectionStrategy reconnectionStrategy = new ReconnectionStrategy() {
+            private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
-                private final ScheduledExecutorService scheduler =
-                    Executors.newScheduledThreadPool(1);
+            @Override
+            public void performReconnection(final ReconnectionAttempt reconnection) {
+                final long exponentialWaitTime =
+                    Math.min((long) Math.pow(2,  retries++) * 100L, maximumAttemptInterval);
 
-                @Override
-                public void performReconnection(
-                    final ReconnectionAttempt reconnection) {
+                scheduler.schedule(new Runnable() {
+                    @Override
+                    public void run() {
+                        reconnection.start();
+                    }
+                }, exponentialWaitTime, TimeUnit.MILLISECONDS);
+            }
+        };
 
-                    final long exponentialWaitTime =
-                        Math.min((long) Math.pow(2, retries++) * 100L,
-                            maximumAttemptInterval);
-
-                    scheduler.schedule(
-                        new Runnable() {
-                            @Override
-                            public void run() {
-                                reconnection.start();
-                            }
-                        },
-                        exponentialWaitTime, TimeUnit.MILLISECONDS);
-                }
-            };
-
-        final Session session =
-            Diffusion.sessions().reconnectionTimeout(maximumTimeoutDuration)
-                .reconnectionStrategy(reconnectionStrategy)
-                .open("ws://diffusion.example.com:80");
-
+        final Session session = Diffusion.sessions().reconnectionTimeout(maximumTimeoutDuration)
+                                                    .reconnectionStrategy(reconnectionStrategy)
+                                                    .open("ws://diffusion.example.com:80");
         session.addListener(new Listener() {
             @Override
-            public void onSessionStateChanged(Session session, State oldState,
-                State newState) {
+            public void onSessionStateChanged(Session session, State oldState, State newState) {
 
                 if (newState == State.RECOVERING_RECONNECT) {
-                    // The session has been disconnected, and has entered
-                    // recovery state. It is during this state that
+                    // The session has been disconnected, and has entered recovery state. It is during this state that
                     // the reconnect strategy will be called
                 }
 
                 if (newState == State.CONNECTED_ACTIVE) {
-                    // The session has connected for the first time, or it has
-                    // been reconnected.
+                    // The session has connected for the first time, or it has been reconnected.
                     retries = 0;
                 }
 
                 if (oldState == State.RECOVERING_RECONNECT) {
-                    // The session has left recovery state. It may either be
-                    // attempting to reconnect, or the attempt has been aborted;
-                    // this will be reflected in the newState.
+                    // The session has left recovery state. It may either be attempting to reconnect, or the attempt has
+                    // been aborted; this will be reflected in the newState.
                 }
             }
         });

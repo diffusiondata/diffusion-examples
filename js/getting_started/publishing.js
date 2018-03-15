@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2015 Push Technology Ltd.
+ * Copyright (C) 2014, 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,24 @@
  * limitations under the License.
  *******************************************************************************/
 
-var diffusion = require('diffusion');
+const diffusion = require('diffusion');
 
 diffusion.connect({
-    host : 'hostname',
+    host : 'localhost',
+    port : '8080',
     principal : 'control',
     credentials : 'password'
 }).then(function(session) {
     console.log('Connected!');
 
-    // Create a topic that contains Double values
-    session.topics.add('foo/counter', diffusion.topics.TopicType.DOUBLE);
-
+    var i = 0;
+        
+    // Create a JSON topic
+    session.topics.add("foo/counter", diffusion.topics.TopicType.JSON);
+  
     // Start updating the topic every second
-    var count = 0;
-
-    setInterval(function() {
-        session.topics.update('foo/counter', count++);
-    }, 1000);
+   setInterval(function() { 
+    session.topics.update("foo/counter", { count : i++ }); 
+	}, 1000);
+   
 });

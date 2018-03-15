@@ -46,8 +46,8 @@ ARG_OPTS_T arg_opts[] = {
         {'t', "topic_selector", "Topic selector", ARG_REQUIRED, ARG_HAS_VALUE, NULL},
         {'r', "retries", "Number of connection retries", ARG_OPTIONAL, ARG_HAS_VALUE, "3"},
         {'d', "retry_delay", "Delay (in ms) between connection attempts", ARG_OPTIONAL, ARG_HAS_VALUE, "1000"},
-        {'p', "principal", "Principal (username) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, "client"},
-        {'c', "credentials", "Credentials (password) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, "password"},
+        {'p', "principal", "Principal (username) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
+        {'c', "credentials", "Credentials (password) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
         END_OF_ARG_OPTS
 };
 
@@ -139,7 +139,7 @@ main(int argc, char **argv)
          * purposes only.
          */
         SESSION_LISTENER_T foo_listener = {
-                .on_state_changed = &on_session_state_changed
+                foo_listener.on_state_changed = &on_session_state_changed
         };
 
         /*

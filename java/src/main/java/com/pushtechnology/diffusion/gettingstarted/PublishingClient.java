@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2014, 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,58 +14,69 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.gettingstarted;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeoutException;
-
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateCallback;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
+import com.pushtechnology.diffusion.datatype.json.JSON;
+import com.pushtechnology.diffusion.datatype.json.JSONDataType;
+
+import java.util.concurrent.CountDownLatch;
 
 /**
- * A client that publishes an incrementing count to the topic 'foo/counter'.
+ * A client that publishes an incrementing count to the JSON topic 'foo/counter'.
  *
  * @author Push Technology Limited
- * @since 5.5
+ * @since 5.9
  */
 public final class PublishingClient {
-
-    /**
+	/**
      * Main.
      */
-    public static void main(String... arguments) throws InterruptedException, ExecutionException, TimeoutException {
+    public static void main(String... arguments) throws InterruptedException {
 
         // Connect using a principal with 'modify_topic' and 'update_topic'
         // permissions
-        final Session session =
-            Diffusion.sessions().principal("principal").password("password").
-            open("ws://host:80");
+    	// Change 'host' to the hostname/address of your Diffusion server
+        final  Session session = Diffusion.sessions().principal("control")
+                .password("password").open("ws://host:8080");
 
         // Get the TopicControl and TopicUpdateControl feature
         final TopicControl topicControl = session.feature(TopicControl.class);
 
         final TopicUpdateControl updateControl =
             session.feature(TopicUpdateControl.class);
+        
+        final JSONDataType jsonDataType = Diffusion.dataTypes().json();
 
-        // Create an int64 topic 'foo/counter'
-        final CompletableFuture<TopicControl.AddTopicResult> future = topicControl.addTopic(
+        final CountDownLatch waitForStart = new CountDownLatch(1);
+        
+        // Create a JSON topic 'foo/counter'
+        topicControl.addTopic(
             "foo/counter",
-            topicControl.newSpecification(TopicType.INT64));
+            TopicType.JSON,
+            new AddCallback.Default() {
+                @Override
+                public void onTopicAdded(String topicPath) {
+                    waitForStart.countDown();
+                }
+            });
 
-        // Wait for the CompletableFuture to complete
-        future.get(10, TimeUnit.SECONDS);
+        // Wait for the onTopicAdded() callback.
+        waitForStart.await();
 
         // Update the topic
         final UpdateCallback updateCallback = new UpdateCallback.Default();
         for (int i = 0; i < 1000; ++i) {
-
+        	final JSON value = jsonDataType.fromJsonString(String.format("{\"count\" : %d }", i));
             // Use the non-exclusive updater to update the topic without locking it
-            updateControl.updater().valueUpdater(Integer.class).update(
-                "foo/counter", i, updateCallback);
+            updateControl.updater().update(
+                "foo/counter",
+                value,
+                updateCallback);
 
             Thread.sleep(1000);
         }

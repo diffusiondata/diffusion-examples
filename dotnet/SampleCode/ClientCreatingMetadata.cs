@@ -26,7 +26,8 @@ namespace Examples {
     /// would include its metadata).
     ///
     /// This example shows the creation of various types of metadata in different methods. Content metadata is used by
-    /// record type topics and field metadata is used by single value topics.
+    /// record type topics. Record metadata is used by paged record topics and field metadata is used by single value
+    /// topics.
     ///
     /// Note that no client session is required in order to create metadata.
     /// </summary>

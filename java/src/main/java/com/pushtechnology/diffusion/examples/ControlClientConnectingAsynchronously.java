@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2017 Push Technology Ltd.
+ * Copyright (C) 2014, 2015 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,12 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicAddFailReason;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionFactory;
@@ -70,18 +67,33 @@ public final class ControlClientConnectingAsynchronously {
 
         @Override
         public void onOpened(final Session session) {
-            try {
-                session.feature(TopicControl.class).addTopic(
-                    topicToAdd,
-                    TopicType.STRING).get(10, TimeUnit.SECONDS);
-            }
-            catch (ExecutionException ex) {
-                LOG.error("Adding topic failed", ex.getCause());
-            }
-            catch (InterruptedException | TimeoutException ex) {
-                LOG.error("Adding topic failed", ex);
-            }
-            session.close();
+            session.feature(TopicControl.class).addTopic(
+                topicToAdd,
+                TopicType.SINGLE_VALUE,
+                new TopicControl.AddCallback() {
+
+                    @Override
+                    public void onDiscard() {
+                        LOG.error("Topic adder discarded");
+                        session.close();
+                    }
+
+                    @Override
+                    public void onTopicAdded(String topicPath) {
+                        LOG.info("Topic " + topicPath + " added");
+                        session.close();
+                    }
+
+                    @Override
+                    public void onTopicAddFailed(
+                        String topicPath,
+                        TopicAddFailReason reason) {
+                        LOG.info(
+                            "Topic " + topicPath + " add failed : " + reason);
+                        session.close();
+                    }
+
+                });
         }
 
     }
