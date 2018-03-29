@@ -40,7 +40,7 @@ namespace Examples {
             session = Diffusion.Sessions.Principal( "control" ).Password( "password" )
                 .Open( "ws://diffusion.example.com:80" );
 
-            var messagingControl = session.GetMessagingControlFeature();
+            var messagingControl = session.MessagingControl;
 
             // Register to receive all messages sent by clients on the "foo" branch.
             // To do this, the client session must have the REGISTER_HANDLER permission.

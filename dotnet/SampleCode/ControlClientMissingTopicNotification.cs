@@ -29,7 +29,7 @@ namespace Examples {
                 .Open( "ws://diffusion.example.com:80" );
 
             topicControl = Diffusion.Sessions.Principal( "control" ).Password( "password" )
-                .Open( "ws://diffusion.example.com:80" ).GetTopicControlFeature();
+                .Open( "ws://diffusion.example.com:80" ).TopicControl;
 
             Subscribe( "some/path10" );
         }
@@ -47,7 +47,7 @@ namespace Examples {
             // Wait for the successful registration of the handler
             var registeredHandler = await missingTopicHandler.OnActiveCalled;
 
-            var topics = clientSession.GetTopicsFeature();
+            var topics = clientSession.Topics;
 
             var topicCompletion = new TaskCompletionSource<bool>();
 

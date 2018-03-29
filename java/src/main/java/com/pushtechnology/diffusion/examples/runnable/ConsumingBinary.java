@@ -63,9 +63,12 @@ public final class ConsumingBinary extends AbstractClient {
             });
 
         // Subscribe to the topic
-        topics.subscribe(
-            ">binary/random",
-            new Topics.CompletionCallback.Default());
+        topics.subscribe("binary/random")
+            .whenComplete((voidResult, exception) -> {
+                if (exception != null) {
+                    LOG.info("subscription failed", exception);
+                }
+            });
     }
 
     /**

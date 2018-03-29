@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2015 Push Technology Ltd.
+ * Copyright (C) 2014, 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import com.pushtechnology.diffusion.client.session.SessionId;
 /**
  * This demonstrates the use of a control client to apply both throttling and
  * conflation to clients. It throttles and conflates all clients that reach
- * their queue thresholds and remove when they go down again.
+ * their queue thresholds.
  * <P>
  * This uses the 'ClientControl' feature.
  *
@@ -72,27 +72,36 @@ public class ControlClientConflateAndThrottle {
     private class MyThresholdHandler extends QueueEventHandler.Default {
 
         @Override
-        public void onUpperThresholdCrossed(
-            final SessionId client,
-            final MessageQueuePolicy policy) {
-
-            // The setThrottled method enables throttling and conflation.
-            // This method requires the client session to have the
-            // 'modify_session' permission.
-            clientControl.setThrottled(client, MESSAGE_INTERVAL, 10,
-                clientCallback);
-        }
-
-        @Override
         public void onLowerThresholdCrossed(
             final SessionId client,
             final MessageQueuePolicy policy) {
 
-            // The setThrottled method enables throttling and conflation.
+            // The setConflated method enables conflation.
+            // The default configuration enables conflation for sessions.
+            clientControl
+                .setConflated(session.getSessionId(), true, clientCallback);
+
+            // The setThrottled method enables throttling.
             // This method requires the client session to have the
             // 'modify_session' permission.
             clientControl
                 .setThrottled(client, MESSAGE_INTERVAL, 1000, clientCallback);
+        }
+
+        @Override
+        public void onUpperThresholdCrossed(
+            final SessionId client,
+            final MessageQueuePolicy policy) {
+
+            // Conflation remains enabled from when the lower threshold was
+            // crossed.
+
+            // The setThrottled method replacing the current throttler with a
+            // more aggressive limit.
+            // This method requires the client session to have the
+            // 'modify_session' permission.
+            clientControl
+                .setThrottled(client, MESSAGE_INTERVAL, 10, clientCallback);
         }
     }
 }

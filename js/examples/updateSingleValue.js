@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,11 +29,18 @@ diffusion.connect({
     // A session may update any existing topic. Update values must be of the same type as the topic being updated.
 
     // Add a topic first with a string type
-    session.topics.add('foo', '').then(function() {
+    session.topics.add('foo', diffusion.topics.TopicType.STRING).then(function() {
         // Update the topic
         return session.topics.update('foo', 'hello');
     }).then(function() {
         // Update the topic again
         return session.topics.update('foo', 'world');
+    });
+
+    // Add a topic with a double type
+    session.topics.add('bar', diffusion.topics.TopicType.DOUBLE).then(function() {
+        return session.topics.update('bar', 123);
+    }).then(function() {
+        return session.topics.update('bar', 456.789);
     });
 });

@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2016 Push Technology Ltd.
+ * Copyright © 2016, 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ namespace PushTechnology.ClientInterface.Examples.Runner {
     /// Class used by the Main method in <see cref="Program"/> to start a new cancelalble task
     /// for each <see cref="IExample"/> implementation.
     /// </summary>
-    public sealed class ExampleRunner {
+    public sealed class ExampleRunner : IDisposable {
         private readonly List<Task> runningExamples =
             new List<Task>();
         private readonly CancellationTokenSource cancellationTokenSource =
@@ -36,8 +36,13 @@ namespace PushTechnology.ClientInterface.Examples.Runner {
         /// <param name="args">An array of arguments. Depending on what is necesarry for an example,
         /// it may contain multiple variables, such as serverUrl, topic paths etc. Check the example class
         /// for the description of what is required for this array.</param>
-        public void StartExample( IExample example, params string[] args ) {
-            var task = Task.Run( () => example.Run( cancellationTokenSource.Token, args ) );
+        public void Start( IExample example, params string[] args ) {
+            var task = Task.Run( async () => {
+                var run = example?.Run( cancellationTokenSource.Token, args );
+                if ( run != null ) {
+                    await run;
+                }
+            } );
             runningExamples.Add( task );
         }
 
@@ -47,12 +52,11 @@ namespace PushTechnology.ClientInterface.Examples.Runner {
         /// <remarks>
         /// Pressing any key will stop the examples.
         /// </remarks>
-        public void AwaitCancellation() {
+        public void Dispose() {
             // Wait for key press to cancel
             Console.ReadKey( true );
             cancellationTokenSource.Cancel();
             Task.WaitAll( runningExamples.ToArray() );
         }
-
     }
 }

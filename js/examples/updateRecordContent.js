@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,26 +26,71 @@ diffusion.connect({
     principal : 'control',
     credentials : 'password'
 }).then(function(session) {
-    // A session may update any existing topic. Update values must be of the same type as the topic being updated.
+    // Record values allow topics to contain data that conforms to a particular schema. Producing a schema allows new
+    // values to be easily constructed.
 
-    // If using RecordContent metadata, update values are constructed from the metadata
+    var TopicSpecification = diffusion.topics.TopicSpecification;
+    var TopicType = diffusion.topics.TopicType;
 
-    // Create a new metadata instance
-    var meta = new diffusion.metadata.RecordContent();
+    var RecordV2DataType = diffusion.datatypes.recordv2();
 
-    meta.addRecord('record', 1, {
-        'field' : meta.integer()
+    // 1. Create a new schema using the SchemaBuilder API
+    var schema = RecordV2DataType.schemaBuilder()
+        .record("Row1").decimal("Field1").integer("Field2")
+        .record("Row2").string("Field3")
+        .build();
+
+    // 2. To create a RecordV2 topic, use a TopicSpecification with the defined schema
+    var specification = new TopicSpecification(TopicType.RECORD_V2, {
+        SCHEMA : schema.asJSONString()
     });
 
-    // Create a builder to set values
-    var builder = meta.builder();
+    session.topics.add('topic/record', specification).then(function() {
+        // 3. Produce RecordV2 values from the schema by creating a mutable model
+        var model = schema.createMutableModel();
 
-    builder.add('record', {
-        field : 123
+        model.set("Row1.Field1", 123.456);
+        model.set("Row1.Field2", 789);
+        model.set("Row2.Field3", "Hello world");
+
+        var update1 = model.asValue();
+
+        session.topics.update('topic/record', update1);
+
+        // 4. Subsequent updates can be produced from the same model
+
+        model.set("Row2.Field3", "Hello everybody");
+
+        var update2 = model.asValue();
+
+        session.topics.update('topic/record', update2);
     });
 
-    // Update the topic with the new value
-    session.topics.add('topic', meta).then(function() {
-        session.topics.update('topic', builder.build());
-    });
+
+    // RecordV2 values can be easily consumed, too
+    session
+        .stream('topic/record')
+        .asType(RecordV2DataType)
+        .on('value', function(topic, specification, newValue, oldValue) {
+            // 5. The schema can be used to produce a model that allows key-based lookup of records and fields
+            var model = newValue.asModel(schema);
+
+            var f1 = model.get("Row1.Field1");
+            var f2 = model.get("Row1.Field2");
+            var f3 = model.get("Row2.Field3");
+
+            console.log(
+                "Field1: " + f1 +
+                "Field2: " + f2 +
+                "Field3: " + f3);
+
+            // 6. If the schema is not known, it is possible to iterate across the received records and fields
+            newValue.asRecords().forEach(function(record) {
+                record.forEach(function(field) {
+                    console.log("Field value: " + field);
+                });
+            });
+        });
+
+    session.subscribe('topic/record');
 });
