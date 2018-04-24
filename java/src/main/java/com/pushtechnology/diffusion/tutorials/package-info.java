@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2015 Push Technology Ltd.
+ * Copyright (C) 2017 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,10 @@
  * limitations under the License.
  *******************************************************************************/
 
-var diffusion = require('diffusion');
-
-diffusion.connect({
-    host : 'diffusion.example.com',
-    principal : 'control',
-    credentials : 'password'
-}).then(function(session) {
-
-    // Subscribe to a topic, consume received values as Numbers, and attach a listener
-    session.subscribe('foo/counter').transform(Number).on('update', function(data) {
-        console.log('New value: ' + data);
-    });
-});
+/**
+ * This provides a number of examples of using the Diffusion Unified API.
+ *
+ * @author Push Technology Limited
+ * @since 5.10
+ */
+package com.pushtechnology.diffusion.tutorials;

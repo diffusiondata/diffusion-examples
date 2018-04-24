@@ -14,8 +14,10 @@
  */
 
 using System;
+using PushTechnology.ClientInterface.Client.Callbacks;
 using PushTechnology.ClientInterface.Client.Content;
 using PushTechnology.ClientInterface.Client.Content.Metadata;
+using PushTechnology.ClientInterface.Client.Content.Update;
 using PushTechnology.ClientInterface.Client.Factories;
 using PushTechnology.ClientInterface.Client.Features.Control.Topics;
 using PushTechnology.ClientInterface.Client.Session;
@@ -60,7 +62,7 @@ namespace Examples {
         public ControlClientUpdatingRecordTopics( string serverUrl ) {
             session = Diffusion.Sessions.Principal( "client" ).Password( "password" ).Open( serverUrl );
 
-            topicControl = session.GetTopicControlFeature();
+            topicControl = session.TopicControl;
 
             var mf = Diffusion.Metadata;
 
@@ -81,7 +83,7 @@ namespace Examples {
             deltaRecordBuilder = Diffusion.Content.NewDeltaRecordBuilder( recordMetadata )
                 .EmptyFieldValue( Constants.EMPTY_FIELD_STRING );
 
-            var updateControl = session.GetTopicUpdateControlFeature();
+            var updateControl = session.TopicUpdateControl;
 
             updateFactory = updateControl.UpdateFactory<IContentUpdateFactory>();
 
@@ -128,7 +130,7 @@ namespace Examples {
         /// will be currency/target currency (e.g. "GBP/USD").</param>
         public void ChangeRate( string currency, string targetCurrency, string bid, string ask,
             ITopicUpdaterUpdateContextCallback<string> callback ) {
-            if ( topicUpdater == null ) {
+            if(topicUpdater == null) {
                 throw new InvalidOperationException( "Not registered as an updater." );
             }
 
@@ -152,7 +154,7 @@ namespace Examples {
         /// will be currency/targetCurrency (e.g. "GBP/USD".</param>
         public void ChangeBidRate( string currency, string targetCurrency, string bid,
             ITopicUpdaterUpdateContextCallback<string> callback ) {
-            if ( topicUpdater == null ) {
+            if(topicUpdater == null) {
                 throw new InvalidOperationException( "Not registered as an updater." );
             }
 
@@ -172,8 +174,8 @@ namespace Examples {
         /// <param name="targetCurrency">The target currency.</param>
         /// <param name="callback">Reports the outcome.</param>
         public void RemoveRate( string currency, string targetCurrency,
-            ITopicControlRemoveContextCallback<string> callback ) {
-            topicControl.RemoveTopics( string.Format( ">{0}", RateTopicName( currency, targetCurrency ) ),
+            ITopicControlRemovalContextCallback<string> callback ) {
+            topicControl.Remove( string.Format( "?{0}//", RateTopicName( currency, targetCurrency ) ),
                 string.Format( "{0}/{1}", currency, targetCurrency ), callback );
         }
 
@@ -182,8 +184,8 @@ namespace Examples {
         /// </summary>
         /// <param name="currency">The base currency.</param>
         /// <param name="callback">Reports the outcome.</param>
-        public void RemoveCurrency( string currency, ITopicControlRemoveContextCallback<string> callback ) {
-            topicControl.RemoveTopics( string.Format( ">{0}/{1}", RootTopic, currency ), currency, callback );
+        public void RemoveCurrency( string currency, ITopicControlRemovalContextCallback<string> callback ) {
+            topicControl.Remove( string.Format( "?{0}/{1}//", RootTopic, currency ), currency, callback );
         }
 
         /// <summary>
@@ -191,7 +193,7 @@ namespace Examples {
         /// </summary>
         public void Close() {
             // Remove our topics and close the session when done
-            topicControl.RemoveTopics( string.Format( ">{0}", RootTopic ), new RemoveCallback( session ) );
+            topicControl.Remove( string.Format( ">{0}//", RootTopic ), new RemoveCallback( session ) );
         }
 
         /// <summary>
@@ -222,7 +224,7 @@ namespace Examples {
             return content;
         }
 
-        private class RemoveCallback : ITopicControlRemoveCallback {
+        private class RemoveCallback : ITopicControlRemovalCallback {
             private readonly ISession theSession;
 
             public RemoveCallback( ISession session ) {
@@ -233,7 +235,7 @@ namespace Examples {
             /// This is called to notify that a call context was closed prematurely, typically due to a timeout or the
             /// session being closed. No further calls will be made for the context.
             /// </summary>
-            public void OnDiscard() {
+            public void OnError( ErrorReason errroReason ) {
                 theSession.Close();
             }
 

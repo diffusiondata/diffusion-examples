@@ -36,7 +36,7 @@ namespace Examples {
             session = Diffusion.Sessions.Principal( "client" ).Password( "password" )
                 .Open( "ws://diffusion.example.com:80" );
 
-            messaging = session.GetMessagingFeature();
+            messaging = session.Messaging;
         }
 
         /// <summary>

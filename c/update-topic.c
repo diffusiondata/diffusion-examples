@@ -62,7 +62,7 @@ ARG_OPTS_T arg_opts[] = {
 static int
 on_topic_added(SESSION_T *session, const SVC_ADD_TOPIC_RESPONSE_T *response, void *context)
 {
-        printf("Added topic\n");
+        printf("Added topic \"%s\"\n", (const char *)context);
         apr_thread_mutex_lock(mutex);
         apr_thread_cond_broadcast(cond);
         apr_thread_mutex_unlock(mutex);
@@ -72,7 +72,7 @@ on_topic_added(SESSION_T *session, const SVC_ADD_TOPIC_RESPONSE_T *response, voi
 static int
 on_topic_add_failed(SESSION_T *session, const SVC_ADD_TOPIC_RESPONSE_T *response, void *context)
 {
-        printf("Failed to add topic (%d)\n", response->response_code);
+        printf("Failed to add topic \"%s\" (%d)\n", (const char *)context, response->response_code);
         apr_thread_mutex_lock(mutex);
         apr_thread_cond_broadcast(cond);
         apr_thread_mutex_unlock(mutex);
@@ -254,12 +254,13 @@ main(int argc, char** argv)
         }
 
         /*
-         * Create a topic holding simple string content.
+         * Create a topic holding JSON content.
          */
-        TOPIC_DETAILS_T *string_topic_details = create_topic_details_single_value(M_DATA_TYPE_STRING);
+        TOPIC_DETAILS_T *json_topic_details = create_topic_details_json();
         const ADD_TOPIC_PARAMS_T add_topic_params = {
                 .topic_path = topic_name,
-                .details = string_topic_details,
+                .context = (void *)topic_name,
+                .details = json_topic_details,
                 .on_topic_added = on_topic_added,
                 .on_topic_add_failed = on_topic_add_failed,
                 .on_discard = on_topic_add_discard,
@@ -270,7 +271,7 @@ main(int argc, char** argv)
         apr_thread_cond_wait(cond, mutex);
         apr_thread_mutex_unlock(mutex);
 
-        topic_details_free(string_topic_details);
+        topic_details_free(json_topic_details);
 
         /*
          * Define the handlers for add_update_source()
@@ -308,17 +309,23 @@ main(int argc, char** argv)
 
                 if(active) {
                         /*
+                         * Compose a JSON content
+                         */
+                        const time_t time_now = time(NULL);
+                        const char *time_str = ctime(&time_now);
+                        CBOR_GENERATOR_T *cbor_generator = cbor_generator_create();
+                        BUF_T *cbor_buf = buf_create();
+                        cbor_write_text_string(cbor_generator, time_str, strlen(time_str));
+                        buf_write_bytes(cbor_buf, cbor_generator->data, cbor_generator->len);
+                        CONTENT_T *json_content = content_create(CONTENT_ENCODING_NONE, cbor_buf);
+                        buf_free(cbor_buf);
+
+                        /*
                          * Create an update structure containing the current time.
                          */
-                        BUF_T *buf = buf_create();
-                        const time_t time_now = time(NULL);
-                        buf_write_string(buf, ctime(&time_now));
-
-                        CONTENT_T *content = content_create(CONTENT_ENCODING_NONE, buf);
-
                         UPDATE_T *upd = update_create(UPDATE_ACTION_REFRESH,
                                                       UPDATE_TYPE_CONTENT,
-                                                      content);
+                                                      json_content);
 
                         UPDATE_SOURCE_PARAMS_T update_source_params = update_source_params_base;
                         update_source_params.update = upd;
@@ -328,9 +335,8 @@ main(int argc, char** argv)
                          */
                         update(session, update_source_params);
 
-                        content_free(content);
+                        content_free(json_content);
                         update_free(upd);
-                        buf_free(buf);
                 }
 
                 sleep(1);

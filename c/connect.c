@@ -36,12 +36,11 @@
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
         {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "ws://localhost:8080"},
-        {'p', "principal", "Principal (username) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
-        {'c', "credentials", "Credentials (password) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
+        {'p', "principal", "Principal (username) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, "client"},
+        {'c', "credentials", "Credentials (password) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, "password"},
         {'d', "delay", "Delay between reconnection attempts, in ms", ARG_OPTIONAL, ARG_HAS_VALUE, "2000" },
         {'r', "retries", "Reconnection retry attempts", ARG_OPTIONAL, ARG_HAS_VALUE, "5" },
         {'t', "timeout", "Reconnection timeout for a disconnected session", ARG_OPTIONAL, ARG_HAS_VALUE, NULL },
-        {'x', "cascade_urls", "Comma-separated list of URLs to use for cascading", ARG_OPTIONAL, ARG_HAS_VALUE, NULL },
         {'s', "sleep", "Time to sleep before disconnecting (in seconds).", ARG_OPTIONAL, ARG_HAS_VALUE, "5" },
         END_OF_ARG_OPTS
 };
@@ -94,40 +93,6 @@ main(int argc, char **argv)
                 reconnect_timeout = -1;
         }
 
-        char *urls = hash_get(options, "cascade_urls");
-
-        /*
-         * Convert a comma-separated list of URLs into a
-         * NULL-terminated array giving URLs to try (in order) until
-         * we successfully connect, or they've all been tried
-         * unsuccessfully. These are in addition to the initial URL.
-         */
-        char **url_array = NULL;
-        if(urls != NULL) {
-                char *urls_copy = strdup(urls);
-                char *start = urls_copy;
-                char *end = urls_copy;
-                int url_count = 0;
-                while(1) {
-                        if(*end == ',' || *end == '\0') {
-                                url_array = realloc(url_array, (url_count + 1) * sizeof(char *));
-                                url_array[url_count] = start;
-                                url_count++;
-                                start = end+1;
-
-                                if(*end == '\0') {
-                                        break;
-                                }
-                                if(*end == ',') {
-                                        *end = '\0';
-                                }
-                        }
-                        end++;
-                }
-                url_array = realloc(url_array, (url_count + 1) * sizeof(char *));
-                url_array[url_count] = NULL;
-        }
-
         const unsigned int sleep_time = atol(hash_get(options, "sleep"));
 
         SESSION_T *session;
@@ -137,7 +102,7 @@ main(int argc, char **argv)
         session_listener.on_state_changed = &on_session_state_changed;
 
         /*
-         * Specify how we might want to cascade/failover or retry, and
+         * Specify how we might want to failover or retry, and
          * how long to keep the session alive on the server before
          * it's discarded.
          */
@@ -147,8 +112,6 @@ main(int argc, char **argv)
         if(reconnect_timeout > 0) {
                 reconnection_strategy_set_timeout(reconnection_strategy, reconnect_timeout);
         }
-
-        reconnection_strategy_set_cascade_urls(reconnection_strategy, (const char **)url_array);
 
         /*
          * Create a session, synchronously.

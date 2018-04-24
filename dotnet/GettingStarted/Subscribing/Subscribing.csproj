@@ -7,9 +7,9 @@
     <ProjectGuid>{80C0332C-2651-4810-B4D0-A5E10149DDCB}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Subscribing</RootNamespace>
+    <RootNamespace>PushTechnology.ClientInterface.GettingStarted</RootNamespace>
     <AssemblyName>Subscribing</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
@@ -24,6 +24,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <UseVSHostingProcess>false</UseVSHostingProcess>
+    <LangVersion>6</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -33,13 +34,14 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>6</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+    <Reference Include="NLog">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\target\NLog.dll</HintPath>
     </Reference>
-    <Reference Include="PushTechnology.ClientInterface, Version=5.9.0.0, Culture=neutral, PublicKeyToken=52cb3a68b6d2d002, processorArchitecture=MSIL">
+    <Reference Include="PushTechnology.ClientInterface">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\target\PushTechnology.ClientInterface.dll</HintPath>
     </Reference>
@@ -60,7 +62,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>

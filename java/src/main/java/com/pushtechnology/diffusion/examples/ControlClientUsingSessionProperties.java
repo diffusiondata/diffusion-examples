@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2015 Push Technology Ltd.
+ * Copyright (C) 2015, 2016 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,13 @@
 package com.pushtechnology.diffusion.examples;
 
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.control.clients.ClientControl;
 import com.pushtechnology.diffusion.client.features.control.topics.SubscriptionControl;
-import com.pushtechnology.diffusion.client.features.control.topics.SubscriptionControl.SubscriptionByFilterCallback;
+import com.pushtechnology.diffusion.client.features.control.topics.SubscriptionControl.SubscriptionByFilterResult;
 import com.pushtechnology.diffusion.client.features.control.topics.SubscriptionControl.SubscriptionCallback;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionId;
@@ -47,9 +50,6 @@ public final class ControlClientUsingSessionProperties {
 
     private final SubscriptionCallback subscriptionCallback =
         new SubscriptionCallback.Default();
-
-    private final SubscriptionByFilterCallback subscriptionFilterCallback =
-        new SubscriptionByFilterCallback.Default();
 
     /**
      * Constructor.
@@ -95,26 +95,37 @@ public final class ControlClientUsingSessionProperties {
      * the old topic and subscribe them to the new one. All new clients will be
      * subscribed to the new one.
      *
-     * @param topic the new topic name
+     * @param newTopic the new topic name
+     * @return a CompletableFuture that completes when the operation succeeds or
+     *         fails.
+     *
+     *         <p>
+     *         If the operation was successful, the CompletableFuture will
+     *         complete successfully.
+     *
+     *         <p>
+     *         Otherwise, the CompletableFuture will complete exceptionally with
+     *         an {@link ExecutionException}. See
+     *         {@link SubscriptionControl#unsubscribeByFilter} and
+     *         {@link SubscriptionControl#subscribeByFilter} for common failure
+     *         reasons.
      */
-    public void changeTopic(String topic) {
+    public CompletableFuture<SubscriptionByFilterResult>
+        changeTopic(String newTopic) {
 
         final String filter = "Department is 'Accounts' and $Country is 'IT'";
 
-        // Unsubscribe all from the current topic
-        subscriptionControl.unsubscribeByFilter(
-            filter,
-            currentTopic,
-            subscriptionFilterCallback);
+        final String oldTopic = currentTopic;
+        // Change the topic that all new clients will be subscribed to.
+        currentTopic = newTopic;
 
-        // Change the topic that all new clients will get
-        currentTopic = topic;
+        return
+            // Unsubscribe all from the current topic...
+            subscriptionControl.unsubscribeByFilter(filter, oldTopic)
 
-        // And subscribe all to the new topic
-        subscriptionControl.subscribeByFilter(
-            filter,
-            currentTopic,
-            subscriptionFilterCallback);
+            // ...then subscribe all to the new topic...
+            .thenCompose(unsubscriptionResult ->
+                subscriptionControl.subscribeByFilter(filter, currentTopic));
     }
 
     /**

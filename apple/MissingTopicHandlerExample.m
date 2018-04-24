@@ -1,6 +1,6 @@
-//  Diffusion Client Library for iOS and OS X - Examples
+//  Diffusion Client Library for iOS, tvOS and OS X / macOS - Examples
 //
-//  Copyright (C) 2016 Push Technology Ltd.
+//  Copyright (C) 2016, 2017 Push Technology Ltd.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -85,10 +85,9 @@
     // Extract topic path from path pattern expression.
     NSString *const topicPath = [expression substringFromIndex:1];
 
-    // Add a stateless topic at this topic path.
+    // Add a topic at this path.
     [_session.topicControl addWithTopicPath:topicPath
-                                       type:PTDiffusionTopicType_Stateless
-                                      value:nil
+                                       type:PTDiffusionTopicType_JSON
                           completionHandler:^(NSError *const error)
     {
         if (error) {
@@ -99,6 +98,15 @@
         // Topic added so allow subscriber to proceed.
         [notification proceed];
     }];
+}
+
+-(void)diffusionTopicTreeRegistrationDidClose:(PTDiffusionTopicTreeRegistration *)registration {
+    NSLog(@"Closed");
+}
+
+-(void)diffusionTopicTreeRegistration:(PTDiffusionTopicTreeRegistration *)registration
+                     didFailWithError:(NSError *)error {
+    NSLog(@"Failed: %@", error);
 }
 
 @end

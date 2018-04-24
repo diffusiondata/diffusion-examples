@@ -31,7 +31,7 @@ namespace Examples {
             session = Diffusion.Sessions.Principal( "client" ).Password( "password" )
                 .Open( "ws://diffusion.example.com:80" );
 
-            topics = session.GetTopicsFeature();
+            topics = session.Topics;
         }
 
         /// <summary>
