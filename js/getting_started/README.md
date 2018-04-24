@@ -6,10 +6,6 @@ The file `index.html` is a browser client that connects to a Diffusion server or
 
 #### Using this client
 
-Before you can use this client with any Diffusion service, you will need to edit the location of the Diffusion client library:
-
-1. Change the path in the script tag from `path_to_library` to point at your Diffusion client library.
-
 To use this client with a Diffusion Cloud service, make the following edits:
 
 1. Change the URL in the `diffusion.connect` method to that of your Diffusion Cloud service.
@@ -24,9 +20,9 @@ To use this client with a Diffusion Cloud service, make the following edits:
 To use this client with a Diffusion server, make the following edits:
 
 1. Change the URL in the `diffusion.connect` method to that of your Diffusion server.
-
-2. You might also have to add the port parameter to specify the port on which the Diffusion server receives client connections. If no port is specified,
-   the JavaScript client assumes port 80 for standard connections and port 443 for secure connections.
+         
+2. You might also have to add the port parameter to specify the port on which the Diffusion server receives client connections. If no port is specified, 
+   the JavaScript client assumes port 80 for standard connections and port 443 for secure connections. 
 
         diffusion.connect({
              host : 'diffusion_url',
@@ -34,7 +30,7 @@ To use this client with a Diffusion server, make the following edits:
              principal : 'client',
              credentials : 'password'
          })
-
+ 
 
 
 
@@ -42,7 +38,7 @@ Open `index.html` in a browser, it makes a connection to your Diffusion Cloud se
 
 #### Testing this client
 
-The client subscribes to the topic `foo/counter`. The web page is updated every time the data on the `foo/counter` topic is updated.
+The client subscribes to the topic `foo/counter`. The web page is updated every time the data on the `foo/counter` topic is updated. 
 To see the client working you must publish updates to `foo\counter`. You can update the data on `foo/counter` by using one of the following tools:
 
 * The publishing client example in this GitHub project
@@ -80,8 +76,8 @@ To use this client with a Diffusion Cloud service or Diffusion server, make the 
              credentials : 'password'
          })
 
-2. (Diffusion only) If required, add a port parameter to the connect method to specify the port on which the Diffusion server receives client connections. If no port is specified,
-   the JavaScript client assumes port 80 for standard connections and port 443 for secure connections.
+2. (Diffusion only) If required, add a port parameter to the connect method to specify the port on which the Diffusion server receives client connections. If no port is specified, 
+   the JavaScript client assumes port 80 for standard connections and port 443 for secure connections. 
 
 3. Run `publishing.js` from the command line using node:
 
@@ -89,7 +85,7 @@ To use this client with a Diffusion Cloud service or Diffusion server, make the 
 
 #### Testing this client
 
-The client creates the topic `foo/counter` and publishes a value to it every second.
+The client creates the topic `foo/counter` and publishes a value to it every second. 
 
 To see the client working you must subscribe to the topic to receive the updates. You can subscribe to `foo/counter` by using one of the following tools:
 

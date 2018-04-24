@@ -33,9 +33,9 @@ namespace Examples {
             // Authenticate with a user that has the VIEW_SECURITY and MODIFY_SECURITY permissions.
             var session = Diffusion.Sessions.Principal( "admin" ).Password( "password" )
                 // Use a secure channel because we're transferring sensitive information.
-                .Open( "wss://diffusion.example.com:8080" );
+                .Open( "wss://diffusion.example.com:8443" );
 
-            securityControl = session.SecurityControl;
+            securityControl = session.GetSecurityControlFeature();
         }
 
         public void DoCapitalizeRoles( IUpdateStoreCallback callback ) {

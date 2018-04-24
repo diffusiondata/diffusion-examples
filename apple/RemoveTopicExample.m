@@ -1,4 +1,4 @@
-//  Diffusion Client Library for iOS, tvOS and OS X / macOS - Examples
+//  Diffusion Client Library for iOS and OS X - Examples
 //
 //  Copyright (C) 2016 Push Technology Ltd.
 //

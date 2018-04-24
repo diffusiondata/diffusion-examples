@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2016 Push Technology Ltd.
+ * Copyright (C) 2014, 2015 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,24 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
 
-import static java.util.Collections.emptySet;
-import static java.util.stream.Collectors.toCollection;
-
+import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.diffusion.client.Diffusion;
+import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.features.control.clients.SecurityControl;
+import com.pushtechnology.diffusion.client.features.control.clients.SecurityControl.ConfigurationCallback;
 import com.pushtechnology.diffusion.client.features.control.clients.SecurityControl.Role;
 import com.pushtechnology.diffusion.client.features.control.clients.SecurityControl.ScriptBuilder;
 import com.pushtechnology.diffusion.client.features.control.clients.SecurityControl.SecurityConfiguration;
+import com.pushtechnology.diffusion.client.features.control.clients.SecurityStoreFeature.UpdateStoreCallback;
 import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.client.types.GlobalPermission;
 import com.pushtechnology.diffusion.client.types.TopicPermission;
 
 /**
@@ -47,7 +49,6 @@ public class ControlClientChangingSecurity {
             ControlClientChangingSecurity.class);
 
     private final SecurityControl securityControl;
-    private final ScriptBuilder emptyScript;
 
     /**
      * Constructor.
@@ -63,7 +64,6 @@ public class ControlClientChangingSecurity {
             .open("wss://diffusion.example.com:80");
 
         securityControl = session.feature(SecurityControl.class);
-        emptyScript = securityControl.scriptBuilder();
     }
 
     /**
@@ -71,117 +71,147 @@ public class ControlClientChangingSecurity {
      * capital letter (note that this does not address changing the use of the
      * roles in the system authentication store).
      *
-     * @return a CompletableFuture that completes when the operation succeeds or
-     *         fails.
-     *
-     *         <p>
-     *         If the operation was successful, the CompletableFuture will
-     *         complete successfully.
-     *
-     *         <p>
-     *         Otherwise, the CompletableFuture will complete exceptionally with
-     *         an {@link ExecutionException}. See
-     *         {@link SecurityControl#getSecurity()} and
-     *         {@link SecurityControl#updateStore(String)} for common failure
-     *         reasons.
+     * @param callback result callback
      */
-    public CompletableFuture<Void> capitalizeRoles() {
-        return securityControl.getSecurity().thenCompose(this::capitalizeRoles);
+    public void capitalizeRoles(UpdateStoreCallback callback) {
+        securityControl.getSecurity(new CapitalizeRoles(callback));
     }
 
-    private CompletableFuture<Void> capitalizeRoles(
-        SecurityConfiguration configuration) {
+    private final class CapitalizeRoles implements ConfigurationCallback {
 
-        final String script = emptyScript
+        private final UpdateStoreCallback callback;
 
-            .setRolesForAnonymousSessions(
-                capitalizeSet(configuration.getRolesForAnonymousSessions()))
-
-            .setRolesForNamedSessions(
-                capitalizeSet(configuration.getRolesForNamedSessions()))
-
-            .append(configuration
-                // For each role ...
-                .getRoles().stream()
-                // ... build a script that capitalises that role ...
-                .map(this::capitalizeRole)
-                /// .. and combine the per-role scripts into one.
-                .reduce(emptyScript, (sb1, sb2) -> sb1.append(sb2)))
-
-            .script();
-
-        LOG.info("Sending the following script to the server:\n{}", script);
-
-        return securityControl.updateStore(script)
-            // Convert CompletableFuture<?> to CompletableFuture<Void>.
-            .thenAccept(ignored -> { });
-    }
-
-    private ScriptBuilder capitalizeRole(Role role) {
-        final String oldName = role.getName();
-        final String newName = capitalizeString(oldName);
-
-        ScriptBuilder builder = emptyScript;
-
-        // Only if new name is different
-        if (!oldName.equals(newName)) {
-            if (!role.getGlobalPermissions().isEmpty()) {
-                builder = builder
-                    // Remove global permissions for old role
-                    .setGlobalPermissions(oldName, emptySet())
-                    // Set global permissions for new role
-                    .setGlobalPermissions(
-                        newName, role.getGlobalPermissions());
-            }
-
-            if (!role.getDefaultTopicPermissions().isEmpty()) {
-                builder = builder
-                    // Remove default topic permissions for old role
-                    .setDefaultTopicPermissions(oldName, emptySet())
-                    // Set default topic permissions for new role
-                    .setDefaultTopicPermissions(
-                        newName, role.getDefaultTopicPermissions());
-            }
-
-            builder = builder.append(
-                role.getTopicPermissions().entrySet().stream().map(
-                    entry -> {
-                        final String topicPath = entry.getKey();
-                        final Set<TopicPermission> permissions = entry.getValue();
-
-                        return emptyScript
-                            // Remove topic permissions for old role
-                            .removeTopicPermissions(oldName, topicPath)
-                            // Set topic permissions for new role
-                            .setTopicPermissions(
-                                newName, topicPath, permissions);
-                    })
-                    .reduce(emptyScript, (sb1, sb2) -> sb1.append(sb2)));
+        CapitalizeRoles(UpdateStoreCallback callback) {
+            this.callback = callback;
         }
 
-        final Set<String> oldIncludedRoles = role.getIncludedRoles();
+        @Override
+        public void onReply(SecurityConfiguration configuration) {
 
-        if (oldIncludedRoles.isEmpty()) {
-            return builder;
+            ScriptBuilder builder =
+                securityControl.scriptBuilder();
+
+            builder = builder.setRolesForAnonymousSessions(
+                capitalize(configuration.getRolesForAnonymousSessions()));
+
+            builder = builder.setRolesForNamedSessions(
+                capitalize(configuration.getRolesForNamedSessions()));
+
+            for (Role role : configuration.getRoles()) {
+
+                final String oldName = role.getName();
+                final String newName = capitalize(oldName);
+
+                // Only if new name is different
+                if (!oldName.equals(newName)) {
+
+                    // Global Permissions
+                    final Set<GlobalPermission> globalPermissions =
+                        role.getGlobalPermissions();
+                    if (!globalPermissions.isEmpty()) {
+                        // Remove global permissions for old role
+                        builder =
+                            builder.setGlobalPermissions(
+                                oldName,
+                                Collections.<GlobalPermission>emptySet());
+                        // Set global permissions for new role
+                        builder =
+                            builder.setGlobalPermissions(
+                                newName,
+                                role.getGlobalPermissions());
+                    }
+
+                    final Set<TopicPermission> defaultTopicPermissions =
+                        role.getDefaultTopicPermissions();
+                    if (!defaultTopicPermissions.isEmpty()) {
+                        // Remove default topic permissions for old role
+                        builder =
+                            builder.setDefaultTopicPermissions(
+                                oldName,
+                                Collections.<TopicPermission>emptySet());
+                        // Set default topic permissions for new role
+                        builder =
+                            builder.setDefaultTopicPermissions(
+                                newName,
+                                role.getDefaultTopicPermissions());
+                    }
+
+                    final Map<String, Set<TopicPermission>> topicPermissions =
+                        role.getTopicPermissions();
+
+                    if (!topicPermissions.isEmpty()) {
+                        for (Map.Entry<String, Set<TopicPermission>> entry : topicPermissions
+                            .entrySet()) {
+                            final String topicPath = entry.getKey();
+                            // Remove old topic permissions
+                            builder =
+                                builder.removeTopicPermissions(
+                                    oldName,
+                                    topicPath);
+                            // Set new topic permissions
+                            builder =
+                                builder.setTopicPermissions(
+                                    newName,
+                                    topicPath,
+                                    entry.getValue());
+                        }
+                    }
+
+                }
+
+                final Set<String> oldIncludedRoles = role.getIncludedRoles();
+                if (!oldIncludedRoles.isEmpty()) {
+
+                    if (!oldName.equals(newName)) {
+                        // Remove old included roles
+                        builder =
+                            builder.setRoleIncludes(
+                                oldName,
+                                Collections.<String>emptySet());
+                    }
+
+                    // This is done even if role name did not change as it is
+                    // possible that roles included may have
+                    final Set<String> newIncludedRoles =
+                        capitalize(oldIncludedRoles);
+                    builder =
+                        builder.setRoleIncludes(
+                            newName,
+                            newIncludedRoles);
+
+                }
+
+
+            }
+
+            final String script = builder.script();
+
+            LOG.info(
+                "Sending the following script to the server:\n{}",
+                script);
+
+            securityControl.updateStore(
+                script,
+                callback);
         }
 
-        return builder
-            // Remove old included roles.
-            .setRoleIncludes(oldName, emptySet())
+        private Set<String> capitalize(Set<String> roles) {
+            final Set<String> newSet = new TreeSet<>();
+            for (String role : roles) {
+                newSet.add(capitalize(role));
+            }
+            return newSet;
+        }
 
-            // Set new roles even if role name did not change as the included
-            // roles may be changed.
-            .setRoleIncludes(newName, capitalizeSet(oldIncludedRoles));
-    }
+        private String capitalize(String role) {
+            return Character.toUpperCase(role.charAt(0)) + role.substring(1);
+        }
 
-    private static Set<String> capitalizeSet(Set<String> roles) {
-        return roles.stream()
-            .map(ControlClientChangingSecurity::capitalizeString)
-            .collect(toCollection(TreeSet::new));
-    }
-
-    private static String capitalizeString(String role) {
-        return Character.toUpperCase(role.charAt(0)) + role.substring(1);
+        @Override
+        public void onError(ErrorReason errorReason) {
+            // This might fail if the session lacks the required permissions.
+            callback.onError(errorReason);
+        }
     }
 
     /**

@@ -1,6 +1,6 @@
-//  Diffusion Client Library for iOS, tvOS and OS X / macOS - Examples
+//  Diffusion Client Library for iOS and OS X - Examples
 //
-//  Copyright (C) 2016, 2017 Push Technology Ltd.
+//  Copyright (C) 2016 Push Technology Ltd.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -90,15 +90,15 @@
 -(void)diffusionStream:(PTDiffusionValueStream *const)stream
     didUpdateTopicPath:(NSString *const)topicPath
          specification:(PTDiffusionTopicSpecification *const)specification
-               oldJSON:(PTDiffusionJSON *const)oldJson
-               newJSON:(PTDiffusionJSON *const)newJson {
+               oldJSON:(PTDiffusionJSON *const)oldJSON
+               newJSON:(PTDiffusionJSON *const)newJSON {
     NSString *const currency = [self currencyFromTopicPath:topicPath];
 
     // We're assuming that the incoming JSON document is correct as expected,
     // in that the root element is a map of currencies to which we have
     // conversion rates.
     NSError * error;
-    NSDictionary *const map = [newJson objectWithError:&error];
+    NSDictionary *const map = [newJSON objectWithError:&error];
     if (!map) {
         NSLog(@"Failed to create map from received JSON. Error: %@", error);
         return;
@@ -120,15 +120,6 @@
                          reason:(const PTDiffusionTopicUnsubscriptionReason)reason {
     NSString *const currency = [self currencyFromTopicPath:topicPath];
     NSLog(@"Unsubscribed: Rates from %@", currency);
-}
-
--(void)diffusionDidCloseStream:(PTDiffusionStream *const)stream {
-    NSLog(@"Closed");
-}
-
--(void)diffusionStream:(PTDiffusionStream *const)stream
-      didFailWithError:(NSError *const)error {
-    NSLog(@"Failed: %@", error);
 }
 
 @end

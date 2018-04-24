@@ -1,35 +1,31 @@
 <html>
     <head>
         <title>JavaScript example</title>
-        <script type="text/javascript" src="path_to_library/diffusion.js"/>></script>
-
+        <script type="text/javascript" src="http://developer.reappt.io/clients/js/diffusion.js"></script>
+        
     </head>
-  <body>
-    <p>The value of foo/counter is: <span id="display"></span></p>
+    <body>
+        <div>
+            <span>The value of foo/counter is: </span>
+            <span id="update">Unknown</span>
+        </div>
+        
         <script type="text/javascript">
-
-        diffusion.connect({
-            // Edit these lines to include the host and port of your Diffusion server
-            host : 'hostname',
-            port : 'port',
-            // To connect anonymously you can leave out the following parameters
-            principal : 'user',
-            credentials : 'password'
-        }).then(function(session) {
-            // Add a stream that matches the topic path and wire it to log the received values
-            session
-                .stream('foo/counter')
-                .asType(diffusion.datatypes.double())
-                .on('value', function(topic, specification, newValue, oldValue) {
-                    console.log("Update for " + topic, newValue);
-
-                    document.getElementById('display').innerHTML = newValue;
-                });
-
-            // Subscribe to the topic
-            session.subscribe('foo/counter');
-        });
-
-        </script>
-  </body>
+      function subscribeToTopic(session) {
+          session.subscribe('foo/counter')
+              .on('update', function(data) {
+                  document.getElementById('update').innerHTML = data;
+              }
+          );
+      }
+      diffusion.connect({
+          // Edit this line to include the URL of your Diffusion Cloud service
+          host : 'service-name.reappt.io',
+          
+          // To connect anonymously you can leave out the following parameters
+          principal : 'user',
+          credentials : 'password'
+      }).then(subscribeToTopic);
+    </script>
+    </body>
 </html>

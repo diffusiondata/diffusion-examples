@@ -89,12 +89,9 @@ public final class ConsumingJson extends AbstractClient {
             });
 
         // Subscribe to the topic
-        topics.subscribe("json/random")
-            .whenComplete((voidResult, exception) -> {
-                if (exception != null) {
-                    LOG.info("subscription failed", exception);
-                }
-            });
+        topics.subscribe(
+            ">json/random",
+            new Topics.CompletionCallback.Default());
     }
 
     /**

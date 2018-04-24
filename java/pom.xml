@@ -6,12 +6,12 @@
     <parent>
         <groupId>com.pushtechnology.sample</groupId>
         <artifactId>sample-parent</artifactId>
-        <version>1.5</version>
+        <version>1.4</version>
     </parent>
 
     <groupId>com.pushtechnology.diffusion</groupId>
     <artifactId>diffusion-api-java-examples</artifactId>
-    <version>6.0.4</version>
+    <version>5.9.19</version>
     <packaging>jar</packaging>
     <description>Diffusion public API examples.</description>
 
@@ -36,7 +36,7 @@
         <dependency>
             <groupId>com.pushtechnology.diffusion</groupId>
             <artifactId>diffusion-api</artifactId>
-            <version>6.0.2</version>
+            <version>5.9.0</version>
         </dependency>
 
         <dependency>
@@ -54,7 +54,7 @@
         <dependency>
             <groupId>com.pushtechnology.diffusion</groupId>
             <artifactId>diffusion-client</artifactId>
-            <version>6.0.4</version>
+            <version>5.9.19</version>
             <scope>runtime</scope>
         </dependency>
 
@@ -76,6 +76,14 @@
 
     <build>
         <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
+
             <!--
                 Configuration to allow the PublishingClient to be executed from Maven.
 

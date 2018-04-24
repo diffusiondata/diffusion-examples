@@ -38,7 +38,7 @@ namespace Examples {
             theSession = Diffusion.Sessions.Principal( "control" ).Password( "password" )
                 .Open( "ws://diffusion.example.com:80" );
 
-            theMessagingControl = theSession.MessagingControl;
+            theMessagingControl = theSession.GetMessagingControlFeature();
 
             // Register and receive all messages sent by clients on the "foo" branch and include the "JobTitle" session
             // property value with each message. To do this, the client session must have the "register_handler"

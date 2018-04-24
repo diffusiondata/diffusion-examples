@@ -61,7 +61,7 @@ namespace Examples {
             /// </summary>
             /// <param name="session"></param>
             public void OnOpened( ISession session ) {
-                session.TopicControl.AddTopic(
+                session.GetTopicControlFeature().AddTopic(
                     topicToAdd, TopicType.SINGLE_VALUE, new TopicAddCallback( session ) );
             }
         }

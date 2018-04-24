@@ -29,9 +29,9 @@ namespace Examples {
             // Authenticate with a user that has the VIEW_SECURITY and MODIFY_SECURITY permissions
             var session = Diffusion.Sessions.Principal( "control" ).Password( "password" )
                 // Use a secure channel because we're transferring sensitive information.
-                .Open( "wss://localhost:8080" );
+                .Open( "wss://localhost:8443" );
 
-            theSystemAuthenticationControl = session.SystemAuthenticationControl;
+            theSystemAuthenticationControl = session.GetSystemAuthenticationControlFeature();
         }
 
         /// <summary>

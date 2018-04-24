@@ -26,8 +26,6 @@
 #include <time.h>
 #ifndef WIN32
 #include <unistd.h>
-#else
-#define sleep(x) Sleep(1000 * x)
 #endif
 
 #include <apr.h>
@@ -48,8 +46,8 @@ apr_thread_cond_t *cond = NULL;
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
         {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "ws://localhost:8080"},
-        {'p', "principal", "Principal (username) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, "client"},
-        {'c', "credentials", "Credentials (password) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, "password"},
+        {'p', "principal", "Principal (username) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
+        {'c', "credentials", "Credentials (password) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
         END_OF_ARG_OPTS
 };
 
@@ -170,9 +168,6 @@ main(int argc, char **argv)
 
         apr_thread_cond_wait(cond, mutex);
         apr_thread_mutex_unlock(mutex);
-
-        // keep it open for 5 seconds
-        sleep( 5 );
 
         /*
          * Close/free session (if we have one) and release resources

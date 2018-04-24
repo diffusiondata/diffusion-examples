@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2016 Push Technology Ltd.
+ * Copyright (C) 2014, 2015 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@ package com.pushtechnology.diffusion.examples;
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.control.topics.SubscriptionControl;
 import com.pushtechnology.diffusion.client.features.control.topics.SubscriptionControl.RoutingSubscriptionRequest;
-import com.pushtechnology.diffusion.client.features.control.topics.SubscriptionControl.RoutingSubscriptionRequest.RoutingHandler;
 import com.pushtechnology.diffusion.client.features.control.topics.SubscriptionControl.SubscriptionCallback;
 import com.pushtechnology.diffusion.client.session.Session;
 
@@ -55,7 +54,8 @@ public class ControlClientSubscriptionControlRouting {
         // 'modify_session', and 'register_handler' permissions.
         subscriptionControl.addRoutingSubscriptionHandler(
             "a/b",
-            new RoutingHandler.Default() {
+            new SubscriptionControl.RoutingSubscriptionRequest.Handler
+            .Default() {
                 @Override
                 public void onSubscriptionRequest(
                     final RoutingSubscriptionRequest request) {
@@ -64,6 +64,7 @@ public class ControlClientSubscriptionControlRouting {
                         "routing/target/topic",
                         routingCallback);
                 }
+
             });
     }
 

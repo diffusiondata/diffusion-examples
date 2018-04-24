@@ -1,6 +1,6 @@
-//  Diffusion Client Library for iOS, tvOS and OS X / macOS - Examples
+//  Diffusion Client Library for iOS and OS X - Examples
 //
-//  Copyright (C) 2016, 2017 Push Technology Ltd.
+//  Copyright (C) 2016 Push Technology Ltd.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 //  limitations under the License.
 
 //** The default path at which the Push Notification Bridge listens for messaging
-#define SERVICE_PATH @"push/notifications"
+#define SERVICE_TOPIC @"push/notifications"
 
 #import "MessagingToPushNotificationBridgeExample.h"
 
@@ -29,29 +29,28 @@
 
     [PTDiffusionSession openWithURL:url
                   completionHandler:^(PTDiffusionSession *session, NSError *error)
-    {
-        if (!session) {
-            NSLog(@"Failed to open session: %@", error);
-            return;
-        }
+     {
+         if (!session) {
+             NSLog(@"Failed to open session: %@", error);
+             return;
+         }
 
-        // At this point we now have a connected session.
-        NSLog(@"Connected.");
+         // At this point we now have a connected session.
+         NSLog(@"Connected.");
 
-        // Set ivar to maintain a strong reference to the session.
-        _session = session;
+         // Set ivar to maintain a strong reference to the session.
+         _session = session;
 
-        // An example APNs device token
-        unsigned char tokenBytes[] =
-           {0x5a, 0x88, 0x3a, 0x57, 0xe2, 0x89, 0x77, 0x84,
-            0x1d, 0xc8, 0x1a, 0x0a, 0xa1, 0x4e, 0x2f, 0xdf,
-            0x64, 0xc6, 0x5a, 0x8f, 0x7b, 0xb1, 0x9a, 0xa1,
-            0x6e, 0xaf, 0xc3, 0x16, 0x13, 0x18, 0x1c, 0x97};
-        NSData *const deviceToken =
-            [NSData dataWithBytes:(void *)tokenBytes length:32];
+         // An example APNs device token
+         unsigned char tokenBytes[] =
+            {0x5a, 0x88, 0x3a, 0x57, 0xe2, 0x89, 0x77, 0x84,
+             0x1d, 0xc8, 0x1a, 0x0a, 0xa1, 0x4e, 0x2f, 0xdf,
+             0x64, 0xc6, 0x5a, 0x8f, 0x7b, 0xb1, 0x9a, 0xa1,
+             0x6e, 0xaf, 0xc3, 0x16, 0x13, 0x18, 0x1c, 0x97};
+         NSData *const deviceToken = [NSData dataWithBytes:(void *)tokenBytes length:32];
 
-        [self doPnSubscribe:@"some/topic/name" deviceToken:deviceToken];
-    }];
+         [self doPnSubscribe:@[@"some/topic/name"] deviceToken:deviceToken];
+     }];
 }
 
 /**
@@ -60,36 +59,37 @@
  * @return string in format expected by the push notification bridge.
  */
 -(NSString*)formatAsURI:(NSData*)deviceID {
-    NSString *const base64 = [deviceID base64EncodedStringWithOptions:0];
-    return [NSString stringWithFormat:@"apns://%@", base64];
+    return [NSString stringWithFormat:@"apns://%@", [deviceID base64EncodedStringWithOptions:0]];
 }
 
 /**
  * Compose and send a subscription request to the Push Notification bridge
- * @param topicPath Diffusion topic path subscribed-to by the Push Notification Bridge.
+ * @param paths topic paths within the subscription request
  */
-- (void)doPnSubscribe:(NSString*) topicPath deviceToken:(NSData*)deviceToken {
+- (void)doPnSubscribe:(NSArray<NSString*> *)paths deviceToken:(NSData*)deviceToken {
     // Compose the JSON request from Obj-C literals
-    NSDictionary *const requestDict = @{
-      @"pnsub": @{
-        @"destination": [self formatAsURI:deviceToken],
-        @"topic": topicPath
-    }};
+    NSString *const correlation = [[NSUUID UUID] UUIDString];
+    PTDiffusionTopicSelector *const selector = [PTDiffusionTopicSelector topicSelectorWithAnyExpression:paths];
+    NSDictionary *const request = 
+        @{@"request": @{
+           @"correlation": correlation,
+           @"content": @{
+              @"pnsub": @{
+                @"destination": [self formatAsURI:deviceToken],
+                @"topic": selector.description}
+              }
+           }};
+    NSData *const requestData = [NSJSONSerialization dataWithJSONObject:request options:0 error:nil];
 
-    // Build a JSON request from that
-    PTDiffusionJSON *const json =
-        [[PTDiffusionJSON alloc] initWithObject:requestDict error:nil];
-
-    [_session.messaging sendRequest:json.request
-                             toPath:SERVICE_PATH
-              JSONCompletionHandler:^(PTDiffusionJSON *json, NSError *error)
-    {
-        if (error) {
-            NSLog(@"Send to \"%@\" failed: %@", SERVICE_PATH, error);
-        } else {
-            NSLog(@"Response: %@", json);
-        }
-    }];
+    // Send a message to `SERVICE_TOPIC`
+    [_session.messaging sendWithTopicPath:SERVICE_TOPIC
+                                    value:[[PTDiffusionContent alloc] initWithData:requestData]
+                        completionHandler:^(NSError * _Nullable error)
+                        {
+                                if(error != nil) {
+                                    NSLog(@"Send to topic %@ failed: %@", SERVICE_TOPIC, error);
+                                }
+                        }];
 }
 
 @end

@@ -6,12 +6,12 @@
     <parent>
         <groupId>com.pushtechnology.sample</groupId>
         <artifactId>sample-parent</artifactId>
-        <version>1.5</version>
+        <version>1.4</version>
     </parent>
 
     <groupId>com.pushtechnology.diffusion</groupId>
     <artifactId>diffusion-api-publisher-examples</artifactId>
-    <version>6.0.4</version>
+    <version>5.9.19</version>
     <packaging>jar</packaging>
     <description>Diffusion Publisher public API examples.</description>
 
@@ -31,6 +31,13 @@
 
     <build>
         <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>

@@ -1,6 +1,6 @@
-//  Diffusion Client Library for iOS, tvOS and OS X / macOS - Examples
+//  Diffusion Client Library for iOS and OS X - Examples
 //
-//  Copyright (C) 2015, 2017 Push Technology Ltd.
+//  Copyright (C) 2015, 2016 Push Technology Ltd.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -57,9 +57,10 @@
     PTDiffusionContent *const content = [[PTDiffusionContent alloc] initWithData:data];
 
     NSLog(@"Sending %lu...", (long)value);
-    [session.messaging sendWithPath:@"foo/bar"
-                              value:content
-                  completionHandler:^(NSError *const error)
+    [session.messaging sendWithTopicPath:@"foo/bar"
+                                   value:content
+                                 options:[PTDiffusionSendOptions new]
+                       completionHandler:^(NSError *const error)
     {
         if (error) {
             NSLog(@"Failed to send. Error: %@", error);

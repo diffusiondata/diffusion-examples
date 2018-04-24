@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2016 Push Technology Ltd.
+ * Copyright (C) 2014, 2015 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,9 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.Pings;
-import com.pushtechnology.diffusion.client.features.Pings.PingDetails;
+import com.pushtechnology.diffusion.client.features.Pings.PingContextCallback;
 import com.pushtechnology.diffusion.client.session.Session;
 
 /**
@@ -47,27 +44,13 @@ public final class ClientUsingPings {
     }
 
     /**
-     * Ping the server, blocking until a response is received.
+     * Ping the server.
      *
-     * @return the round-trip time in milliseconds
-     * @throws InterruptedException if interrupted while waiting
-     * @throws ExecutionException if the ping failed. The chained
-     *         {@link ExecutionException#getCause() cause} provides more
-     *         information, e.g. SessionClosedException.
+     * @param context string to log with round trip time
+     * @param callback used to return ping reply
      */
-    public long ping() throws InterruptedException, ExecutionException {
-        return pings.pingServer().get().getRoundTripTime();
-    }
-
-    /**
-     * Ping the server, returning the result asynchronously using a
-     * CompletableFuture.
-     *
-     * @return provides the round-trip time in milliseconds when the ping
-     *         response is received
-     */
-    public CompletableFuture<Long> pingAsync() {
-        return pings.pingServer().thenApply(PingDetails::getRoundTripTime);
+    public void ping(String context, PingContextCallback<String> callback) {
+        pings.pingServer(context, callback);
     }
 
     /**
@@ -76,4 +59,5 @@ public final class ClientUsingPings {
     public void close() {
         session.close();
     }
+
 }
