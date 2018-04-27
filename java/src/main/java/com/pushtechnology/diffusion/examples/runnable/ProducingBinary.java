@@ -1,3 +1,17 @@
+/*******************************************************************************
+ * Copyright (C) 2016, 2018 Push Technology Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package com.pushtechnology.diffusion.examples.runnable;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -6,11 +20,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 
-import com.pushtechnology.diffusion.client.callbacks.TopicTreeHandler;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateCallback;
 import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.binary.Binary;
 
@@ -25,8 +39,6 @@ public final class ProducingBinary extends AbstractClient {
         .newSingleThreadScheduledExecutor();
     private static final UpdateCallback.Default UPDATE_CALLBACK =
         new UpdateCallback.Default();
-    private static final TopicControl.AddCallback.Default ADD_CALLBACK =
-        new TopicControl.AddCallback.Default();
 
     private volatile Future<?> updateTask;
 
@@ -43,15 +55,13 @@ public final class ProducingBinary extends AbstractClient {
     public void onStarted(Session session) {
         final TopicControl topicControl = session.feature(TopicControl.class);
 
-        topicControl.addTopic(
-            "binary/random",
-            topicControl.newSpecification(TopicType.BINARY),
-            ADD_CALLBACK);
+        final TopicSpecification specification =
+            topicControl.newSpecification(TopicType.BINARY).withProperty(
+                TopicSpecification.REMOVAL,
+                "When no session has '$SessionId is \"" +
+                session.getSessionId().toString() + "\"'");
 
-        // Remove topics when the session closes
-        topicControl.removeTopicsWithSession(
-            "binary",
-            new TopicTreeHandler.Default());
+        topicControl.addTopic("binary/random", specification);
     }
 
     @Override

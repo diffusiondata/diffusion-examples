@@ -1,6 +1,6 @@
 //  Diffusion Client Library for iOS, tvOS and OS X / macOS - Examples
 //
-//  Copyright (C) 2016, 2017 Push Technology Ltd.
+//  Copyright (C) 2016, 2018 Push Technology Ltd.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -86,9 +86,9 @@
     NSString *const topicPath = [expression substringFromIndex:1];
 
     // Add a topic at this path.
-    [_session.topicControl addWithTopicPath:topicPath
+    [_session.topicControl addTopicWithPath:topicPath
                                        type:PTDiffusionTopicType_JSON
-                          completionHandler:^(NSError *const error)
+                          completionHandler:^(PTDiffusionAddTopicResult *const result, NSError *const error)
     {
         if (error) {
             NSLog(@"Failed to add topic.");

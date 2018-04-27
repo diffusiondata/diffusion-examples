@@ -1,6 +1,6 @@
 //  Diffusion Client Library for iOS, tvOS and OS X / macOS - Examples
 //
-//  Copyright (C) 2016, 2017 Push Technology Ltd.
+//  Copyright (C) 2016, 2018 Push Technology Ltd.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -54,14 +54,14 @@
 
 -(void)addTopicsForSession:(PTDiffusionSession *const)session {
     // Add a JSON topic.
-    [session.topicControl addWithTopicPath:@"Example/JSON"
+    [session.topicControl addTopicWithPath:@"Example/JSON"
                                       type:PTDiffusionTopicType_JSON
-                         completionHandler:^(NSError *const error)
+                         completionHandler:^(PTDiffusionAddTopicResult *const result, NSError *const error)
     {
         if (error) {
             NSLog(@"Failed to add single value topic. Error: %@", error);
         } else {
-            NSLog(@"Single value topic created.");
+            NSLog(@"Single value topic %@.", result);
         }
     }];
 }

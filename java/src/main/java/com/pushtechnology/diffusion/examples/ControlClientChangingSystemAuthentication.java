@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2016 Push Technology Ltd.
+ * Copyright (C) 2014, 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.control.clients.SystemAuthenticationControl;
 import com.pushtechnology.diffusion.client.features.control.clients.SystemAuthenticationControl.ScriptBuilder;
-import com.pushtechnology.diffusion.client.features.control.clients.SecurityStoreFeature.UpdateStoreCallback;
 import com.pushtechnology.diffusion.client.session.Session;
 
 /**
@@ -82,8 +81,7 @@ public class ControlClientChangingSystemAuthentication {
      *         {@link SystemAuthenticationControl#updateStore(String)} for
      *         common failure reasons.
      */
-    public CompletableFuture<Void>
-        changeSuperUsersToAdministrators(UpdateStoreCallback callback) {
+    public CompletableFuture<Void> changeSuperUsersToAdministrators() {
 
         return systemAuthenticationControl
             .getSystemAuthentication()

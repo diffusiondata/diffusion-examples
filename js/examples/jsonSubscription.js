@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,6 @@ diffusion.connect({
     // Like subscribing, streams are registered using a topic selection. Each stream will only receive notifications
     // from topics that match the topic selector it is registered with.
 
-    // A stream can be converted to a ValueStream by a call to asType passing in the DataType for the type of
-    // values it is interested in.
-
     // A ValueStream will only receive notifications from topics that match the topic selector it is registered
     // with and that match its DataType.
 
@@ -45,12 +42,11 @@ diffusion.connect({
     // A ValueStream also emits 'open', 'close', 'subscribe' and 'unsubscribe' events.
 
     session
-        .stream('foo')
-        .asType(diffusion.datatypes.json())
+        .addStream('foo', diffusion.datatypes.json())
         .on('value', function(path, specification, newValue, oldValue) {
             console.log('Got JSON update for topic: ' + path, newValue.get());
         });
 
-    // 2. Subscribe to the "foo" topic. The stream registered earlier will now start to receive notifications.
-    session.subscribe('foo');
+    // 2. Subscribe to the "foo" topic. The value stream registered earlier will now start to receive notifications.
+    session.select('foo');
 });

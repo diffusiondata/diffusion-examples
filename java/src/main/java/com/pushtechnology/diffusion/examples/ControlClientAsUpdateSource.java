@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2017 Push Technology Ltd.
+ * Copyright (C) 2014, 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateCo
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.ValueUpdater;
 import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 
 /**
@@ -78,15 +79,20 @@ public class ControlClientAsUpdateSource {
         final ScheduledExecutorService scheduler)
         throws InterruptedException, ExecutionException, TimeoutException {
 
-        // Add the topic and when created notify the server that the topic
-        // should be removed when the session closes.
+        // Add the topic with a REMOVAL policy indicating that the topic
+        // will be removed when the session no longer exists.
         final TopicControl topicControl = session.feature(TopicControl.class);
+
+        final TopicSpecification specification =
+            topicControl.newSpecification(TopicType.STRING).withProperty(
+                TopicSpecification.REMOVAL,
+                "When no session has '$SessionId is \"" +
+                session.getSessionId().toString() +
+                "\"'");
 
         topicControl.addTopic(
             TOPIC_NAME,
-            TopicType.STRING).get(5, TimeUnit.SECONDS);
-
-        topicControl.removeTopicsWithSession(TOPIC_NAME);
+            specification).get(5, TimeUnit.SECONDS);
 
         // Declare a custom update source implementation. When the source is set
         // as active start a periodic task to poll the provider every second and

@@ -39,8 +39,10 @@ SOURCES = subscribe.c fetch.c 	\
 		  get-session-properties.c                              \
 	 	  missing-topic-notification.c				\
 		  subscription-control.c reconnect.c			\
-		  json/cjson-publishing-example.c      \
-		  json/cjson-subscribing-example.c
+		  json/json-publishing-example.c			\
+		  json/json-subscribing-example.c			\
+		  value-stream.c recordv2-topics.c binary-topics.c	\
+		  int64-topics.c double-topics.c string-topics.c
 
 TARGETDIR	= target
 OBJDIR		= $(TARGETDIR)/objs
@@ -57,7 +59,9 @@ TARGETS = subscribe fetch \
 		  get-session-properties                                \
                   missing-topic-notification				\
 		  subscription-control reconnect			\
-		  cjson-publishing-example cjson-subscribing-example
+		  json-publishing-example json-subscribing-example	\
+		  value-stream recordv2-topics binary-topics		\
+		  int64-topics double-topics string-topics
 
 all:		prepare $(TARGETS)
 .PHONY:		all
@@ -134,11 +138,29 @@ subscription-control:	$(OBJDIR)/subscription-control.o
 reconnect:	$(OBJDIR)/reconnect.o
 		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
 
-cjson-publishing-example:	json/cjson-publishing-example.c json/cJSON.c
+json-publishing-example:	json/json-publishing-example.c
 		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
 
-cjson-subscribing-example:	json/cjson-subscribing-example.c
+json-subscribing-example:	json/json-subscribing-example.c
 		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
+
+value-stream:	$(OBJDIR)/value-stream.o
+		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
+
+recordv2-topics:	$(OBJDIR)/recordv2-topics.o
+		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
+
+binary-topics:	$(OBJDIR)/binary-topics.o
+		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
+
+int64-topics:	$(OBJDIR)/int64-topics.o
+		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
+
+double-topics:	$(OBJDIR)/double-topics.o
+		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
+
+string-topics:	$(OBJDIR)/string-topics.o
+		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
 
 clean:
 		rm -rf $(TARGETS) $(OBJECTS) $(TARGETDIR) core a.out

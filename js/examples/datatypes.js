@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,11 +31,12 @@ diffusion.connect({
     // to assign these directly to a local variable.
     var stringDataType = diffusion.datatypes.string();
     var jsonDataType = diffusion.datatypes.json();
-
+    var TopicSpecification = diffusion.topics.TopicSpecification;
+    var TopicType = diffusion.topics.TopicType;
 
     // 2. Data Types are currently provided for JSON, Binary, String, Double, Int64 and RecordV2 topic types.
-    session.topics.add('topic/string', diffusion.topics.TopicType.STRING);
-    session.topics.add('topic/json', diffusion.topics.TopicType.JSON);
+    session.topics.add('topic/string', new TopicSpecification(TopicType.STRING));
+    session.topics.add('topic/json', new TopicSpecification(TopicType.JSON));
 
     // 3. Values can be created directly from the data type.
     var jsonValue = jsonDataType.from({
@@ -43,16 +44,16 @@ diffusion.connect({
     });
 
     // Topics are updated using the standard update mechanisms
-    session.topics.update('topic/json', jsonValue);
+    session.topics.updateValue('topic/json', jsonValue, jsonDataType);
 
     // For String, Double and Int64 topics, values can be passed directly
-    session.topics.update('topic/string', "This is a new string value");
+    session.topics.updateValue('topic/string', "This is a new string value", stringDataType);
 
 
-    session.subscribe('topic/.*');
+    session.select('?topic//');
 
-    // 4. Streams can be specialised to provide values from a specific datatype.
-    session.stream('topic/json').asType(jsonDataType).on('value', function(topic, spec, newValue, oldValue) {
+    // 4. Add a value streams for receiving JSON values.
+    session.addStream('topic/json', jsonDataType).on('value', function(topic, spec, newValue, oldValue) {
         // When a JSON or Binary topic is updated, any value handlers on a subscription will be called with both the
         // new value, and the old value.
    
@@ -63,7 +64,7 @@ diffusion.connect({
         console.log("Update for " + topic, newValue.get());
     });
 
-    session.stream('topic/string').asType(stringDataType).on('value', function(topic, spec, newValue, oldValue) {
+    session.addStream('topic/string', stringDataType).on('value', function(topic, spec, newValue, oldValue) {
         // Unlike JSON or Binary, String, Double and Int64 datatypes provide values as primitive types.
         // This means you don't need to call #get to receive the actual data.
         console.log("Update for string topic: " + newValue);
@@ -71,8 +72,5 @@ diffusion.connect({
 
     // 5. Raw values of an appropriate type can also be used for JSON and Binary topics. 
     // For example, plain JSON objects can be used to update JSON topics.
-    session.topics.update('topic/json', {
-         "foo" : "baz",
-         "numbers" : [1, 2, 3]
-    });
+    session.topics.updateValue('topic/json', {"foo" : "baz", "numbers" : [1, 2, 3] }, jsonDataType);
 });

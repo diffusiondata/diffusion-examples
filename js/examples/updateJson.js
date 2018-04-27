@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,19 +26,21 @@ diffusion.connect({
     principal : 'control',
     credentials : 'password'
 }).then(function(session) {
-	var jsonDataType = diffusion.datatypes.json();
+    var jsonDataType = diffusion.datatypes.json();
+    var TopicSpecification = diffusion.topics.TopicSpecification;
+    var TopicType = diffusion.topics.TopicType;
 
     // A session may update any existing topic. Update values must be of the same type as the topic being updated.
 
-    // Add a topic first with a JSON type
-    session.topics.add('foo', { "hello": "world", "foo": "bar" }).then(function() {
+    // Add a topic first with topic specification
+    session.topics.add('foo', new TopicSpecification(TopicType.JSON)).then(function() {
         // Update the topic with JSON content
-        return session.topics.update('foo', jsonDataType.from({ "hello": "bar", "foo": "world" }));
+        return session.topics.updateValue('foo', jsonDataType.from({ "hello": "bar", "foo": "world" }), jsonDataType);
     }).then(function() {
         // Update the topic again with JSON converted from a JSON string
-        return session.topics.update('foo', jsonDataType.fromJsonString("{ \"hello\": \"foo\", \"foo\": \"hello\" }"));
+        return session.topics.updateValue('foo', jsonDataType.fromJsonString("{ \"hello\": \"foo\", \"foo\": \"hello\" }"), jsonDataType);
     }).then(function() {
         // Update the topic again with a standard JavaScript JSON object
-        return session.topics.update('foo', { hello: "world", foo: "bar"});
+        return session.topics.updateValue('foo', { hello: "world", foo: "bar"}, jsonDataType);
     });
 });

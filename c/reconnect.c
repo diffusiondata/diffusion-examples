@@ -152,8 +152,7 @@ main(int argc, char **argv)
                 make_reconnection_strategy_user_function(backoff_reconnection_strategy,
                                                          backoff_args,
                                                          backoff_success,
-                                                         backoff_failure,
-                                                         NULL);
+                                                         backoff_failure);
 
         /*
          * Only ever retry for 30 seconds.

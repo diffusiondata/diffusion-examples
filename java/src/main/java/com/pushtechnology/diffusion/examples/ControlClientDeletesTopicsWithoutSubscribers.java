@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,138 +14,72 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 
-import net.jcip.annotations.GuardedBy;
-
 /**
- * This example control client deletes topic {@link #DEMO_TOPIC} when the number
- * of subscribers falls to and remains at zero for 10 seconds.
- * <P>
- * Manual interaction with {@link #DEMO_TOPIC} is required in order to trigger
- * the listener which detects the change in state caused by the interaction.
- * <P>
- * When the number of subscribers to the topic reaches 0, a {@code Runnable} is
- * scheduled which will delete the topic after 10 seconds and a ScheduledFuture
- * is stored in a map.
- * <P>
- * When the number of subscribers to {@link #DEMO_TOPIC} goes from 0 to >0 the
- * map is queried for a ScheduledFuture and if a ScheduledFuture exists for the
- * topic it is cancelled and removed from the map.
- * <P>
- * If nobody subscribes to the topic after it has been created, the
- * onNoSubscribers callback is not called and the topic is not deleted.
+ * This example control client provides a methods that allows a topic to be
+ * created that will be automatically removed when the number of subscribers
+ * falls to and remains at zero for 10 seconds.
  *
  * @author Push Technology Limited
  */
 public final class ControlClientDeletesTopicsWithoutSubscribers {
 
-    private static final Logger LOG = LoggerFactory
-        .getLogger(ControlClientDeletesTopicsWithoutSubscribers.class);
-
-    private static final String DEMO_BRANCH = "DEMO";
-    private static final String DEMO_TOPIC = DEMO_BRANCH + "/TOPIC";
-
-    private static final int TIMEOUT = 10;
-    private static final TimeUnit TIMEOUT_UNIT = TimeUnit.SECONDS;
-
     private final Session session;
     private final TopicControl topicControl;
+    private final TopicSpecification specification;
 
-    // Maps a topic name to a scheduled future that will delete the topic
-    @GuardedBy("this")
-    private final Map<String, ScheduledFuture<?>> map = new HashMap<>();
-    private final ScheduledExecutorService executorService =
-        Executors.newScheduledThreadPool(1);
-
-    ControlClientDeletesTopicsWithoutSubscribers()
-        throws InterruptedException, IOException {
+    /**
+     * Construct client that can add topics that will be automatically
+     * removed.
+     *
+     * @param serverURL url of the server to connect to.
+     */
+    public ControlClientDeletesTopicsWithoutSubscribers(String serverURL) {
 
         session = Diffusion.sessions()
             .principal("control").password("password")
-            .open("ws://localhost:8080");
+            .open(serverURL);
 
         topicControl = session.feature(TopicControl.class);
 
-        topicControl.addTopic(DEMO_TOPIC, TopicType.JSON);
+        specification =
+            topicControl.newSpecification(
+                TopicType.JSON).withProperty(
+                    TopicSpecification.REMOVAL,
+                    "When subscriptions < 1 for 10s");
 
-        topicControl.addTopicEventListener(DEMO_BRANCH,
-            new TopicControl.TopicEventListener.Default() {
-                @Override
-                public void onHasSubscribers(String topicPath) {
-                    hasSubscribers(topicPath);
-                }
-
-                @Override
-                public void onNoSubscribers(final String topicPath) {
-                    noSubscribers(topicPath);
-                }
-            });
-
-        LOG.info("Press enter to quit");
-        System.in.read();
     }
 
     /**
-     * When {@link #DEMO_TOPIC} goes from 0 to >0 subscribers, cancel any
-     * scheduled removal of that topic.
+     * Creates a topic that will be automatically removed after it has had
+     * no subscribers for at least 10 seconds.
+     *
+     * @param topicPath the topic path
+     * @throws InterruptedException
+     * @throws ExecutionException if the add topic request failed
+     * @throws TimeoutException timed out waiting for response from add topic
+     * request
      */
-    private synchronized void hasSubscribers(String topicPath) {
-
-        LOG.info("{} now has a subscriber", topicPath);
-
-        final ScheduledFuture<?> future = map.get(topicPath);
-
-        if (future != null) {
-            LOG.info("Cancelling scheduled removal of {}", topicPath);
-            future.cancel(true);
-            map.remove(topicPath);
-        }
+    public void addTopic(String topicPath)
+        throws InterruptedException, ExecutionException, TimeoutException {
+        topicControl.addTopic(topicPath, specification).get(10, SECONDS);
     }
 
     /**
-     * When {@link #DEMO_TOPIC} goes from >0 to 0 subscribers, schedule removal
-     * of that topic.
+     * Close session.
      */
-    private synchronized void noSubscribers(final String topicPath) {
-
-        LOG.info("{} now has no subscribers", topicPath);
-        LOG.info("Scheduling removal of {} in {} {}", topicPath, TIMEOUT,
-            TIMEOUT_UNIT);
-
-        final ScheduledFuture<?> future =
-            executorService.schedule(
-                (Runnable) () -> {
-                    LOG.info("Removing {}", topicPath);
-                    topicControl.remove(
-                        topicPath,
-                        new TopicControl.RemovalCallback.Default() {
-                            @Override
-                            public void onTopicsRemoved() {
-                                synchronized (map) {
-                                    map.remove(topicPath);
-                                    LOG.info("{} removed", topicPath);
-                                }
-                            }
-                        });
-                },
-                TIMEOUT,
-                TIMEOUT_UNIT);
-
-        map.put(topicPath, future);
+    public void close() {
+        session.close();
     }
+
 }

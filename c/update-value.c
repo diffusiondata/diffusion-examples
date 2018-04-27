@@ -61,7 +61,7 @@ ARG_OPTS_T arg_opts[] = {
  * Handlers for add topic feature.
  */
 static int
-on_topic_added(SESSION_T *session, const SVC_ADD_TOPIC_RESPONSE_T *response, void *context)
+on_topic_added(SESSION_T *session, TOPIC_ADD_RESULT_CODE result_code, void *context)
 {
         printf("Added topic\n");
         apr_thread_mutex_lock(mutex);
@@ -71,9 +71,9 @@ on_topic_added(SESSION_T *session, const SVC_ADD_TOPIC_RESPONSE_T *response, voi
 }
 
 static int
-on_topic_add_failed(SESSION_T *session, const SVC_ADD_TOPIC_RESPONSE_T *response, void *context)
+on_topic_add_failed(SESSION_T *session, TOPIC_ADD_FAIL_RESULT_CODE result_code, const DIFFUSION_ERROR_T *error, void *context)
 {
-        printf("Failed to add topic (%d)\n", response->response_code);
+        printf("Failed to add topic (%d)\n", result_code);
         apr_thread_mutex_lock(mutex);
         apr_thread_cond_broadcast(cond);
         apr_thread_mutex_unlock(mutex);
@@ -259,22 +259,23 @@ main(int argc, char** argv)
         /*
          * Create a topic holding binary or JSON content.
          */
-        TOPIC_DETAILS_T *topic_details =
-                json ? create_topic_details_json() : create_topic_details_binary();
-        const ADD_TOPIC_PARAMS_T add_topic_params = {
-                .topic_path = topic_name,
-                .details = topic_details,
-                .on_topic_added = on_topic_added,
-                .on_topic_add_failed = on_topic_add_failed,
-                .on_discard = on_topic_add_discard,
+        TOPIC_SPECIFICATION_T *topic_specification =
+                json ? topic_specification_init(TOPIC_TYPE_JSON) : topic_specification_init(TOPIC_TYPE_BINARY);
+
+        DIFFUSION_DATATYPE datatype = json ? DATATYPE_JSON : DATATYPE_BINARY;
+
+        ADD_TOPIC_CALLBACK_T callback = {
+                .on_topic_added_with_specification = on_topic_added,
+                .on_topic_add_failed_with_specification = on_topic_add_failed,
+                .on_discard = on_topic_add_discard
         };
 
         apr_thread_mutex_lock(mutex);
-        add_topic(session, add_topic_params);
+        add_topic_from_specification(session, topic_name, topic_specification, callback);
         apr_thread_cond_wait(cond, mutex);
         apr_thread_mutex_unlock(mutex);
 
-        topic_details_free(topic_details);
+        topic_specification_free(topic_specification);
 
         /*
          * Define the handlers for add_update_source()
@@ -318,15 +319,20 @@ main(int argc, char** argv)
                         const time_t time_now = time(NULL);
 
                         if(json) {
-                                CBOR_GENERATOR_T *cbor = cbor_generator_create();
-                                cbor_write_map(cbor, 1);
-                                cbor_write_text_string(cbor, "timestamp", strlen("timestamp"));
-                                cbor_write_uint(cbor, time_now);
-                                buf_write_bytes(buf, cbor->data, cbor->len);
-                                cbor_generator_free(cbor);
+                                char time_update[50];
+                                snprintf(time_update, 50, "{\"timestamp\":%ld}", time_now);
+
+                                if(!write_diffusion_json_value(time_update, buf)) {
+                                        printf("Error whilst writing json update\n");
+                                        return EXIT_FAILURE;
+                                }
                         }
                         else {
-                                buf_write_string(buf, ctime(&time_now));
+                                void *update = ctime(&time_now);
+                                if(!write_diffusion_binary_value(update, buf, strlen(update))) {
+                                        printf("Error whilst writing binary update\n");
+                                        return EXIT_FAILURE;
+                                }
                         }
                         UPDATE_VALUE_PARAMS_T update_value_params = update_value_params_base;
                         update_value_params.data = buf;
@@ -334,7 +340,7 @@ main(int argc, char** argv)
                         /*
                          * Update the topic.
                          */
-                        update_value(session, update_value_params);
+                        update_value_with_datatype(session, datatype, update_value_params);
                         buf_free(buf);
                 }
 

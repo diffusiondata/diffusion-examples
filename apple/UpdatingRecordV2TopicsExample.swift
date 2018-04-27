@@ -1,6 +1,6 @@
 //  Diffusion Client Library for iOS, tvOS and OS X / macOS - Examples
 //
-//  Copyright (C) 2017 Push Technology Ltd.
+//  Copyright (C) 2017, 2018 Push Technology Ltd.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -99,10 +99,10 @@ public class UpdatingRecordV2TopicsExample {
      */
     public func addRateTopic(currency: String, targetCurrency: String) throws {
         if let session = self.session {
-            session.topicControl.add(
-                withTopicPath: Static.rateTopicName(currency, targetCurrency),
+            session.topicControl.addTopic(
+                withPath: Static.rateTopicName(currency, targetCurrency),
                 specification: topicSpecification,
-                completionHandler: { (error: Error?) in
+                completionHandler: { (result, error)  in
                     if let addTopicError = error {
                         print(addTopicError)
                     }

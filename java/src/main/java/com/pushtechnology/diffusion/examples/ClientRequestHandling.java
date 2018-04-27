@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2017, 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.features.Messaging;
+import com.pushtechnology.diffusion.client.features.Messaging.RequestStream;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionId;
 import com.pushtechnology.diffusion.datatype.json.JSON;
@@ -70,7 +71,7 @@ public class ClientRequestHandling {
     }
 
     /**
-     * Sets up a {@link JSONRequestStream} for a particular message path.
+     * Sets up a JSON {@link RequestStream} for a particular message path.
      *
      * @param messagePath message path to receive requests from
      */
@@ -106,7 +107,7 @@ public class ClientRequestHandling {
     /**
      * Request stream that logs received requests and echoes them back to the original client.
      */
-    private final class JSONRequestStream implements Messaging.RequestStream<JSON, JSON> {
+    private final class JSONRequestStream implements RequestStream<JSON, JSON> {
 
         @Override
         public void onClose() {

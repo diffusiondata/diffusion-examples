@@ -1,6 +1,6 @@
 //  Diffusion Client Library for iOS, tvOS and OS X / macOS - Examples
 //
-//  Copyright (C) 2016, 2017 Push Technology Ltd.
+//  Copyright (C) 2016, 2018 Push Technology Ltd.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -51,27 +51,25 @@
 
         PTDiffusionTopicControlFeature *const tc = session.topicControl;
 
+        NSString *const topicPath = @"Example/Auto Removed";
+        NSString *const removalPolicy =
+            [NSString stringWithFormat:@"when no session has \"$SessionId is '%@'\" "
+                "remove \"?%@//\"", session.sessionId, topicPath];
+        NSDictionary<NSString *, NSString *> *const properties =
+            @{[PTDiffusionTopicSpecification removalPropertyKey] : removalPolicy};
+        PTDiffusionTopicSpecification *const specification =
+            [[PTDiffusionTopicSpecification alloc] initWithType:PTDiffusionTopicType_JSON
+                                                     properties:properties];
+
         // Add a topic so we can register it for removal on session close.
-        [tc addWithTopicPath:@"Example/Auto Removed"
-                        type:PTDiffusionTopicType_JSON
-           completionHandler:^(NSError *const error)
+        [tc addTopicWithPath:topicPath
+               specification:specification
+           completionHandler:^(PTDiffusionAddTopicResult *const result, NSError *const error)
         {
             if (error) {
                 NSLog(@"Failed to add topic. Error: %@", error);
             } else {
-                NSLog(@"Topic added.");
-            }
-        }];
-
-        // Register to remove the Example topic tree when the session closes.
-        [tc removeTopicsWithSessionForTopicPath:@"Example"
-                                       delegate:self
-                              completionHandler:^(PTDiffusionTopicTreeRegistration *const registration, NSError *const error)
-        {
-            if (registration) {
-                NSLog(@"Registered.");
-            } else {
-                NSLog(@"Registration failed. Error: %@", error);
+                NSLog(@"Topic %@.", result);
             }
         }];
     }];

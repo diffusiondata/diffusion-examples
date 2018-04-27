@@ -1,6 +1,6 @@
 //  Diffusion Client Library for iOS, tvOS and OS X / macOS - Examples
 //
-//  Copyright (C) 2016, 2017 Push Technology Ltd.
+//  Copyright (C) 2016, 2018 Push Technology Ltd.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -58,14 +58,14 @@ static NSString *const _TopicPath = @"Example/Exclusively Updating";
 
 -(void)addTopicForSession:(PTDiffusionSession *const)session {
     // Add an Int64 primitive topic.
-    [session.topicControl addWithTopicPath:_TopicPath
+    [session.topicControl addTopicWithPath:_TopicPath
                                       type:PTDiffusionTopicType_Int64
-                         completionHandler:^(NSError *const error)
+                         completionHandler:^(PTDiffusionAddTopicResult *const result, NSError *const error)
     {
         if (error) {
             NSLog(@"Failed to add topic. Error: %@", error);
         } else {
-            NSLog(@"Topic created.");
+            NSLog(@"Topic %@.", result);
 
             // Register as an exclusive update source.
             [self registerAsUpdateSourceForSession:session];

@@ -16,10 +16,9 @@
             principal : 'user',
             credentials : 'password'
         }).then(function(session) {
-            // Add a stream that matches the topic path and wire it to log the received values
+            // Add a value stream that matches the topic path and wire it to log the received values
             session
-                .stream('foo/counter')
-                .asType(diffusion.datatypes.double())
+                .addStream('foo/counter', diffusion.datatypes.double())
                 .on('value', function(topic, specification, newValue, oldValue) {
                     console.log("Update for " + topic, newValue);
 
@@ -27,7 +26,7 @@
                 });
 
             // Subscribe to the topic
-            session.subscribe('foo/counter');
+            session.select('foo/counter');
         });
 
         </script>

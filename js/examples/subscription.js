@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,62 +30,29 @@ diffusion.connect({
     // When subscribing, a topic selector is used to select which topics to subscribe to. Topics do not need to exist
     // at the time of subscription - the server dynamically resolves subscriptions as topics are added or removed.
 
-    // Subscribe to the "foo" topic with an inline callback function
-    var subscription = session.subscribe('foo', function(update) {
-        // Log the new value whenever the 'foo' topic is updated
-        // By default, we get a Buffer object which preserves binary
-        // data.
-        console.log(update);
-    });
-
-    // Callbacks can also be registered after the subscription has occurred
-    subscription.on({
-        update : function(value, topic) {
-            console.log('Update for topic: ' + topic, value);
-        },
-        subscribe : function(details, topic) {
-            console.log('Subscribed to topic: ' + topic);
-        },
-        unsubscribe : function(reason, topic) {
-            console.log('Unsubscribed from topic:' + topic);
-            subscription.close();
-        }
-    });
+    // Subscribe to the "foo" topic
+    session.select('foo');
 
     // 2. Sessions may unsubscribe from any topic to stop receiving data
 
     // Unsubscribe from the "foo" topic. Sessions do not need to have previously been subscribed to the topics they are
-    // unsubscribing from. Unsubscribing from a topic will result in the 'unsubscribe' callback registered above being
-    // called.
+    // unsubscribing from.
     session.unsubscribe('foo');
 
     // 3. Subscriptions / Unsubscriptions can select multiple topics using Topic Selectors
 
     // Topic Selectors provide regex-like capabilities for subscribing to topics. These are resolved dynamically, much
     // like subscribing to a single topic.
-    var subscription2 = session.subscribe('?foo/.*/[a-z]');
+    session.select('?foo/.*/[a-z]');
 
-    // 4. Subscriptions can use transformers to convert update values
+    // 4. Register a value stream
+    var valueStream = session.addStream('baz', diffusion.datatypes.json());
 
-    // Subscribe to a topic and then convert all received values to JSON. Transforming a subscription creates a new
-    // subscription stream, rather than modifying the original. This assumes that the topic is a single value topic
-    // receiving stringified JSON and is not a JSON topic.
-    session.subscribe('bar').transform(JSON.parse).on('update', function(value, topic) {
-        console.log('Got JSON update for topic: ' + topic, value);
+    // Receive update values
+    valueStream.on('value', function(topic, spec, newValue, oldValue) {
+        console.log('Got JSON update for topic: ' + topic, newValue.get());
     });
 
-    // 5. Metadata can be used within transformers to parse data
-
-    // Create a simple metadata instance
-    var meta = new diffusion.metadata.RecordContent();
-
-    // Add a single record/field
-    meta.addRecord('record', {
-        'field' : meta.string('some-value')
-    });
-
-    // Subscribe to a topic and transform with the metadata
-    session.subscribe('baz').transform(meta).on('update', function(value) {
-        console.log('Field value: ', value.get('record').get('field'));
-    });
+    // Subscribe to a JSON topic
+    session.select('baz');
 });

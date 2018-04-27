@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2017 Push Technology Ltd.
+ * Copyright (C) 2014, 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.pushtechnology.diffusion.client.Diffusion;
-import com.pushtechnology.diffusion.client.callbacks.TopicTreeHandler;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddTopicResult;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.RemovalCallback;
@@ -121,6 +120,33 @@ public class ControlClientAddingAndRemovingTopics {
     }
 
     /**
+     * This shows how to create a topic that will be automatically removed,
+     * along with all of its descendants, when the session closes.
+     *
+     * @param topicPath the topic path
+     * @param topicType the topic type
+     * @return true if the topic was added or false if it already existed
+     * @throws ExecutionException if adding the topic fails
+     * @throws TimeoutException if operation does not complete within 5 seconds
+     * @throws InterruptedException if the current thread is interrupted whilst
+     *         waiting for the result
+     * @since 6.1
+     */
+    public boolean addSessionTopic(String topicPath, TopicType topicType)
+        throws ExecutionException, TimeoutException, InterruptedException {
+        final TopicSpecification specification =
+            topicControl.newSpecification(topicType).withProperty(
+                TopicSpecification.REMOVAL,
+                "When no session has '$SessionId is \"" +
+                session.getSessionId().toString() +
+                "\"' remove '" +
+                "?" + topicPath + "//'");
+        final AddTopicResult result =
+            topicControl.addTopic(topicPath, specification).get(5, TimeUnit.SECONDS);
+        return result == AddTopicResult.CREATED;
+    }
+
+    /**
      * Remove a single topic given its path.
      *
      * @param topicPath the topic path
@@ -148,26 +174,6 @@ public class ControlClientAddingAndRemovingTopics {
      */
     public void removeTopics(String topicSelector, RemovalCallback callback) {
         topicControl.remove(topicSelector, callback);
-    }
-
-    /**
-     * Request that the topic {@code topicPath} and its descendants be removed
-     * when the session is closed (either explicitly using {@link Session#close}
-     * , or by the server). If more than one session calls this method for the
-     * same {@code topicPath}, the topics will be removed when the last session
-     * is closed.
-     *
-     * <p>
-     * Different sessions may call this method for the same topic path, but not
-     * for topic paths above or below existing registrations on the same branch
-     * of the topic tree.
-     *
-     * @param topicPath the part of the topic tree to remove when the last
-     *        session is closed
-     */
-    public void removeTopicsWithSession(String topicPath) {
-        topicControl.removeTopicsWithSession(
-            topicPath, new TopicTreeHandler.Default());
     }
 
     /**

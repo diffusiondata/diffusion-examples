@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,21 +26,24 @@ diffusion.connect({
     principal : 'control',
     credentials : 'password'
 }).then(function(session) {
+    var TopicSpecification = diffusion.topics.TopicSpecification;
+    var TopicType = diffusion.topics.TopicType;
+
     // A session may update any existing topic. Update values must be of the same type as the topic being updated.
 
     // Add a topic first with a string type
-    session.topics.add('foo', diffusion.topics.TopicType.STRING).then(function() {
+    session.topics.add('foo', new TopicSpecification(TopicType.STRING)).then(function() {
         // Update the topic
-        return session.topics.update('foo', 'hello');
+        return session.topics.updateValue('foo', 'hello', diffusion.datatypes.string());
     }).then(function() {
         // Update the topic again
-        return session.topics.update('foo', 'world');
+        return session.topics.updateValue('foo', 'world', diffusion.datatypes.string());
     });
 
     // Add a topic with a double type
-    session.topics.add('bar', diffusion.topics.TopicType.DOUBLE).then(function() {
-        return session.topics.update('bar', 123);
+    session.topics.add('bar', new TopicSpecification(TopicType.DOUBLE)).then(function() {
+        return session.topics.updateValue('bar', 123, diffusion.datatypes.double());
     }).then(function() {
-        return session.topics.update('bar', 456.789);
+        return session.topics.updateValue('bar', 456.789, diffusion.datatypes.double());
     });
 });

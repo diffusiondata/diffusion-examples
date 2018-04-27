@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,16 +42,16 @@ diffusion.connect({
       });
 
     // Subscribe to the topic
-    session.subscribe(topic);
+    session.select(topic);
 });
 
-// Create and return an observable which creates a stream to receive transformed topic updates on its handler.
-// The stream is closed when the subscription to the observable is disposed of.
+// Create and return an observable which creates a value stream to receive topic updates on its handler.
+// The value stream is closed when the subscription to the observable is disposed of.
 function observable(session, topic, type) {
-  var stream;
+  var valueStream;
   return Rx.Observable.fromEventPattern(
     function(handler) {
-      stream = session.stream(topic).asType(type).on({
+      valueStream = session.addStream(topic, type).on({
         value: function(topic, spec, newV, oldV) {
           // Pass the new value to the handler
           handler(newV);
@@ -59,6 +59,6 @@ function observable(session, topic, type) {
       });
     },
     function() {
-      stream.close();
+      valueStream.close();
     });
 }

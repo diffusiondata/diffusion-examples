@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2017, 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,15 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddTopicResult;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.ValueUpdater;
 import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 
 /**
@@ -45,7 +42,7 @@ import com.pushtechnology.diffusion.client.topics.details.TopicType;
  */
 public final class ControlClientUpdatingSimpleTopics {
 
-    private static final String TOPIC = "MyTopic";
+    private static final String TOPIC = "StringTopic";
 
     private final Session session;
     private final ValueUpdater<String> valueUpdater;
@@ -53,25 +50,27 @@ public final class ControlClientUpdatingSimpleTopics {
     /**
      * Constructor.
      *
-     * @throws TimeoutException
-     * @throws ExecutionException
-     * @throws InterruptedException
+     * @param serverUrl for example "ws://diffusion.example.com:80"
      */
-    public ControlClientUpdatingSimpleTopics() throws Exception {
+    public ControlClientUpdatingSimpleTopics(String serverUrl) throws Exception {
 
         session =
             Diffusion.sessions().principal("control").password("password")
-                .open("ws://diffusion.example.com:80");
+                .open(serverUrl);
 
         final TopicControl topicControl = session.feature(TopicControl.class);
 
         // Create the topic and request that it is removed when the session
-        // closes if it was created.
-        final CompletableFuture<AddTopicResult> result =
-            topicControl.addTopic(TOPIC, TopicType.STRING);
-        if (result.get(5, TimeUnit.SECONDS) == AddTopicResult.CREATED) {
-            topicControl.removeTopicsWithSession(TOPIC);
-        }
+        // closes
+        final TopicSpecification specification =
+            topicControl.newSpecification(TopicType.STRING).withProperty(
+                TopicSpecification.REMOVAL,
+                "When no session has '$SessionId is \"" +
+                session.getSessionId().toString() +
+                "\"' remove '" +
+                "?" + TOPIC + "//'");
+
+        topicControl.addTopic(TOPIC, specification).get(5, TimeUnit.SECONDS);
 
         final TopicUpdateControl updateControl =
             session.feature(TopicUpdateControl.class);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016, 2017 Push Technology Ltd.
+ * Copyright (C) 2016, 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.callbacks.Registration;
-import com.pushtechnology.diffusion.client.callbacks.TopicTreeHandler;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.RemovalContextCallback;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
@@ -36,6 +35,7 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateCo
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateContextCallback;
 import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 import com.pushtechnology.diffusion.datatype.json.JSONDataType;
@@ -82,7 +82,8 @@ public final class ControlClientUpdatingJSONTopics {
      *
      * @param serverUrl for example "ws://diffusion.example.com:80"
      */
-    public ControlClientUpdatingJSONTopics(String serverUrl) {
+    public ControlClientUpdatingJSONTopics(String serverUrl)
+        throws InterruptedException, ExecutionException, TimeoutException {
 
         cborFactory.setCodec(new ObjectMapper());
 
@@ -92,8 +93,17 @@ public final class ControlClientUpdatingJSONTopics {
 
         topicControl = session.feature(TopicControl.class);
 
-        // Register as an updater for all topics under the root and request
-        // that all topics created are removed when the session closes
+        // Create the root topic that will remove itself when the session closes
+        final TopicSpecification specification =
+            topicControl.newSpecification(TopicType.STRING).withProperty(
+                TopicSpecification.REMOVAL,
+                "When no session has '$SessionId is \"" +
+                session.getSessionId().toString() +
+                "\"' remove '" +
+                "?" + ROOT_TOPIC + "//'");
+        topicControl.addTopic(ROOT_TOPIC, specification).get(5, TimeUnit.SECONDS);
+
+        // Register as an updater for all topics under the root
         session.feature(TopicUpdateControl.class).registerUpdateSource(
             ROOT_TOPIC,
             new UpdateSource.Default() {
@@ -106,9 +116,6 @@ public final class ControlClientUpdatingJSONTopics {
 
                 @Override
                 public void onActive(String topicPath, Updater updater) {
-                    topicControl.removeTopicsWithSession(
-                        ROOT_TOPIC,
-                        new TopicTreeHandler.Default());
                     valueUpdater = updater.valueUpdater(JSON.class);
                 }
 

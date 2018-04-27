@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2016, 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.pushtechnology.diffusion.client.callbacks.TopicTreeHandler;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateCallback;
 import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
@@ -44,8 +44,6 @@ public final class ProducingJson extends AbstractClient {
         .getLogger(ProducingJson.class);
     private static final UpdateCallback.Default UPDATE_CALLBACK =
         new UpdateCallback.Default();
-    private static final TopicControl.AddCallback.Default ADD_CALLBACK =
-        new TopicControl.AddCallback.Default();
 
     private final ScheduledExecutorService executor = Executors
         .newSingleThreadScheduledExecutor();
@@ -64,14 +62,13 @@ public final class ProducingJson extends AbstractClient {
     public void onStarted(Session session) {
         final TopicControl topicControl = session.feature(TopicControl.class);
 
-        // Add the JSON topic with an initial value
-        topicControl.addTopic(
-            "json/random", topicControl.newSpecification(TopicType.JSON), ADD_CALLBACK);
+        final TopicSpecification specification =
+            topicControl.newSpecification(TopicType.JSON).withProperty(
+                TopicSpecification.REMOVAL,
+                "When no session has '$SessionId is \"" +
+                session.getSessionId().toString() + "\"'");
 
-        // Remove topics when the session closes
-        topicControl.removeTopicsWithSession(
-            "json",
-            new TopicTreeHandler.Default());
+        topicControl.addTopic("json/random", specification);
     }
 
     @Override

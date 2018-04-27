@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,9 @@ diffusion.connect({
     port   : 443,
     secure : true
 }).then(function(session) {
+	var stringDataType = diffusion.datatypes.string();
+	var TopicType = diffusion.topics.TopicType;
+	var TopicSpecification = diffusion.topics.TopicSpecification;
 
 	// Register a missing topic handler on the "example" root topic
 	// Any subscriptions to missing topics along this path will invoke this handler
@@ -31,10 +34,13 @@ diffusion.connect({
 		// Called when a handler is successfully registered
 		onRegister : function(path, close) {
 			console.log("Registered missing topic handler on path: " + path);
-			// Once we've registered the handler, we initiate a subscription with the selector "?example/topic/.*"
-			// This will invoke the handler.
-			session.subscribe("?example/topic/.*").on('subscribe', function(type, path) {
-				console.log("Subscribed to topic: " + path);
+
+			// Once we've registered the handler, we subscribe with the selector "?example/topic/.*"
+			session.select("?example/topic/.*");
+
+			// Register a stream to listen for a subscription event
+			session.addStream("?example/topic/.*", stringDataType).on('subscribe', function(topic, specification) {
+				console.log("Subscribed to topic: " + topic);
 			});
 		},
 		// Called when the handler is closed
@@ -53,7 +59,7 @@ diffusion.connect({
 
 			var topic = "example/topic/foo";
 
-			session.topics.add(topic).then(function(result) {
+			session.topics.add(topic, new TopicSpecification(TopicType.STRING)).then(function(result) {
 				console.log("Topic add success: " + topic);
 				// If the topic addition is successful, we proceed() with the session's subscription.
 				// The client will now be subscribed to the topic

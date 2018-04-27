@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2017, 2108 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -263,7 +263,7 @@ public class ControlClientTopicNotifications {
     }
 
     /**
-     * Callback interface for walking the topic tree via {@link walkTree}.
+     * Callback interface for walking the topic tree via {@link #walkTree}.
      */
     interface TreeWalker {
         /**
@@ -278,7 +278,6 @@ public class ControlClientTopicNotifications {
          * Notification that a topic has been removed.
          *
          * @param node the tree node for this topic
-         * @param specification the topic specification for this topic
          */
         void onTopicRemoved(TreeNode node);
     }

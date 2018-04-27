@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ diffusion.connect({
     var TopicType = diffusion.topics.TopicType;
 
     // Create a topic from a topic type
-    session.topics.add('topic/string', TopicType.STRING);
+    session.topics.add('topic/string', new TopicSpecification(TopicType.STRING));
 
     // Create a topic from a topic specification, with optional properties
     session.topics.add('topic/integer', new TopicSpecification(TopicType.INT64, {
@@ -42,23 +42,23 @@ diffusion.connect({
 
     // 2. Adding a topic returns a result, which allows us to handle when the operation has either completed
     // successfully or encountered an error.
-    session.topics.add('topic/result', TopicType.JSON).then(function(result) {
+    session.topics.add('topic/result', new TopicSpecification(TopicType.JSON)).then(function(result) {
         console.log('Added topic: ' + result.topic);
     }, function(reason) {
         console.log('Failed to add topic: ', reason);
     });
 
     // Adding a topic that already exists will succeed, so long as it has the same value type
-    session.topics.add('topic/result', TopicType.JSON).then(function(result) {
+    session.topics.add('topic/result', new TopicSpecification(TopicType.JSON)).then(function(result) {
         // result.added will be false, as the topic already existed
         console.log('Added topic: ' + result.topic, result.added);
     });
 
     // 3. Because the result returned from adding a topic is a promise, we can easily chain multiple topic adds together
-    session.topics.add('chain/foo', TopicType.STRING)
-        .then(session.topics.add('chain/bar', TopicType.STRING))
-        .then(session.topics.add('chain/baz', TopicType.STRING))
-        .then(session.topics.add('chain/bob', TopicType.STRING))
+    session.topics.add('chain/foo', new TopicSpecification(TopicType.STRING))
+        .then(session.topics.add('chain/bar', new TopicSpecification(TopicType.STRING)))
+        .then(session.topics.add('chain/baz', new TopicSpecification(TopicType.STRING)))
+        .then(session.topics.add('chain/bob', new TopicSpecification(TopicType.STRING)))
         .then(function() {
             console.log('Added all topics');
         }, function(reason) {

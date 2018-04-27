@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2017, 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ import com.pushtechnology.diffusion.client.topics.details.TopicType;
 
 /**
  * This example shows a control client creating a {@link TimeSeries} topic.
- * Values can be appended to the topic using {@link #appendValue(Long)}, and
- * the last value of the topic can be edited using {@link #editLast(Long)}.
+ * Values can be appended to the topic using {@link #appendValue(long)}, and
+ * the last value of the topic can be edited using {@link #editLast(long)}.
  *
  * @author Push Technology Limited
  * @since 6.0

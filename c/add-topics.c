@@ -42,18 +42,6 @@
 // Topic selector, selector set delimiter
 #define DELIM "////"
 
-
-#define BUILD_TOPIC_PARAMS(TOPIC_NAME, DETAILS) {\
-    .on_topic_added = on_topic_added, \
-    .on_topic_add_failed = on_topic_add_failed, \
-    .on_discard = on_topic_add_discard, \
-    .topic_path = (TOPIC_NAME), \
-    .details = (DETAILS), \
-    .context = (void *)(TOPIC_NAME) \
-}
-
-
-
 /*
  * We use a mutex and a condition variable to help synchronize the
  * flow so that it becomes linear and easier to follow the core logic.
@@ -72,7 +60,7 @@ ARG_OPTS_T arg_opts[] = {
 
 // Various handlers which are common to all add_topic() functions.
 static int
-on_topic_added(SESSION_T *session, const SVC_ADD_TOPIC_RESPONSE_T *response, void *context)
+on_topic_added(SESSION_T *session, TOPIC_ADD_RESULT_CODE result_code, void *context)
 {
         printf("on_topic_added: %s\n", (const char *)context);
         apr_thread_mutex_lock(mutex);
@@ -82,9 +70,9 @@ on_topic_added(SESSION_T *session, const SVC_ADD_TOPIC_RESPONSE_T *response, voi
 }
 
 static int
-on_topic_add_failed(SESSION_T *session, const SVC_ADD_TOPIC_RESPONSE_T *response, void *context)
+on_topic_add_failed(SESSION_T *session, TOPIC_ADD_FAIL_RESULT_CODE result_code, const DIFFUSION_ERROR_T *error, void *context)
 {
-        printf("on_topic_add_failed: %s -> %d\n", (const char *)context, response->response_code);
+        printf("on_topic_add_failed: %s -> %d\n", (const char *)context, result_code);
         apr_thread_mutex_lock(mutex);
         apr_thread_cond_broadcast(cond);
         apr_thread_mutex_unlock(mutex);
@@ -120,6 +108,20 @@ on_topic_remove_discard(SESSION_T *session, void *context)
         apr_thread_mutex_unlock(mutex);
         return HANDLER_SUCCESS;
 }
+
+static ADD_TOPIC_CALLBACK_T
+create_topic_callback(char *topic_name)
+{
+        ADD_TOPIC_CALLBACK_T callback = {
+                .on_topic_added_with_specification = on_topic_added,
+                .on_topic_add_failed_with_specification = on_topic_add_failed,
+                .on_discard = on_topic_add_discard,
+                .context = topic_name
+        };
+
+        return callback;
+}
+
 /*
  *
  */
@@ -159,121 +161,106 @@ int main(int argc, char** argv)
         }
 
         /*
-         * Create a JSON topic.
-         */
+        * Create a JSON topic.
+        */
         {
-            TOPIC_DETAILS_T *json_topic_details = create_topic_details_json();
-            ADD_TOPIC_PARAMS_T json_params = BUILD_TOPIC_PARAMS("json", json_topic_details);
+                char *json_topic_name = "json";
+                TOPIC_SPECIFICATION_T *json_specification = topic_specification_init(TOPIC_TYPE_JSON);
 
-            CBOR_GENERATOR_T *cbor_generator = cbor_generator_create();
-            const char *json_message_str = "Hello world, this is a JSON string.";
-            cbor_write_text_string(cbor_generator, json_message_str, strlen(json_message_str));
-            BUF_T *cbor_buf = buf_create();
-            buf_write_bytes(cbor_buf, cbor_generator->data, cbor_generator->len);
+                apr_thread_mutex_lock(mutex);
+                add_topic_from_specification(session, json_topic_name, json_specification, create_topic_callback(json_topic_name));
+                apr_thread_cond_wait(cond, mutex);
+                apr_thread_mutex_unlock(mutex);
 
-            CONTENT_T *json_content = content_create(CONTENT_ENCODING_NONE, cbor_buf);
-            json_params.content = json_content;
-
-            apr_thread_mutex_lock(mutex);
-            add_topic(session, json_params);
-            apr_thread_cond_wait(cond, mutex);
-            apr_thread_mutex_unlock(mutex);
-
-            content_free(json_content);
-            cbor_generator_free(cbor_generator);
-            buf_free(cbor_buf);
-            topic_details_free(json_topic_details);
+                topic_specification_free(json_specification);
         }
 
-
         /*
-         * Create a slave topic which is an alias for the string-data
-         * topic (its master topic).
-         */
-        TOPIC_DETAILS_T *slave_topic_details = create_topic_details_slave("string-data");
-        ADD_TOPIC_PARAMS_T slave_params = BUILD_TOPIC_PARAMS("slave", slave_topic_details);
-    
-        apr_thread_mutex_lock(mutex);
-        add_topic(session, slave_params);
-        apr_thread_cond_wait(cond, mutex);
-        apr_thread_mutex_unlock(mutex);
+        * Create a slave topic which is an alias for the string-data
+        * topic (its master topic).
+        */
+        {
+                HASH_T *properties = hash_new(1);
+                hash_add(properties, DIFFUSION_SLAVE_MASTER_TOPIC, "string-data");
 
-        /*
-         * Record topic data.
-         *
-         * The C API does not have the concept of "builders" for
-         * creating record topic data, but requires you to build a
-         * string containing XML that describes the structure of the
-         * messages.
-         */
+                char *slave_topic_name = "slave";
+                TOPIC_SPECIFICATION_T *slave_topic_specification = topic_specification_init_with_properties(TOPIC_TYPE_SLAVE, properties);
+        
+                apr_thread_mutex_lock(mutex);
+                add_topic_from_specification(session, slave_topic_name, slave_topic_specification, create_topic_callback(slave_topic_name));
+                apr_thread_cond_wait(cond, mutex);
+                apr_thread_mutex_unlock(mutex);
 
+                topic_specification_free(slave_topic_specification);
+                hash_free(properties, NULL, NULL);
+        }
 
         /*
          * This adds a topic with a record containing multiple fields
          * of different types.
          */
         {
-            BUF_T *record_schema = buf_create();
-            buf_write_string(record_schema,
-                "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
-                "<message topicDataType=\"record\" name=\"MyContent\">"
-                "<record name=\"Record1\">"
-                "<field type=\"string\" default=\"\" allowsEmpty=\"true\" name=\"Field1\"/>"
-                "<field type=\"integerString\" default=\"0\" allowsEmpty=\"false\" name=\"Field2\"/>"
-                "<field type=\"decimalString\" default=\"0.00\" scale=\"2\" allowsEmpty=\"false\" name=\"Field3\"/>"
-                "</record>"
-                "</message>");
-            TOPIC_DETAILS_T *record_topic_details = create_topic_details_record();
-            record_topic_details->user_defined_schema = record_schema;
+                DIFFUSION_RECORDV2_SCHEMA_BUILDER_T *schema_builder = diffusion_recordv2_schema_builder_init();
+                diffusion_recordv2_schema_builder_record(schema_builder, "Record1", NULL);
+                diffusion_recordv2_schema_builder_string(schema_builder, "Field1", NULL);
+                diffusion_recordv2_schema_builder_integer(schema_builder, "Field2", NULL);
+                diffusion_recordv2_schema_builder_decimal(schema_builder, "Field3", 2, NULL);
 
-            ADD_TOPIC_PARAMS_T record_params = BUILD_TOPIC_PARAMS("record", record_topic_details);
+                DIFFUSION_RECORDV2_SCHEMA_T *schema = diffusion_recordv2_schema_builder_build(schema_builder, NULL);
+                char *schema_string = diffusion_recordv2_schema_as_json_string(schema);
 
-            apr_thread_mutex_lock(mutex);
-            add_topic(session, record_params);
-            apr_thread_cond_wait(cond, mutex);
-            apr_thread_mutex_unlock(mutex);
-            topic_details_free(record_topic_details);
+                HASH_T *properties = hash_new(2);
+                hash_add(properties, DIFFUSION_VALIDATE_VALUES, "true");
+                hash_add(properties, DIFFUSION_SCHEMA, schema_string);
+
+                char *recordv2_topic_name = "recordv2";
+                TOPIC_SPECIFICATION_T *recordv2_specification = topic_specification_init_with_properties(TOPIC_TYPE_RECORDV2, properties);
+
+                apr_thread_mutex_lock(mutex);
+                add_topic_from_specification(session, recordv2_topic_name, recordv2_specification, create_topic_callback(recordv2_topic_name));
+                apr_thread_cond_wait(cond, mutex);
+                apr_thread_mutex_unlock(mutex);
+
+                diffusion_recordv2_schema_builder_free(schema_builder);
+                diffusion_recordv2_schema_free(schema);
+                free(schema_string);
+
+                topic_specification_free(recordv2_specification);
+                hash_free(properties, NULL, NULL);
         }
 
         /*
-         * Create a topic with binary data
+         * Create a binary topic
          */
         {
-            TOPIC_DETAILS_T *binary_topic_details = create_topic_details_binary();
-            ADD_TOPIC_PARAMS_T binary_params = BUILD_TOPIC_PARAMS("binary-data", binary_topic_details);
+                char *binary_topic_name = "binary";
+                TOPIC_SPECIFICATION_T *binary_specification = topic_specification_init(TOPIC_TYPE_BINARY);
 
-            char binary_bytes[] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05 };
+                apr_thread_mutex_lock(mutex);
+                add_topic_from_specification(session, binary_topic_name, binary_specification, create_topic_callback(binary_topic_name));
+                apr_thread_cond_wait(cond, mutex);
+                apr_thread_mutex_unlock(mutex);
 
-            BUF_T *binary_data_buf = buf_create();
-            buf_write_bytes(binary_data_buf, binary_bytes, sizeof(binary_bytes));
-            CONTENT_T *binary_content = content_create(CONTENT_ENCODING_NONE, binary_data_buf);
-            binary_params.content = binary_content;
-
-            apr_thread_mutex_lock(mutex);
-            add_topic(session, binary_params);
-            apr_thread_cond_wait(cond, mutex);
-            apr_thread_mutex_unlock(mutex);
-            content_free(binary_content);
-            topic_details_free(binary_topic_details);
+                topic_specification_free(binary_specification);
         }
 
         /*
          * We can also remove topics.
          */
         {
-            puts("Removing topics in 5 seconds...");
-            sleep(5);
+                puts("Removing topics in 5 seconds...");
+                sleep(5);
 
-            REMOVE_TOPICS_PARAMS_T remove_params = {
-                    .on_removed = on_topic_removed,
-                    .on_discard = on_topic_remove_discard,
-                    .topic_selector = "#json" DELIM "record" DELIM "binary-data"
-            };
+                REMOVE_TOPICS_PARAMS_T remove_params = {
+                        .on_removed = on_topic_removed,
+                        .on_discard = on_topic_remove_discard,
+                        .topic_selector = "#json" DELIM "slave" DELIM "recordv2" DELIM "binary"
+                };
 
-            apr_thread_mutex_lock(mutex);
-            remove_topics(session, remove_params);
-            apr_thread_cond_wait(cond, mutex);
-            apr_thread_mutex_unlock(mutex);
+                apr_thread_mutex_lock(mutex);
+                remove_topics(session, remove_params);
+                apr_thread_cond_wait(cond, mutex);
+                apr_thread_mutex_unlock(mutex);
         }
 
         /*

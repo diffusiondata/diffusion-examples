@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,20 +27,24 @@ diffusion.connect({
     credentials : 'password'
 }).then(function(session) {
 
+    var TopicSpecification = diffusion.topics.TopicSpecification;
+    var TopicType = diffusion.topics.TopicType;
+
     // 1. Like session.topics.add(), remove returns a promise, so we can chain together calls.
-    session.topics.add('foo').then(session.topics.remove('foo'))
-                             .then(function() {
-                                console.log('Removed topic foo');
-                             }, function(reason) {
-                                console.log('Failed to remove topic foo: ', reason);
-                             });
+    session.topics.add('foo', new TopicSpecification(TopicType.STRING))
+        .then(session.topics.remove('foo'))
+        .then(function() {
+            console.log('Removed topic foo');
+        }, function(reason) {
+            console.log('Failed to remove topic foo: ', reason);
+        });
                            
     // 2. Removing a topic will remove all topics underneath it.
     
     // Add a hierarchy of topics.
-    var added = session.topics.add('a').then(session.topics.add('a/b'))
-                                       .then(session.topics.add('a/b/c'))
-                                       .then(session.topics.add('a/b/c/d'));
+    var added = session.topics.add('a').then(session.topics.add('a/b', new TopicSpecification(TopicType.STRING)))
+                                       .then(session.topics.add('a/b/c', new TopicSpecification(TopicType.STRING)))
+                                       .then(session.topics.add('a/b/c/d', new TopicSpecification(TopicType.STRING)));
 
     // Wait until we've added all the topics
     added.then(session.topics.remove('a'))

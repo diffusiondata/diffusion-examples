@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ diffusion.connect({
 
         var update1 = model.asValue();
 
-        session.topics.update('topic/record', update1);
+        session.topics.updateValue('topic/record', update1, RecordV2DataType);
 
         // 4. Subsequent updates can be produced from the same model
 
@@ -63,14 +63,13 @@ diffusion.connect({
 
         var update2 = model.asValue();
 
-        session.topics.update('topic/record', update2);
+        session.topics.updateValue('topic/record', update2, RecordV2DataType);
     });
 
 
     // RecordV2 values can be easily consumed, too
     session
-        .stream('topic/record')
-        .asType(RecordV2DataType)
+        .addStream('topic/record', RecordV2DataType)
         .on('value', function(topic, specification, newValue, oldValue) {
             // 5. The schema can be used to produce a model that allows key-based lookup of records and fields
             var model = newValue.asModel(schema);
@@ -92,5 +91,5 @@ diffusion.connect({
             });
         });
 
-    session.subscribe('topic/record');
+    session.select('topic/record');
 });

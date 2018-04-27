@@ -66,7 +66,7 @@ static const char *EMPTY_FIELD_MARKER = "-EMPTY-";
  * Handlers for adding topics.
  */
 static int
-on_topic_added(SESSION_T *session, const SVC_ADD_TOPIC_RESPONSE_T *response, void *context)
+on_topic_added(SESSION_T *session, TOPIC_ADD_RESULT_CODE result_code, void *context)
 {
         printf("Added topic\n");
         apr_thread_mutex_lock(mutex);
@@ -76,9 +76,9 @@ on_topic_added(SESSION_T *session, const SVC_ADD_TOPIC_RESPONSE_T *response, voi
 }
 
 static int
-on_topic_add_failed(SESSION_T *session, const SVC_ADD_TOPIC_RESPONSE_T *response, void *context)
+on_topic_add_failed(SESSION_T *session, TOPIC_ADD_FAIL_RESULT_CODE result_code, const DIFFUSION_ERROR_T *error, void *context)
 {
-        printf("Failed to add topic (%d)\n", response->response_code);
+        printf("Failed to add topic (%d)\n", result_code);
         apr_thread_mutex_lock(mutex);
         apr_thread_cond_broadcast(cond);
         apr_thread_mutex_unlock(mutex);
@@ -223,31 +223,38 @@ main(int argc, char** argv)
          * Add a topic with a simple record topic data structure,
          * containing two fields.
          */
-        BUF_T *schema = buf_create();
-        buf_write_string(schema,
-                         "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n"
-                         "<message topicDataType=\"record\" name=\"SimpleMessage\">\n"
-                         "<record name=\"SimpleRecord\">\n"
-                         "<field name=\"first\" type=\"string\" default=\"x\" allowsEmpty=\"true\"/>"
-                         "<field name=\"second\" type=\"string\" default=\"y\" allowsEmpty=\"true\"/>"
-                         "</record>\n"
-                         "</message>\n");
+        DIFFUSION_RECORDV2_SCHEMA_BUILDER_T *schema_builder = diffusion_recordv2_schema_builder_init();
+        diffusion_recordv2_schema_builder_record(schema_builder, "SimpleRecord", NULL);
+        diffusion_recordv2_schema_builder_string(schema_builder, "first", NULL);
+        diffusion_recordv2_schema_builder_string(schema_builder, "second", NULL);
 
-        TOPIC_DETAILS_T *record_topic_details = create_topic_details_record();
-        record_topic_details->user_defined_schema = schema;
-        set_empty_field_value(record_topic_details, EMPTY_FIELD_MARKER);
+        DIFFUSION_RECORDV2_SCHEMA_T *schema = diffusion_recordv2_schema_builder_build(schema_builder, NULL);
+        char *schema_as_string = diffusion_recordv2_schema_as_json_string(schema);
 
-        const ADD_TOPIC_PARAMS_T add_topic_params = {
-                .topic_path = topic_name,
-                .details = record_topic_details,
-                .on_topic_added = on_topic_added,
-                .on_topic_add_failed = on_topic_add_failed
+        HASH_T *properties = hash_new(2);
+        hash_add(properties, DIFFUSION_VALIDATE_VALUES, "true");
+        hash_add(properties, DIFFUSION_SCHEMA, schema_as_string);
+
+        TOPIC_SPECIFICATION_T *recordv2_specification = topic_specification_init_with_properties(TOPIC_TYPE_RECORDV2, properties);
+
+        ADD_TOPIC_CALLBACK_T callback = {
+                .on_topic_added_with_specification = on_topic_added,
+                .on_topic_add_failed_with_specification = on_topic_add_failed,
+                .on_discard = NULL,
+                .context = (void *)topic_name
         };
 
         apr_thread_mutex_lock(mutex);
-        add_topic(session, add_topic_params);
+        add_topic_from_specification(session, topic_name, recordv2_specification, callback);
         apr_thread_cond_wait(cond, mutex);
         apr_thread_mutex_unlock(mutex);
+
+        diffusion_recordv2_schema_builder_free(schema_builder);
+        diffusion_recordv2_schema_free(schema);
+        free(schema_as_string);
+
+        topic_specification_free(recordv2_specification);
+        hash_free(properties, NULL, NULL);
 
         /*
          * Define the handlers for add_update_source()
@@ -281,12 +288,18 @@ main(int argc, char** argv)
          */
         int count1 = 0;
         int count2 = 0;
-        BUF_T *buf;
+
         CONTENT_T *content;
         UPDATE_T *upd;
         UPDATE_SOURCE_PARAMS_T update_source_params = update_source_params_base;
 
+        DIFFUSION_RECORDV2_BUILDER_T *value_builder = diffusion_recordv2_builder_init();
+        char **fields = calloc(3, sizeof(char *));
+
         while(active) {
+
+                BUF_T *buf = buf_create();
+
                 if(count1 % 2 == 0) {
                         count2++;
                 }
@@ -294,11 +307,28 @@ main(int argc, char** argv)
 
                 buf = buf_create();
                 if(count1 == 5 || count1 == 6) {
-                        // Set the fields to "empty".
-                        buf_sprintf(buf, "%s%c%s", EMPTY_FIELD_MARKER, DPT_FIELD_DELIM, EMPTY_FIELD_MARKER);
+                        fields[0] = (char *)EMPTY_FIELD_MARKER;
+                        fields[1] = (char *)EMPTY_FIELD_MARKER;
                 }
                 else {
-                        buf_sprintf(buf, "%d%c%d", count1, DPT_FIELD_DELIM, count2);
+                        char count1_string[20];
+                        char count2_string[20];
+                        snprintf(count1_string, 20, "%d", count1);
+                        snprintf(count2_string, 20, "%d", count2);
+                        fields[0] = count1_string;
+                        fields[1] = count2_string;
+                }
+
+                diffusion_recordv2_builder_add_record(value_builder, fields);
+                void *record_bytes = diffusion_recordv2_builder_build(value_builder);
+
+                if(!write_diffusion_recordv2_value(record_bytes, buf)) {
+                        fprintf(stderr, "Unable to write the recordv2 update\n");
+
+                        diffusion_recordv2_builder_free(value_builder);
+                        free(fields);
+                        buf_free(buf);
+                        return EXIT_FAILURE;
                 }
 
                 /*
@@ -319,8 +349,15 @@ main(int argc, char** argv)
                 update(session, update_source_params);
                 update_free(upd);
 
+                diffusion_recordv2_builder_clear(value_builder);
+                free(record_bytes);
+                buf_free(buf);
+
                 sleep(1);
         }
+
+        diffusion_recordv2_builder_free(value_builder);
+        free(fields);
 
         /*
          * Close session and tidy up.

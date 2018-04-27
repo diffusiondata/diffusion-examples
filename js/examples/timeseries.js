@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,8 @@ diffusion.connect({
 
     // 2. Create a time series topic
     session.topics.add('topic/timeseries', specification).then(function() {
-        // 3. Subscribe
-        session.subscribe('topic/timeseries').asType(dataType).on('value', function(topic, specification, newValue, oldValue) {
+        // 3. Register a value stream
+        session.addStream('topic/timeseries', dataType).on('value', function(topic, specification, newValue, oldValue) {
             var value = newValue.toString();
 
             if (newValue.isEditEvent === true) {
@@ -49,6 +49,9 @@ diffusion.connect({
                 console.log("New value appended to topic: " + value);
             }
         });
+
+        // 4. Subscribe
+        session.select('topic/timeseries');
 
         for (var i = 0; i < 10; i++) {
             // 4. Append values 0-9 to the topic

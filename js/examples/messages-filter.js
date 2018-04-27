@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * limitations under the License.
  *******************************************************************************/
 
-var diffusion = require('../../js-uci-client/src/diffusion');
+var diffusion = require('diffusion');
 
 // Connect to the server. Change these options to suit your own environment.
 // Node.js will not accept self-signed certificates by default. If you have

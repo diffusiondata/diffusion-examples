@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2017, 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.concurrent.TimeoutException;
 
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.callbacks.Registration;
-import com.pushtechnology.diffusion.client.callbacks.TopicTreeHandler;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateContextCallback;
@@ -70,13 +69,24 @@ public final class ControlClientUpdatingRecordV2Topics {
      */
     public ControlClientUpdatingRecordV2Topics(
         String serverUrl,
-        boolean withSchema) {
+        boolean withSchema)
+            throws InterruptedException, ExecutionException, TimeoutException {
 
         session =
             Diffusion.sessions().principal("control").password("password")
                 .open(serverUrl);
 
         topicControl = session.feature(TopicControl.class);
+
+        // Create the root topic that will remove itself when the session closes
+        final TopicSpecification specification =
+            topicControl.newSpecification(TopicType.STRING).withProperty(
+                TopicSpecification.REMOVAL,
+                "When no session has '$SessionId is \"" +
+                session.getSessionId().toString() +
+                "\"' remove '" +
+                "?" + ROOT_TOPIC + "//'");
+        topicControl.addTopic(ROOT_TOPIC, specification).get(5, TimeUnit.SECONDS);
 
         dataType = Diffusion.dataTypes().recordV2();
 
@@ -108,9 +118,6 @@ public final class ControlClientUpdatingRecordV2Topics {
                 public void onRegistered(
                     String topicPath,
                     Registration registration) {
-                    topicControl.removeTopicsWithSession(
-                        ROOT_TOPIC,
-                        new TopicTreeHandler.Default());
                     updateSourceRegistration = registration;
                 }
 

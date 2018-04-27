@@ -23,12 +23,14 @@ diffusion.connect({
     console.log('Connected!');
 
     // Create a topic that contains Double values
-    session.topics.add('foo/counter', diffusion.topics.TopicType.DOUBLE);
+    var doubleSpec = new diffusion.topics.TopicSpecification(diffusion.topics.TopicType.DOUBLE);
+    
+    session.topics.add('foo/counter', doubleSpec);
 
     // Start updating the topic every second
     var count = 0;
 
     setInterval(function() {
-        session.topics.update('foo/counter', count++);
+        session.topics.updateValue('foo/counter', count++, diffusion.datatypes.double());
     }, 1000);
 });
