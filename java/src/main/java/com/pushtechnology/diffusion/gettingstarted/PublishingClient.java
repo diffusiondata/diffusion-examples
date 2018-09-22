@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2017, 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,10 +61,10 @@ public final class PublishingClient {
 
         // Update the topic
         final UpdateCallback updateCallback = new UpdateCallback.Default();
-        for (int i = 0; i < 1000; ++i) {
+        for (long i = 0; i < 1000; ++i) {
 
             // Use the non-exclusive updater to update the topic without locking it
-            updateControl.updater().valueUpdater(Integer.class).update(
+            updateControl.updater().valueUpdater(Long.class).update(
                 "foo/counter", i, updateCallback);
 
             Thread.sleep(1000);
