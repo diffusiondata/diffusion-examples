@@ -14,8 +14,11 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
 
+import static com.pushtechnology.diffusion.client.topics.details.TopicSpecification.REMOVAL;
+import static com.pushtechnology.diffusion.client.topics.details.TopicSpecification.SLAVE_MASTER_TOPIC;
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.pushtechnology.diffusion.client.Diffusion;
@@ -72,9 +75,9 @@ public class ControlClientAddingAndRemovingTopics {
      */
     public boolean addTopic(String topicPath, TopicType topicType)
         throws ExecutionException, TimeoutException, InterruptedException {
-        final AddTopicResult result =
-            topicControl.addTopic(topicPath, topicType).get(5, TimeUnit.SECONDS);
-        return result == AddTopicResult.CREATED;
+
+        return topicControl.addTopic(topicPath, topicType).get(5, SECONDS) ==
+            AddTopicResult.CREATED;
     }
 
     /**
@@ -94,8 +97,7 @@ public class ControlClientAddingAndRemovingTopics {
      */
     public void addTopic(String topicPath, TopicSpecification specification)
         throws InterruptedException, ExecutionException, TimeoutException {
-        topicControl.addTopic(
-            topicPath, specification).get(5, TimeUnit.SECONDS);
+        topicControl.addTopic(topicPath, specification).get(5, SECONDS);
     }
 
     /**
@@ -114,9 +116,9 @@ public class ControlClientAddingAndRemovingTopics {
         throws InterruptedException, ExecutionException, TimeoutException {
         topicControl.addTopic(
             topicPath,
-            topicControl.newSpecification(TopicType.SLAVE).withProperty(
-                TopicSpecification.SLAVE_MASTER_TOPIC, masterTopicPath))
-            .get(5, TimeUnit.SECONDS);
+            topicControl.newSpecification(TopicType.SLAVE)
+                .withProperty(SLAVE_MASTER_TOPIC, masterTopicPath))
+            .get(5, SECONDS);
     }
 
     /**
@@ -134,16 +136,15 @@ public class ControlClientAddingAndRemovingTopics {
      */
     public boolean addSessionTopic(String topicPath, TopicType topicType)
         throws ExecutionException, TimeoutException, InterruptedException {
+
         final TopicSpecification specification =
             topicControl.newSpecification(topicType).withProperty(
-                TopicSpecification.REMOVAL,
-                "When no session has '$SessionId is \"" +
-                session.getSessionId().toString() +
-                "\"' remove '" +
-                "?" + topicPath + "//'");
-        final AddTopicResult result =
-            topicControl.addTopic(topicPath, specification).get(5, TimeUnit.SECONDS);
-        return result == AddTopicResult.CREATED;
+                REMOVAL,
+                "when this session closes remove '?" + topicPath + "//'");
+
+        return
+            topicControl.addTopic(topicPath, specification).get(5, SECONDS) ==
+                AddTopicResult.CREATED;
     }
 
     /**

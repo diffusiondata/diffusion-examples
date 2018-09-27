@@ -14,6 +14,8 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples.runnable;
 
+import static com.pushtechnology.diffusion.client.topics.details.TopicSpecification.REMOVAL;
+import static com.pushtechnology.diffusion.client.topics.details.TopicType.BINARY;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import java.util.concurrent.Executors;
@@ -25,7 +27,6 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateCo
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateCallback;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
-import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.binary.Binary;
 
 /**
@@ -56,10 +57,8 @@ public final class ProducingBinary extends AbstractClient {
         final TopicControl topicControl = session.feature(TopicControl.class);
 
         final TopicSpecification specification =
-            topicControl.newSpecification(TopicType.BINARY).withProperty(
-                TopicSpecification.REMOVAL,
-                "When no session has '$SessionId is \"" +
-                session.getSessionId().toString() + "\"'");
+            topicControl.newSpecification(BINARY)
+                .withProperty(REMOVAL, "when this session closes");
 
         topicControl.addTopic("binary/random", specification);
     }

@@ -14,13 +14,15 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
 
+import static com.pushtechnology.diffusion.client.topics.details.TopicSpecification.REMOVAL;
+import static com.pushtechnology.diffusion.client.topics.details.TopicType.JSON;
 import static java.util.Objects.requireNonNull;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -95,13 +97,11 @@ public final class ControlClientUpdatingJSONTopics {
 
         // Create the root topic that will remove itself when the session closes
         final TopicSpecification specification =
-            topicControl.newSpecification(TopicType.STRING).withProperty(
-                TopicSpecification.REMOVAL,
-                "When no session has '$SessionId is \"" +
-                session.getSessionId().toString() +
-                "\"' remove '" +
-                "?" + ROOT_TOPIC + "//'");
-        topicControl.addTopic(ROOT_TOPIC, specification).get(5, TimeUnit.SECONDS);
+            topicControl.newSpecification(TopicType.STRING)
+                .withProperty(REMOVAL,
+                "When this session closes remove '?" + ROOT_TOPIC + "//'");
+
+        topicControl.addTopic(ROOT_TOPIC, specification).get(5, SECONDS);
 
         // Register as an updater for all topics under the root
         session.feature(TopicUpdateControl.class).registerUpdateSource(
@@ -141,8 +141,7 @@ public final class ControlClientUpdatingJSONTopics {
         throws InterruptedException, ExecutionException, TimeoutException,
         IOException {
 
-        topicControl.addTopic(rateTopicName(currency), TopicType.JSON).
-            get(5, TimeUnit.SECONDS);
+        topicControl.addTopic(rateTopicName(currency), JSON).get(5, SECONDS);
 
         changeRates(currency, values, callback);
     }

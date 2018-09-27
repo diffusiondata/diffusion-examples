@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2017, 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  *******************************************************************************/
 
 /**
- * This provides a number of examples of using the Diffusion Unified API.
+ * This provides a number of examples of using the Diffusion API.
  *
  * @author Push Technology Limited
  * @since 5.10

@@ -14,10 +14,13 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
 
+import static com.pushtechnology.diffusion.client.topics.details.TopicSpecification.REMOVAL;
+import static com.pushtechnology.diffusion.client.topics.details.TopicType.STRING;
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.pushtechnology.diffusion.client.Diffusion;
@@ -29,7 +32,6 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateCo
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.ValueUpdater;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
-import com.pushtechnology.diffusion.client.topics.details.TopicType;
 
 /**
  * An example of using a control client as an event feed to a topic.
@@ -84,15 +86,12 @@ public class ControlClientAsUpdateSource {
         final TopicControl topicControl = session.feature(TopicControl.class);
 
         final TopicSpecification specification =
-            topicControl.newSpecification(TopicType.STRING).withProperty(
-                TopicSpecification.REMOVAL,
-                "When no session has '$SessionId is \"" +
-                session.getSessionId().toString() +
-                "\"'");
+            topicControl.newSpecification(STRING)
+                .withProperty(REMOVAL, "when this session closes");
 
         topicControl.addTopic(
             TOPIC_NAME,
-            specification).get(5, TimeUnit.SECONDS);
+            specification).get(5, SECONDS);
 
         // Declare a custom update source implementation. When the source is set
         // as active start a periodic task to poll the provider every second and
@@ -106,7 +105,7 @@ public class ControlClientAsUpdateSource {
                     scheduler.scheduleAtFixedRate(
                         new FeederTask(provider,
                             updater.valueUpdater(String.class)),
-                        1, 1, TimeUnit.SECONDS);
+                        1, 1, SECONDS);
             }
 
             @Override

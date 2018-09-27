@@ -14,8 +14,13 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
 
+import static com.pushtechnology.diffusion.client.topics.details.TopicSpecification.REMOVAL;
+import static com.pushtechnology.diffusion.client.topics.details.TopicSpecification.SCHEMA;
+import static com.pushtechnology.diffusion.client.topics.details.TopicType.RECORD_V2;
+import static com.pushtechnology.diffusion.client.topics.details.TopicType.STRING;
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.pushtechnology.diffusion.client.Diffusion;
@@ -25,7 +30,6 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateCo
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateContextCallback;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
-import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.recordv2.RecordV2;
 import com.pushtechnology.diffusion.datatype.recordv2.RecordV2DataType;
 import com.pushtechnology.diffusion.datatype.recordv2.model.MutableRecordModel;
@@ -80,13 +84,12 @@ public final class ControlClientUpdatingRecordV2Topics {
 
         // Create the root topic that will remove itself when the session closes
         final TopicSpecification specification =
-            topicControl.newSpecification(TopicType.STRING).withProperty(
-                TopicSpecification.REMOVAL,
-                "When no session has '$SessionId is \"" +
-                session.getSessionId().toString() +
-                "\"' remove '" +
-                "?" + ROOT_TOPIC + "//'");
-        topicControl.addTopic(ROOT_TOPIC, specification).get(5, TimeUnit.SECONDS);
+            topicControl.newSpecification(STRING)
+                .withProperty(
+                    REMOVAL,
+                    "when this session closes remove '?" + ROOT_TOPIC + "//'");
+
+        topicControl.addTopic(ROOT_TOPIC, specification).get(5, SECONDS);
 
         dataType = Diffusion.dataTypes().recordV2();
 
@@ -95,16 +98,16 @@ public final class ControlClientUpdatingRecordV2Topics {
                 .record("Rates").decimal("Bid", 5).decimal("Ask", 5).build();
             // Create the topic specification to be used for all rates topics
             topicSpecification =
-                topicControl.newSpecification(TopicType.RECORD_V2)
+                topicControl.newSpecification(RECORD_V2)
                     .withProperty(
-                        TopicSpecification.SCHEMA,
+                        SCHEMA,
                         schema.asJSONString());
         }
         else {
             schema = null;
             // Create the topic specification to be used for all rates topics
             topicSpecification =
-                topicControl.newSpecification(TopicType.RECORD_V2);
+                topicControl.newSpecification(RECORD_V2);
         }
 
         final TopicUpdateControl updateControl =
@@ -148,7 +151,7 @@ public final class ControlClientUpdatingRecordV2Topics {
 
         topicControl.addTopic(
             rateTopicName(currency, targetCurrency),
-            topicSpecification).get(5, TimeUnit.SECONDS);
+            topicSpecification).get(5, SECONDS);
     }
 
     /**
@@ -216,7 +219,7 @@ public final class ControlClientUpdatingRecordV2Topics {
 
         topicControl.removeTopics(
             rateTopicName(currency, targetCurrency))
-            .get(5, TimeUnit.SECONDS);
+            .get(5, SECONDS);
     }
 
     /**
@@ -228,7 +231,7 @@ public final class ControlClientUpdatingRecordV2Topics {
         throws InterruptedException, ExecutionException, TimeoutException {
         topicControl
             .removeTopics(String.format("?%s/%s//", ROOT_TOPIC, currency))
-            .get(5, TimeUnit.SECONDS);
+            .get(5, SECONDS);
     }
 
     /**

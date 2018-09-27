@@ -13,8 +13,9 @@
  * limitations under the License.
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
-
-import java.util.concurrent.TimeUnit;
+import static com.pushtechnology.diffusion.client.topics.details.TopicSpecification.REMOVAL;
+import static com.pushtechnology.diffusion.client.topics.details.TopicType.STRING;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
@@ -23,7 +24,6 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateCo
 import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.ValueUpdater;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
-import com.pushtechnology.diffusion.client.topics.details.TopicType;
 
 /**
  * An example of using a control client to create and update a simple scalar
@@ -63,14 +63,12 @@ public final class ControlClientUpdatingSimpleTopics {
         // Create the topic and request that it is removed when the session
         // closes
         final TopicSpecification specification =
-            topicControl.newSpecification(TopicType.STRING).withProperty(
-                TopicSpecification.REMOVAL,
-                "When no session has '$SessionId is \"" +
-                session.getSessionId().toString() +
-                "\"' remove '" +
-                "?" + TOPIC + "//'");
+            topicControl.newSpecification(STRING)
+                .withProperty(
+                    REMOVAL,
+                    "when this session closes remove '?" + TOPIC + "//'");
 
-        topicControl.addTopic(TOPIC, specification).get(5, TimeUnit.SECONDS);
+        topicControl.addTopic(TOPIC, specification).get(5, SECONDS);
 
         final TopicUpdateControl updateControl =
             session.feature(TopicUpdateControl.class);

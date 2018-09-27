@@ -20,7 +20,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\target\Diffusion.Client.dll</HintPath>
     </Reference>
-    <PackageReference Include="Microsoft.CSharp" Version="4.4.1" />
     <PackageReference Include="NLog" Version="4.5.3" />
   </ItemGroup>
 
