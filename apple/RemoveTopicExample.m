@@ -1,6 +1,6 @@
 //  Diffusion Client Library for iOS, tvOS and OS X / macOS - Examples
 //
-//  Copyright (C) 2016 Push Technology Ltd.
+//  Copyright (C) 2016, 2018 Push Technology Ltd.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -45,10 +45,10 @@
         NSLog(@"Connected.");
 
         // Set ivar to maintain a strong reference to the session.
-        _session = session;
+        self->_session = session;
 
         // Remove topic.
-        NSString *const topicPath = @"Example/Stateless";
+        NSString *const topicPath = @"Example/Some Topic";
         [session.topicControl removeDiscreteWithTopicSelectorExpression:topicPath
                                                       completionHandler:^(NSError *const error)
         {

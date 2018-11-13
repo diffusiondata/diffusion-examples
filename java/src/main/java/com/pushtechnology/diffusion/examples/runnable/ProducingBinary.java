@@ -22,9 +22,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 
+import com.pushtechnology.diffusion.client.features.TopicUpdate;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateCallback;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.datatype.binary.Binary;
@@ -38,8 +37,6 @@ import com.pushtechnology.diffusion.datatype.binary.Binary;
 public final class ProducingBinary extends AbstractClient {
     private static final ScheduledExecutorService EXECUTOR = Executors
         .newSingleThreadScheduledExecutor();
-    private static final UpdateCallback.Default UPDATE_CALLBACK =
-        new UpdateCallback.Default();
 
     private volatile Future<?> updateTask;
 
@@ -65,20 +62,17 @@ public final class ProducingBinary extends AbstractClient {
 
     @Override
     public void onConnected(Session session) {
-        final TopicUpdateControl.ValueUpdater<Binary> updater = session
-            .feature(TopicUpdateControl.class)
-            .updater()
-            .valueUpdater(Binary.class);
+        final TopicUpdate topicUpdate = session.feature(TopicUpdate.class);
 
         updateTask = EXECUTOR.scheduleAtFixedRate(
             new Runnable() {
                 @Override
                 public void run() {
                     // Update the topic with random data
-                    updater.update(
+                    topicUpdate.set(
                         "binary/random",
-                        RandomData.toBinary(RandomData.next()),
-                        UPDATE_CALLBACK);
+                        Binary.class,
+                        RandomData.toBinary(RandomData.next()));
                 }
             },
             0L,

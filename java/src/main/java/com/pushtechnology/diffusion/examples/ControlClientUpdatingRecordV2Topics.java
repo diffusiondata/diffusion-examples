@@ -20,14 +20,14 @@ import static com.pushtechnology.diffusion.client.topics.details.TopicType.RECOR
 import static com.pushtechnology.diffusion.client.topics.details.TopicType.STRING;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.callbacks.Registration;
+import com.pushtechnology.diffusion.client.features.TopicUpdate;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateContextCallback;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.datatype.recordv2.RecordV2;
@@ -40,7 +40,7 @@ import com.pushtechnology.diffusion.datatype.recordv2.schema.Schema;
  * exclusive mode.
  * <P>
  * This uses the 'TopicControl' feature to create a topic and the
- * 'TopicUpdateControl' feature to send updates to it.
+ * 'TopicUpdate' feature to send updates to it.
  * <P>
  * To send updates to a topic, the client session requires the 'update_topic'
  * permission for that branch of the topic tree.
@@ -63,8 +63,6 @@ public final class ControlClientUpdatingRecordV2Topics {
     private volatile Registration updateSourceRegistration;
     private final Schema schema;
     private final RecordV2DataType dataType;
-
-    private volatile TopicUpdateControl.ValueUpdater<RecordV2> valueUpdater;
 
     /**
      * Constructor.
@@ -109,29 +107,6 @@ public final class ControlClientUpdatingRecordV2Topics {
             topicSpecification =
                 topicControl.newSpecification(RECORD_V2);
         }
-
-        final TopicUpdateControl updateControl =
-            session.feature(TopicUpdateControl.class);
-
-        // Register as an updater for all topics under the root
-        updateControl.registerUpdateSource(
-            ROOT_TOPIC,
-            new TopicUpdateControl.UpdateSource.Default() {
-                @Override
-                public void onRegistered(
-                    String topicPath,
-                    Registration registration) {
-                    updateSourceRegistration = registration;
-                }
-
-                @Override
-                public void onActive(
-                    String topicPath,
-                    TopicUpdateControl.Updater updater) {
-                    valueUpdater = updater.valueUpdater(RecordV2.class);
-                }
-            });
-
     }
 
     /**
@@ -167,21 +142,14 @@ public final class ControlClientUpdatingRecordV2Topics {
      * @param bid the new bid rate
      *
      * @param ask the new ask rate
-     *
-     * @param callback a callback which will be called to report the outcome.
-     *        The context in the callback will be currency/targetCurrency (e.g.
-     *        "GBP/USD")
+     * @return a CompletableFuture that completes when a response is received
+     *         from the server
      */
-    public void setRate(
+    public CompletableFuture<?> setRate(
         String currency,
         String targetCurrency,
         String bid,
-        String ask,
-        UpdateContextCallback<String> callback) {
-
-        if (valueUpdater == null) {
-            throw new IllegalStateException("Not registered as updater");
-        }
+        String ask) {
 
         final RecordV2 value;
         if (schema == null) {
@@ -197,12 +165,10 @@ public final class ControlClientUpdatingRecordV2Topics {
             value = model.asValue();
         }
 
-        valueUpdater.update(
+        return session.feature(TopicUpdate.class).set(
             rateTopicName(currency, targetCurrency),
-            value,
-            String.format("%s/%s", currency, targetCurrency),
-            callback);
-
+            RecordV2.class,
+            value);
     }
 
     /**

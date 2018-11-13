@@ -11,8 +11,6 @@ runtime platform. They will require minimum modification to run on either OS X o
 
 You can download the Apple client libraries from the following location:
 
-*   [http://download.pushtechnology.com/cloud/latest/sdks.html](http://download.pushtechnology.com/cloud/latest/sdks.html)
-    
-The client libraries are also available in the `clients` directory of the Diffusion server installation.
+*   [http://download.pushtechnology.com/cloud/latest/sdks.html](http://download.pushtechnology.com/cloud/latest/sdks.html#apple)
 
-
+The client libraries are also available in the `clients` directory of the Diffusion installation.

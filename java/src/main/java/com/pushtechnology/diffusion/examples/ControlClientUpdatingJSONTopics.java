@@ -22,6 +22,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -29,13 +30,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
 import com.pushtechnology.diffusion.client.Diffusion;
-import com.pushtechnology.diffusion.client.callbacks.Registration;
+import com.pushtechnology.diffusion.client.features.TopicUpdate;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.RemovalContextCallback;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.UpdateSource;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateContextCallback;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
@@ -74,8 +70,6 @@ public final class ControlClientUpdatingJSONTopics {
 
     private final Session session;
     private final TopicControl topicControl;
-    private volatile TopicUpdateControl.ValueUpdater<JSON> valueUpdater;
-    private volatile Registration updateSourceRegistration;
     private final CBORFactory cborFactory = new CBORFactory();
     private final JSONDataType jsonDataType = Diffusion.dataTypes().json();
 
@@ -102,29 +96,6 @@ public final class ControlClientUpdatingJSONTopics {
                 "When this session closes remove '?" + ROOT_TOPIC + "//'");
 
         topicControl.addTopic(ROOT_TOPIC, specification).get(5, SECONDS);
-
-        // Register as an updater for all topics under the root
-        session.feature(TopicUpdateControl.class).registerUpdateSource(
-            ROOT_TOPIC,
-            new UpdateSource.Default() {
-                @Override
-                public void onRegistered(
-                    String topicPath,
-                    Registration registration) {
-                    updateSourceRegistration = registration;
-                }
-
-                @Override
-                public void onActive(String topicPath, Updater updater) {
-                    valueUpdater = updater.valueUpdater(JSON.class);
-                }
-
-                @Override
-                public void onClose(String topicPath) {
-                    session.close();
-                }
-            });
-
     }
 
     /**
@@ -132,18 +103,18 @@ public final class ControlClientUpdatingJSONTopics {
      *
      * @param currency the base currency
      * @param values the full map of initial rates values
-     * @param callback reports outcome
+     * @return a CompletableFuture that completes when a response is received
+     *         from the server
      */
-    public void addRates(
+    public CompletableFuture<?> addRates(
         String currency,
-        Map<String, String> values,
-        UpdateContextCallback<String> callback)
+        Map<String, String> values)
         throws InterruptedException, ExecutionException, TimeoutException,
         IOException {
 
         topicControl.addTopic(rateTopicName(currency), JSON).get(5, SECONDS);
 
-        changeRates(currency, values, callback);
+        return changeRates(currency, values);
     }
 
     /**
@@ -152,23 +123,18 @@ public final class ControlClientUpdatingJSONTopics {
      *
      * @param currency the base currency
      * @param values the new rates values
-     * @param callback reports outcome
+     * @return a CompletableFuture that completes when a response is received
+     *         from the server
      * @throws IOException if unable to convert rates map
      */
-    public void changeRates(
+    public CompletableFuture<?> changeRates(
         String currency,
-        Map<String, String> values,
-        UpdateContextCallback<String> callback) throws IOException {
+        Map<String, String> values) throws IOException {
 
-        if (valueUpdater == null) {
-            throw new IllegalStateException("Not registered as updater");
-        }
-
-        valueUpdater.update(
+        return session.feature(TopicUpdate.class).set(
             rateTopicName(currency),
-            mapToJSON(values),
-            currency,
-            callback);
+            JSON.class,
+            mapToJSON(values));
     }
 
     /**
@@ -178,25 +144,19 @@ public final class ControlClientUpdatingJSONTopics {
      *
      * @param currency the base currency
      * @param jsonString a JSON string specifying the map of currency rates
-     * @param callback reports the outcome
+     * @return a CompletableFuture that completes when a response is received
+     *         from the server
      * @throws IOException if unable to convert string
      */
-    public void changeRates(
+    public CompletableFuture<?> changeRates(
         String currency,
-        String jsonString,
-        UpdateContextCallback<String> callback)
+        String jsonString)
         throws IllegalArgumentException, IOException {
 
-        if (valueUpdater == null) {
-            throw new IllegalStateException("Not registered as updater");
-        }
-
-        valueUpdater.update(
+        return session.feature(TopicUpdate.class).set(
             rateTopicName(currency),
-            jsonDataType.fromJsonString(jsonString),
-            currency,
-            callback);
-
+            JSON.class,
+            jsonDataType.fromJsonString(jsonString));
     }
 
     /**
@@ -212,31 +172,25 @@ public final class ControlClientUpdatingJSONTopics {
     }
 
     /**
-     * Remove a rates entry (removes its topic) and clear cached value for the
-     * topic.
+     * Remove a rates entry (removes its topic).
      *
      * @param currency the currency
      *
-     * @param callback reports the outcome
+     * @return a CompletableFuture that completes when a response is received
+     *         from the server
      */
-    public void removeRates(
-        String currency,
-        RemovalContextCallback<String> callback) {
+    public CompletableFuture<?> removeRates(String currency) {
 
         final String topicName = rateTopicName(currency);
 
-        if (valueUpdater != null) {
-            valueUpdater.removeCachedValues(topicName);
-        }
-
-        topicControl.remove(topicName, currency, callback);
+        return topicControl.removeTopics(topicName);
     }
 
     /**
      * Close the session.
      */
     public void close() {
-        updateSourceRegistration.close();
+        session.close();
     }
 
     /**

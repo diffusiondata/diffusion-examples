@@ -40,11 +40,11 @@ public class ControlClientSubscriptionControlRouting {
      * @param routingCallback for routing subscription requests
      */
     public ControlClientSubscriptionControlRouting(
-        final SubscriptionCallback routingCallback) {
+        final SubscriptionCallback routingCallback, String serverUrl) {
 
         session =
             Diffusion.sessions().principal("control").password("password")
-                .open("ws://diffusion.example.com:80");
+                .open(serverUrl);
 
         final SubscriptionControl subscriptionControl =
             session.feature(SubscriptionControl.class);

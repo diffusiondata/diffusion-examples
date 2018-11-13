@@ -47,7 +47,7 @@
         NSLog(@"Connected.");
 
         // Set ivar to maintain a strong reference to the session.
-        _session = session;
+        self->_session = session;
 
         // Add topic.
         [self addTopicForSession:session];

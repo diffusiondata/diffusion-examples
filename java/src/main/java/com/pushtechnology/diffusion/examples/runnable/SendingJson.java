@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2016, 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,36 +15,26 @@
 
 package com.pushtechnology.diffusion.examples.runnable;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.pushtechnology.diffusion.client.Diffusion;
-import com.pushtechnology.diffusion.client.content.Content;
 import com.pushtechnology.diffusion.client.features.Messaging;
-import com.pushtechnology.diffusion.client.features.Messaging.MessageStream;
 import com.pushtechnology.diffusion.client.session.Session;
-import com.pushtechnology.diffusion.client.types.ReceiveContext;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
- * A client that creates and sends JSON messages.
+ * A client that creates and sends JSON requests.
  *
  * @author Push Technology Limited
  * @since 5.7
+ * @see ReceivingJson
  */
 public final class SendingJson extends AbstractClient {
     private static final Logger LOG = LoggerFactory
         .getLogger(ProducingJson.class);
-    private static final Messaging.SendCallback.Default SEND_CALLBACK =
-        new Messaging.SendCallback.Default();
-    private final ScheduledExecutorService executor = Executors
-        .newSingleThreadScheduledExecutor();
 
     /**
      * Constructor.
@@ -57,58 +47,35 @@ public final class SendingJson extends AbstractClient {
 
     @Override
     public void onConnected(Session session) {
-        final Messaging messagingFeature = session.feature(Messaging.class);
 
-        // Add a message handler for receiving messages sent to the session
-        messagingFeature.addMessageStream(
-            ">json/response",
-            new MessageStream.Default() {
-                @Override
-                public void onMessageReceived(
-                    String topicPath,
-                    Content content,
-                    ReceiveContext context) {
+        final JSON request;
 
-                    // Convert the content to JSON
-                    final JSON json = Diffusion
-                        .dataTypes()
-                        .json()
-                        .readValue(content);
-
-                    LOG.info("Received response {}", json);
-
-                    executor.schedule(
-                        new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    // Send the next message to the server
-                                    messagingFeature.send(
-                                        "json/request",
-                                        RandomData.toJSON(RandomData.next()),
-                                        SEND_CALLBACK);
-                                }
-                                catch (JsonProcessingException e) {
-                                    LOG.error("Failed to transform RandomData" +
-                                        " to Content");
-                                }
-                            }
-                        },
-                        1,
-                        SECONDS);
-                }
-        });
-
-        // Send the first message to the server
         try {
-            messagingFeature.send(
-                "json/request",
-                RandomData.toJSON(RandomData.next()),
-                SEND_CALLBACK);
+            request = RandomData.toJSON(RandomData.next());
         }
         catch (JsonProcessingException e) {
             LOG.error("Failed to transform RandomData to Content");
+            return;
         }
+
+        final Messaging messaging = session.feature(Messaging.class);
+
+        // Send the request to the server
+        final CompletableFuture<JSON> response =
+            messaging.sendRequest(
+            "json/request",
+            request,
+            JSON.class,
+            JSON.class);
+
+        response.whenComplete((result, error) -> {
+            if (error != null) {
+                LOG.error("Request failed", error);
+            }
+            else {
+                LOG.info("Received response {}", result);
+            }
+        });
     }
 
     /**

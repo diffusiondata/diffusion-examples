@@ -18,13 +18,13 @@ import static com.pushtechnology.diffusion.client.topics.details.TopicSpecificat
 import static com.pushtechnology.diffusion.client.topics.details.TopicSpecification.SLAVE_MASTER_TOPIC;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddTopicResult;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.RemovalCallback;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
@@ -49,11 +49,11 @@ public class ControlClientAddingAndRemovingTopics {
     /**
      * Constructor.
      */
-    public ControlClientAddingAndRemovingTopics() {
+    public ControlClientAddingAndRemovingTopics(String serverUrl) {
 
         session =
             Diffusion.sessions().principal("control").password("password")
-                .open("ws://diffusion.example.com:80");
+                .open(serverUrl);
 
         topicControl = session.feature(TopicControl.class);
 
@@ -151,30 +151,33 @@ public class ControlClientAddingAndRemovingTopics {
      * Remove a single topic given its path.
      *
      * @param topicPath the topic path
-     * @param callback notifies result of operation
+     * @return a CompletableFuture that completes when a response is received
+     *         from the server
      */
-    public void removeTopic(String topicPath, RemovalCallback callback) {
-        topicControl.remove(topicPath, callback);
+    public CompletableFuture<?> removeTopic(String topicPath) {
+        return removeTopics(">" + topicPath);
     }
 
     /**
      * Remove a topic and all of its descendants.
      *
      * @param topicPath the topic path
-     * @param callback notifies result of operation
+     * @return a CompletableFuture that completes when a response is received
+     *         from the server
      */
-    public void removeTopicBranch(String topicPath, RemovalCallback callback) {
-        topicControl.remove("?" + topicPath + "//", callback);
+    public CompletableFuture<?> removeTopicBranch(String topicPath) {
+        return removeTopics("?" + topicPath + "//");
     }
 
     /**
      * Remove one or more topics using a topic selector expression.
      *
      * @param topicSelector the selector expression
-     * @param callback notifies result of operation
+     * @return a CompletableFuture that completes when a response is received
+     *         from the server
      */
-    public void removeTopics(String topicSelector, RemovalCallback callback) {
-        topicControl.remove(topicSelector, callback);
+    public CompletableFuture<?> removeTopics(String topicSelector) {
+        return topicControl.removeTopics(topicSelector);
     }
 
     /**

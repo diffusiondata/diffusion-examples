@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2015 Push Technology Ltd.
+ * Copyright (C) 2014, 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,10 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
 
+import java.util.concurrent.CompletableFuture;
+
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.control.topics.SubscriptionControl;
-import com.pushtechnology.diffusion.client.features.control.topics.SubscriptionControl.SubscriptionCallback;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionId;
 
@@ -38,11 +39,11 @@ public class ControlClientSubscriptionControl {
     /**
      * Constructor.
      */
-    public ControlClientSubscriptionControl() {
+    public ControlClientSubscriptionControl(String serverUrl) {
 
         session =
             Diffusion.sessions().principal("control").password("password")
-                .open("ws://diffusion.example.com:80");
+                .open(serverUrl);
 
         subscriptionControl = session.feature(SubscriptionControl.class);
     }
@@ -52,19 +53,18 @@ public class ControlClientSubscriptionControl {
      *
      * @param sessionId client to subscribe
      * @param topicSelector topic selector expression
-     * @param callback for subscription result
+     * @return a CompletableFuture that completes when a response is received
+     *         from the server
      */
-    public void subscribe(
+    public CompletableFuture<?> subscribe(
         SessionId sessionId,
-        String topicSelector,
-        SubscriptionCallback callback) {
+        String topicSelector) {
 
         // To subscribe a client to a topic, this client session
         // must have the 'modify_session' permission.
-        subscriptionControl.subscribe(
+        return subscriptionControl.subscribe(
             sessionId,
-            topicSelector,
-            callback);
+            topicSelector);
     }
 
     /**
@@ -72,19 +72,18 @@ public class ControlClientSubscriptionControl {
      *
      * @param sessionId client to unsubscribe
      * @param topicSelector topic selector expression
-     * @param callback for unsubscription result
+     * @return a CompletableFuture that completes when a response is received
+     *         from the server
      */
-    public void unsubscribe(
+    public CompletableFuture<?> unsubscribe(
         SessionId sessionId,
-        String topicSelector,
-        SubscriptionCallback callback) {
+        String topicSelector) {
 
         // To unsubscribe a client from a topic, this client session
         // must have the 'modify_session' permission.
-        subscriptionControl.unsubscribe(
+        return subscriptionControl.unsubscribe(
             sessionId,
-            topicSelector,
-            callback);
+            topicSelector);
     }
 
     /**

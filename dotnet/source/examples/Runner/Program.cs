@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using PushTechnology.ClientInterface.Example.Consuming;
+using PushTechnology.ClientInterface.Example.Features;
 using PushTechnology.ClientInterface.Example.Publishing;
 
 namespace PushTechnology.ClientInterface.Examples.Runner {
@@ -43,7 +44,7 @@ namespace PushTechnology.ClientInterface.Examples.Runner {
                 //runner.Start( new ConsumingStringTopics(), url );
 
                 /// Start integer topic examples
-                //runner.Start( new PublishingIntegerTopics(), secureUrl );
+                //runner.Start( new PublishingIntegerTopics(), secureUrl );                
                 //runner.Start( new ConsumingIntegerTopics(), url );
 
                 /// Start double topic examples
@@ -75,7 +76,10 @@ namespace PushTechnology.ClientInterface.Examples.Runner {
                 //runner.Start( new SendingSessionRequestMessages(), secureUrl );
 
                 /// Start ping example
-                //runner.Start( new PingServer(), url );
+                //runner.Start( new Example.Features.PingServer(), secureUrl );
+
+                /// Start automatic topic removal
+                //runner.Start( new Removal(), secureUrl );
             }
         }
 

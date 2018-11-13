@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2016 Push Technology Ltd.
+ * Copyright (C) 2014, 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.diffusion.client.Diffusion;
-import com.pushtechnology.diffusion.client.content.Content;
 import com.pushtechnology.diffusion.client.features.Topics;
 import com.pushtechnology.diffusion.client.features.Topics.ValueStream;
 import com.pushtechnology.diffusion.client.session.Session;
@@ -48,7 +47,7 @@ public class SubscribingClient {
         final Topics topics = session.feature(Topics.class);
 
         // Add a new stream for 'foo/counter'
-        topics.addStream(">foo/counter", Content.class, new ValueStreamPrintLn());
+        topics.addStream(">foo/counter", Long.class, new ValueStreamPrintLn());
 
         // Subscribe to the topic 'foo/counter'
         topics.subscribe("foo/counter")
@@ -65,14 +64,14 @@ public class SubscribingClient {
     /**
      * A topic stream that prints updates to the console.
      */
-    private static class ValueStreamPrintLn extends ValueStream.Default<Content> {
+    private static class ValueStreamPrintLn extends ValueStream.Default<Long> {
         @Override
         public void onValue(
             String topicPath,
             TopicSpecification specification,
-            Content oldValue,
-            Content newValue) {
-            System.out.println(topicPath + ":   " + newValue.asString());
+            Long oldValue,
+            Long newValue) {
+            System.out.println(topicPath + ":   " + newValue);
         }
     }
 }

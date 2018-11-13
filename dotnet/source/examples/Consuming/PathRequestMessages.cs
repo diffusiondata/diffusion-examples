@@ -32,7 +32,7 @@ namespace PushTechnology.ClientInterface.Example.Consuming {
         /// Runs the client receiving messages example.
         /// </summary>
         /// <param name="cancellationToken">A token used to end the client example.</param>
-        /// <param name="args">A single string should be used for the server url.</param>
+        /// <param name="args">A single string should be used for the server URL.</param>
         public async Task Run( CancellationToken cancellationToken, string[] args ) {
             var serverUrl = args[ 0 ];
             var session = Diffusion.Sessions.Principal( "control" ).Password( "password" ).Open( serverUrl );
@@ -47,7 +47,7 @@ namespace PushTechnology.ClientInterface.Example.Consuming {
                 await Task.Delay( Timeout.InfiniteTimeSpan, cancellationToken );
             } finally {
                 // Close session
-                await requestHandlerRegistration.Close();
+                await requestHandlerRegistration.CloseAsync();
                 session.Close();
             }
         }

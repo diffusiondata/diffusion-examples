@@ -9,6 +9,7 @@
     <Import_RootNamespace>PushTechnology.ClientInterface.Example.Features</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AutomaticRemoval.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PingServer.cs" />
   </ItemGroup>
 </Project>

@@ -27,6 +27,8 @@
 
 #ifdef WIN32
 #define sleep(x) Sleep(1000 * x)
+#else
+#include <unistd.h>
 #endif
 
 #include "diffusion.h"

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2015 Push Technology Ltd.
+ * Copyright (C) 2015, 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,21 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import com.pushtechnology.diffusion.client.Diffusion;
-import com.pushtechnology.diffusion.client.content.Content;
+import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.features.control.topics.MessagingControl;
-import com.pushtechnology.diffusion.client.features.control.topics.MessagingControl.MessageHandler;
-import com.pushtechnology.diffusion.client.features.control.topics.MessagingControl.SendToFilterCallback;
+import com.pushtechnology.diffusion.client.features.control.topics.MessagingControl.FilteredRequestCallback;
+import com.pushtechnology.diffusion.client.features.control.topics.MessagingControl.RequestHandler;
 import com.pushtechnology.diffusion.client.session.Session;
-import com.pushtechnology.diffusion.client.session.SessionId;
-import com.pushtechnology.diffusion.client.types.ReceiveContext;
 
 /**
  * This is an example of a control client using the 'MessagingControl' feature
  * to send messages to clients using message filters. It also demonstrates the
- * ability to register a message handler with an interest in session property
+ * ability to register a request handler with an interest in session property
  * values.
  *
  * @author Push Technology Limited
@@ -36,28 +38,35 @@ public final class ControlClientUsingFiltersAndProperties {
 
     private final Session session;
     private final MessagingControl messagingControl;
-    private final SendToFilterCallback sendToFilterCallback;
+
+    private static final FilteredRequestCallback<String> FILTERED_CALLBACK =
+        new FilteredRequestCallback.Default<>();
 
     /**
      * Constructor.
-     *
-     * @param callback for result of sends
+     * @throws TimeoutException
+     * @throws ExecutionException
+     * @throws InterruptedException
      */
-    public ControlClientUsingFiltersAndProperties(SendToFilterCallback callback) {
-
-        sendToFilterCallback = callback;
+    public ControlClientUsingFiltersAndProperties(String serverUrl)
+        throws InterruptedException, ExecutionException, TimeoutException {
 
         session =
             Diffusion.sessions().principal("control").password("password")
-                .open("ws://diffusion.example.com:80");
+                .open(serverUrl);
+
         messagingControl = session.feature(MessagingControl.class);
 
         // Register to receive all messages sent by clients on the "foo" branch
         // and include the "JobTitle" session property value with each message.
         // To do this, the client session must have the 'register_handler'
         // permission.
-        messagingControl.addMessageHandler(
-            "foo", new BroadcastHandler(), "JobTitle");
+        messagingControl.addRequestHandler(
+            "foo",
+            String.class,
+            String.class,
+            new BroadcastHandler(),
+            "JobTitle").get(5, TimeUnit.SECONDS);
     }
 
     /**
@@ -72,23 +81,39 @@ public final class ControlClientUsingFiltersAndProperties {
      * property set to "Staff" if, and only if it comes from a session that has
      * a "JobTitle" set to "Manager".
      */
-    private class BroadcastHandler extends MessageHandler.Default {
+    private class BroadcastHandler implements RequestHandler<String, String> {
+
         @Override
-        public void onMessage(
-            SessionId sessionId,
-            String topicPath,
-            Content content,
-            ReceiveContext context) {
+        public void onRequest(
+            String request,
+            RequestContext context,
+            final Responder<String> responder) {
 
-            if ("Manager".equals(context.getSessionProperties().get("JobTitle"))) {
-                messagingControl.sendToFilter(
+            if ("Manager".equals(
+                context.getSessionProperties().get("JobTitle"))) {
+                messagingControl.sendRequestToFilter(
                     "JobTitle is 'Staff'",
-                    topicPath,
-                    content,
-                    sendToFilterCallback);
+                    "foo",
+                    request,
+                    String.class,
+                    String.class,
+                    FILTERED_CALLBACK)
+                    .thenAccept(sentTo ->
+                        responder.respond("Sent to " + sentTo + " staff"));
             }
-
+            else {
+                responder.respond("Not sent");
+            }
         }
+
+        @Override
+        public void onClose() {
+        }
+
+        @Override
+        public void onError(ErrorReason errorReason) {
+        }
+
     }
 
 }

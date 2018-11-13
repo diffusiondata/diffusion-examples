@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2016, 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.session.Session;
-import com.pushtechnology.diffusion.client.session.SessionFactory;
 
 /**
  * Abstract client. Supporting a simplified state model and starting and
@@ -101,18 +100,7 @@ public abstract class AbstractClient {
                     }
                 }
             })
-            .open(url, new SessionFactory.OpenCallback() {
-                @Override
-                public void onError(ErrorReason errorReason) {
-                    synchronized (AbstractClient.this) {
-                        AbstractClient.this.onError(errorReason);
-                    }
-                }
-
-                @Override
-                public void onOpened(Session session) {
-                }
-            });
+            .open(url);
     }
 
     /**

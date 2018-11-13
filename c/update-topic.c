@@ -38,7 +38,6 @@
 #include "diffusion.h"
 #include "args.h"
 #include "conversation.h"
-#include "service/svc-update.h"
 
 int active = 0;
 
@@ -60,7 +59,7 @@ ARG_OPTS_T arg_opts[] = {
  * Handlers for add topic feature.
  */
 static int
-on_topic_added(SESSION_T *session, const SVC_ADD_TOPIC_RESPONSE_T *response, void *context)
+on_topic_added_with_specification(SESSION_T *session, TOPIC_ADD_RESULT_CODE result_code, void *context)
 {
         printf("Added topic \"%s\"\n", (const char *)context);
         apr_thread_mutex_lock(mutex);
@@ -70,9 +69,9 @@ on_topic_added(SESSION_T *session, const SVC_ADD_TOPIC_RESPONSE_T *response, voi
 }
 
 static int
-on_topic_add_failed(SESSION_T *session, const SVC_ADD_TOPIC_RESPONSE_T *response, void *context)
+on_topic_add_failed_with_specification(SESSION_T *session, TOPIC_ADD_FAIL_RESULT_CODE result_code, const DIFFUSION_ERROR_T *error, void *context)
 {
-        printf("Failed to add topic \"%s\" (%d)\n", (const char *)context, response->response_code);
+        printf("Failed to add topic \"%s\" (%d)\n", (const char *)context, result_code);
         apr_thread_mutex_lock(mutex);
         apr_thread_cond_broadcast(cond);
         apr_thread_mutex_unlock(mutex);
@@ -208,6 +207,19 @@ on_update_failure(SESSION_T *session,
         return HANDLER_SUCCESS;
 }
 
+static ADD_TOPIC_CALLBACK_T
+create_topic_callback(const char *topic_name)
+{
+        ADD_TOPIC_CALLBACK_T callback = {
+                .on_topic_added_with_specification = on_topic_added_with_specification,
+                .on_topic_add_failed_with_specification = on_topic_add_failed_with_specification,
+                .on_discard = on_topic_add_discard,
+                .context = (char *)topic_name
+        };
+
+        return callback;
+}
+
 /*
  * Program entry point.
  */
@@ -253,25 +265,15 @@ main(int argc, char** argv)
                 return EXIT_FAILURE;
         }
 
-        /*
-         * Create a topic holding JSON content.
-         */
-        TOPIC_DETAILS_T *json_topic_details = create_topic_details_json();
-        const ADD_TOPIC_PARAMS_T add_topic_params = {
-                .topic_path = topic_name,
-                .context = (void *)topic_name,
-                .details = json_topic_details,
-                .on_topic_added = on_topic_added,
-                .on_topic_add_failed = on_topic_add_failed,
-                .on_discard = on_topic_add_discard,
-        };
+        ADD_TOPIC_CALLBACK_T callback = create_topic_callback(topic_name);
+        TOPIC_SPECIFICATION_T *spec = topic_specification_init(TOPIC_TYPE_JSON);
 
         apr_thread_mutex_lock(mutex);
-        add_topic(session, add_topic_params);
+        add_topic_from_specification(session, topic_name, spec, callback);
         apr_thread_cond_wait(cond, mutex);
         apr_thread_mutex_unlock(mutex);
 
-        topic_details_free(json_topic_details);
+        topic_specification_free(spec);
 
         /*
          * Define the handlers for add_update_source()
@@ -317,7 +319,11 @@ main(int argc, char** argv)
                         BUF_T *cbor_buf = buf_create();
                         cbor_write_text_string(cbor_generator, time_str, strlen(time_str));
                         buf_write_bytes(cbor_buf, cbor_generator->data, cbor_generator->len);
-                        CONTENT_T *json_content = content_create(CONTENT_ENCODING_NONE, cbor_buf);
+
+                        CONTENT_T *json_content = calloc(1, sizeof(CONTENT_T));
+                        json_content->data = buf_dup(cbor_buf);
+                        json_content->encoding = CONTENT_ENCODING_NONE;
+
                         buf_free(cbor_buf);
 
                         /*

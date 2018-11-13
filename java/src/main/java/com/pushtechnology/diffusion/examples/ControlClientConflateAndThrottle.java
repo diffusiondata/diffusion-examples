@@ -18,7 +18,6 @@ import static com.pushtechnology.diffusion.client.features.control.clients.Messa
 
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.control.clients.ClientControl;
-import com.pushtechnology.diffusion.client.features.control.clients.ClientControl.ClientCallback;
 import com.pushtechnology.diffusion.client.features.control.clients.ClientControl.QueueEventHandler;
 import com.pushtechnology.diffusion.client.features.control.clients.MessageQueuePolicy;
 import com.pushtechnology.diffusion.client.session.Session;
@@ -38,14 +37,11 @@ public class ControlClientConflateAndThrottle {
 
     private final Session session;
     private final ClientControl clientControl;
-    private final ClientCallback clientCallback;
 
     /**
      * Constructor.
-     *
-     * @param callback notifies callback from throttle requests
      */
-    public ControlClientConflateAndThrottle(ClientCallback callback) {
+    public ControlClientConflateAndThrottle() {
 
         session =
             Diffusion.sessions().principal("control").password("password")
@@ -55,7 +51,6 @@ public class ControlClientConflateAndThrottle {
         // thresholds on new connecting clients and sets a listener for queue
         // events.
         clientControl = session.feature(ClientControl.class);
-        clientCallback = callback;
 
         // To register a queue event handler, the client session must have
         // the 'register handler' and 'view_session' permissions.
@@ -78,14 +73,12 @@ public class ControlClientConflateAndThrottle {
 
             // The setConflated method enables conflation.
             // The default configuration enables conflation for sessions.
-            clientControl
-                .setConflated(session.getSessionId(), true, clientCallback);
+            clientControl.setConflated(session.getSessionId(), true);
 
             // The setThrottled method enables throttling.
             // This method requires the client session to have the
             // 'modify_session' permission.
-            clientControl
-                .setThrottled(client, MESSAGE_INTERVAL, 1000, clientCallback);
+            clientControl.setThrottled(client, MESSAGE_INTERVAL, 1000);
         }
 
         @Override
@@ -100,8 +93,7 @@ public class ControlClientConflateAndThrottle {
             // more aggressive limit.
             // This method requires the client session to have the
             // 'modify_session' permission.
-            clientControl
-                .setThrottled(client, MESSAGE_INTERVAL, 10, clientCallback);
+            clientControl.setThrottled(client, MESSAGE_INTERVAL, 10);
         }
     }
 }

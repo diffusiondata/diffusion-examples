@@ -42,7 +42,6 @@
 #include "diffusion.h"
 #include "args.h"
 #include "conversation.h"
-#include "service/svc-update.h"
 
 int active = 0;
 
@@ -335,7 +334,10 @@ main(int argc, char** argv)
                  * Prepare the structure that defines the update and
                  * its contents.
                  */
-                content = content_create(CONTENT_ENCODING_NONE, buf);
+                content = calloc(1, sizeof(CONTENT_T));
+                content->data = buf_dup(buf);
+                content->encoding = CONTENT_ENCODING_NONE;
+
                 upd = update_create(send_full_data ? UPDATE_ACTION_REFRESH : UPDATE_ACTION_UPDATE,
                                     UPDATE_TYPE_CONTENT,
                                     content);

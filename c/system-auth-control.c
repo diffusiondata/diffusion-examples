@@ -31,7 +31,6 @@
 
 #include "diffusion.h"
 #include "args.h"
-#include "service/svc-system-auth-control.h"
 
 apr_pool_t *pool = NULL;
 apr_thread_mutex_t *mutex = NULL;

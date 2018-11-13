@@ -17,7 +17,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)FilterRequestMessages.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SessionRequestMessages.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PathRequestMessages.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Messages.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StringTopics.cs" />
   </ItemGroup>
 </Project>

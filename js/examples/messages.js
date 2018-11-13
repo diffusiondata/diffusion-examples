@@ -26,41 +26,45 @@ diffusion.connect({
     principal : 'control',
     credentials : 'password'
 }).then(function(session) {
+
     // 1. Messages can be sent & received between sessions.
-    
-    // Create a stream of received messages for a specific path
-    session.messages.listen('foo').on('message', function(msg) {
-        console.log('Received message: ' + msg.content);
+    // Create a request handler that handles strings
+    var handler = {
+        onRequest: function(request, context, responder) {
+            console.log('Received request: ' + request); // Log the request
+            responder.respond('something');
+        },
+        onError: function() {
+            console.log('An error occurred');
+        },
+        onClose: function() {
+            console.log('Handler closed');
+        }
+    };
+
+    // Register the handler
+    session.messages.addRequestHandler('foo/bar', handler).then(function() {
+        console.log("Request handler has been added")
+    }, function(error) {
+        console.log('Failed to register request handler: ', e);
     });
 
-    // Send a message to another session. It is the application's responsibility to find the SessionID of the intended
-    // recipient.
-    session.messages.send('foo', 'Hello world', 'another-session-id');
+    // 2. Messages can be sent & received between sessions.
 
-    // 2. Messages can also be sent without a recipient, in which case they will be dispatched to any Message Handlers
+    // Send a message to another session. It is the application's responsibility
+    // to find the SessionID of the intended recipient.
+    session.messages.sendRequest('foo/bar', 'Hello World', 'another-session-id')
+    .then(function(response) {
+        console.log("Received response " + response);
+    });
+
+    // 3. Messages can also be sent without a recipient, in which case they will be dispatched to any Message Handlers
     // that have been registered for the same path. If multiple handlers are registered to the same path, any given
     // message will only be dispatched to one handler.
-    
-    // Register the handler to receive messages at or below the given path. 
-    session.messages.addHandler('foo', {
-        onActive : function() {
-            console.log('Handler registered');
-        },
-        onClose : function() {
-            console.log('Handler closed');
-        },
-        onMessage : function(msg) {
-            console.log('Received message:' + msg.content + ' from Session: ' + msg.session);
-            if (msg.properties) {
-                console.log('with properties:', msg.properties);
-            }
-        }
-    }).then(function() {
-        console.log('Registered handler');
-    }, function(e) {
-        console.log('Failed to register handler: ', e);
-    });
 
     // Send a message at a lower path, without an explicit recipient - this will be received by the Handler.
-    session.messages.send('foo/bar', 'Another message');
+    session.messages.sendRequest('foo/bar', 'Hello World')
+    .then(function(response) {
+        console.log("Received response " + response);
+    });
 });

@@ -14,22 +14,10 @@ your Diffusion server or Diffusion Cloud service. Then start the example using M
 
 ## Client libraries
 
+The Java client library is available from the [Push Technology Maven repository](https://download.pushtechnology.com/maven/).
 
-### Android 
-
-You can download the Android client libraries from the following locations:
-
-*   Download from [our website](http://download.pushtechnology.com/cloud/latest/sdks.html#android)
-
-*   The client libraries are also available in the `clients` directory of the Diffusion server installation.
-
-
-### Java 
-
-You can download the Java client libraries from the following locations:
+You can also download the Java client library from the following locations:
 
 *   Download from [our website](http://download.pushtechnology.com/cloud/latest/sdks.html#java)
 
-*   The client libraries are also available in the `clients` directory of the Diffusion server installation.
-
-
+*   The client library is also available in the `clients` directory of the Diffusion installation.

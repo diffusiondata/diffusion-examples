@@ -38,10 +38,10 @@ public class ClientUsingCredentials {
     /**
      * Constructor.
      */
-    public ClientUsingCredentials() {
+    public ClientUsingCredentials(String serverUrl) {
         session =
             Diffusion.sessions().principal("client").password("password")
-                .open("ws://diffusion.example.com:80");
+                .open(serverUrl);
         security = session.feature(Security.class);
     }
 

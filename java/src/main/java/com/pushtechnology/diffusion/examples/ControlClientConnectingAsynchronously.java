@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2017 Push Technology Ltd.
+ * Copyright (C) 2014, 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,11 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.concurrent.CompletableFuture;
 
 import com.pushtechnology.diffusion.client.Diffusion;
-import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
-import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.AddTopicResult;
 import com.pushtechnology.diffusion.client.session.SessionFactory;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 
@@ -37,53 +31,25 @@ import com.pushtechnology.diffusion.client.topics.details.TopicType;
  */
 public final class ControlClientConnectingAsynchronously {
 
-    private static final Logger LOG =
-        LoggerFactory.getLogger(ControlClientConnectingAsynchronously.class);
+    private final SessionFactory sessionFactory =
+        Diffusion.sessions().principal("control").password("password");
 
     /**
-     * Constructor.
-     * @param topicPath the path of the topic to create
+     * Create a session to the server, add a string topic, then close the
+     * session.
+     *
+     * @param topicPath path of session to add
+     * @return a CompletableFuture that completes when the topic has been added
      */
-    public ControlClientConnectingAsynchronously(String topicPath) {
-        Diffusion.sessions().principal("control").password("password")
-            .open("ws://diffusion.example.com:80", new TopicAdder(topicPath));
+    public CompletableFuture<AddTopicResult> createTopic(String topicPath) {
 
+        return sessionFactory
+            .openAsync("ws://diffusion.example.com:80")
+            .thenCompose(session -> {
+                return session
+                    .feature(TopicControl.class)
+                    .addTopic(topicPath, TopicType.STRING)
+                    .whenComplete((result, ex) -> session.close());
+            });
     }
-
-    private final class TopicAdder implements SessionFactory.OpenCallback {
-
-        private final String topicToAdd;
-
-        /**
-         * Constructor.
-         * @param topicPath
-         */
-        private TopicAdder(String topicPath) {
-            super();
-            topicToAdd = topicPath;
-        }
-
-        @Override
-        public void onError(ErrorReason errorReason) {
-            LOG.error("Unable to connect a session" + errorReason);
-        }
-
-        @Override
-        public void onOpened(final Session session) {
-            try {
-                session.feature(TopicControl.class).addTopic(
-                    topicToAdd,
-                    TopicType.STRING).get(10, TimeUnit.SECONDS);
-            }
-            catch (ExecutionException ex) {
-                LOG.error("Adding topic failed", ex.getCause());
-            }
-            catch (InterruptedException | TimeoutException ex) {
-                LOG.error("Adding topic failed", ex);
-            }
-            session.close();
-        }
-
-    }
-
 }

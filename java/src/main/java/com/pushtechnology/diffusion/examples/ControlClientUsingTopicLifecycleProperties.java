@@ -38,7 +38,7 @@ import com.pushtechnology.diffusion.client.topics.details.TopicType;
  * that is for the specific use of a named principal and will be automatically
  * removed when the principal no longer has a session.
  * <p>
- * For simplicity all topics created are {@link TopicType#STRING STRING} topics.
+ * For simplicity all topics created are {@link TopicType#STRING string} topics.
  * Also for simplicity all topic creations are blocking and there is no specific
  * error handling.
  *

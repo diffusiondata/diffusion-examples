@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2016 Push Technology Ltd.
+ * Copyright (C) 2014, 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.diffusion.client.Diffusion;
-import com.pushtechnology.diffusion.client.content.Content;
 import com.pushtechnology.diffusion.client.features.Topics;
 import com.pushtechnology.diffusion.client.features.Topics.ValueStream;
 import com.pushtechnology.diffusion.client.session.Session;
@@ -57,7 +56,7 @@ public final class ClientSimpleSubscriber {
         // Use the Topics feature to add a topic stream for
         // Foo and all topics under Bar and request subscription to those topics
         final Topics topics = session.feature(Topics.class);
-        topics.addStream(">Foo", Content.class, new FooStream());
+        topics.addStream(">Foo", String.class, new FooStream());
         topics.addStream(">Bar//", JSON.class, new BarStream());
 
         topics.subscribe(Diffusion.topicSelectors().anyOf("Foo", "Bar//"))
@@ -76,16 +75,16 @@ public final class ClientSimpleSubscriber {
     }
 
     /**
-     * The stream for all messages on the 'Foo' topic.
+     * The stream for all messages on the 'Foo' String topic.
      */
-    private class FooStream extends ValueStream.Default<Content> {
+    private class FooStream extends ValueStream.Default<String> {
         @Override
         public void onValue(
             String topicPath,
             TopicSpecification specification,
-            Content oldValue,
-            Content newValue) {
-            LOG.info(newValue.asString());
+            String oldValue,
+            String newValue) {
+            LOG.info(newValue);
         }
     }
 

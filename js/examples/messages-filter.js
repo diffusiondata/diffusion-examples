@@ -26,13 +26,39 @@ diffusion.connect({
     principal   : 'control',
     credentials : 'password'
 }).then(function(session) {
+    // Create a request handler that handles strings
+    var requestSream = {
+        onRequest: function(path, request, responder) {
+            console.log('Received request: ' + request); // Log the request
+            responder.respond('something');
+        },
+        onError: function() {
+            console.log('An error occurred');
+        },
+        onClose: function() {
+            console.log('Handler closed');
+        }
+    };
 
-    // Create a listener for a stream of messages on a specific path.
-    session.messages.listen('foo').on('message', function(msg) {
-        console.log('Received message: ' + msg.content);
-    });
+    // Register the stream
+    session.messages.setRequestStream('foo/bar', requestSream);
 
     // Send a message to another session listening on 'foo' by way of
     // session properties.
-    session.messages.send('foo', 'Hello world', '$Principal is "control"');
+    var responseHandler = {
+          onResponse : function(sessionID, response) {
+              console.log("Received response " + response);
+          },
+          onResponseError : function() {
+              console.log("There was an error when receiving the response");
+          },
+          onError : function() {
+              console.log("There was an with the response handler");
+          },
+          onClose : function() {
+              console.log("The response handler was closed");
+          }
+    };
+
+    session.messages.sendRequestToFilter('$Principal is "control"', 'foo/bar', 'Hello world', responseHandler);
 });

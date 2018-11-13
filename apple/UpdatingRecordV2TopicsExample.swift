@@ -171,13 +171,12 @@ public class UpdatingRecordV2TopicsExample {
     public func removeRate(currency: String, targetCurrency: String) throws {
         if let session = self.session {
             session.topicControl.removeDiscrete(
-                withTopicSelectorExpression:
-                    Static.rateTopicName(currency, targetCurrency),
-                completionHandler: { (error: Error?) in
-                    if let removeError = error {
-                        print(removeError)
-                    }
-            })
+                withTopicSelectorExpression: Static.rateTopicName(currency, targetCurrency))
+            { (error) in
+                if let removeError = error {
+                    print(removeError)
+                }
+            }
         } else {
             throw ExampleError.notConnected
         }
@@ -193,10 +192,11 @@ public class UpdatingRecordV2TopicsExample {
             session.topicControl.removeDiscrete(
                 withTopicSelectorExpression:
                     "?" + Static.rootTopic + "/" + currency + "//",
-                completionHandler: { (error: Error?) in
+                completionHandler:
+                { (error) in
                     if let removeError = error {
                         print(removeError)
-                    }
+                }
             })
         } else {
             throw ExampleError.notConnected
@@ -220,7 +220,7 @@ public class UpdatingRecordV2TopicsExample {
             let updateSource = UpdateSource()
             topicUpdateControl.register(updateSource,
                 forTopicPath: Static.rootTopic)
-            { (registration: PTDiffusionTopicTreeRegistration?, error: Error?) in
+            { (registration, error) in
                 if let registrationError = error {
                     print(registrationError)
                 } else {

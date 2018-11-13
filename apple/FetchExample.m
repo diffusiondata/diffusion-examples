@@ -1,6 +1,6 @@
 //  Diffusion Client Library for iOS, tvOS and OS X / macOS - Examples
 //
-//  Copyright (C) 2015, 2016 Push Technology Ltd.
+//  Copyright (C) 2015, 2018 Push Technology Ltd.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 
 @import Diffusion;
 
-@interface FetchExample (PTDiffusionFetchStreamDelegate) <PTDiffusionFetchStreamDelegate>
-@end
-
+/**
+ Example of fetch without values.
+ */
 @implementation FetchExample {
     PTDiffusionSession* _session;
 }
@@ -39,29 +39,24 @@
         NSLog(@"Connected.");
 
         // Set ivar to maintain a strong reference to the session.
-        _session = session;
+        self->_session = session;
 
         // Send fetch request.
-        [session.topics fetchWithTopicSelectorExpression:@"*Assets//" delegate:self];
+        [[session.topics fetchRequest] fetchWithTopicSelectorExpression:@"*Assets//"
+                                                      completionHandler:
+        ^(PTDiffusionFetchResult* result, NSError* error)
+        {
+            if (result) {
+                for (PTDiffusionFetchTopicResult* topicResult in result.results) {
+                    NSLog(@"Fetch topic result, \"%@\": %@",
+                        topicResult.path,
+                        topicResult.specification);
+                }
+            } else {
+                NSLog(@"Fetch failed with error: %@", error);
+            }
+        }];
     }];
-}
-
-@end
-
-@implementation FetchExample (PTDiffusionFetchStreamDelegate)
-
--(void)diffusionStream:(PTDiffusionStream * const)stream
-     didFetchTopicPath:(NSString * const)topicPath
-               content:(PTDiffusionContent * const)content {
-    NSLog(@"Fetch Result: %@ = \"%@\"", topicPath, content);
-}
-
--(void)diffusionDidCloseStream:(PTDiffusionStream * const)stream {
-    NSLog(@"Fetch stream finished.");
-}
-
--(void)diffusionStream:(PTDiffusionStream * const)stream didFailWithError:(NSError * const)error {
-    NSLog(@"Fetch stream failed error: %@", error);
 }
 
 @end

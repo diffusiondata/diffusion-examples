@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2017, 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.pushtechnology.diffusion.client.Diffusion;
+import com.pushtechnology.diffusion.client.features.TopicUpdate;
 import com.pushtechnology.diffusion.client.features.Topics;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
@@ -33,7 +32,7 @@ import com.pushtechnology.diffusion.datatype.json.JSONDataType;
  * Example of basic publish / subscribe functionality.
  *
  * @author Push Technology Limited
- * @since 5.10
+ * @since 6.0
  */
 public class PubSubExample {
     public static void main(String... arguments) throws Exception {
@@ -64,19 +63,17 @@ public class PubSubExample {
             }
         });
 
-        topics.subscribe("counter", new Topics.CompletionCallback.Default());
+        topics.subscribe("counter");
 
         /**
          * Add the "counter" topic
          */
         topicControl.addTopic(
             "counter",
-            topicControl.newSpecification(TopicType.JSON),
-            new TopicControl.AddCallback.Default());
+            topicControl.newSpecification(TopicType.JSON));
 
         final JSONDataType jsonDataType = Diffusion.dataTypes().json();
-        final TopicUpdateControl updateControl =
-            session.feature(TopicUpdateControl.class);
+        final TopicUpdate topicUpdate = session.feature(TopicUpdate.class);
 
         final AtomicInteger i = new AtomicInteger(0);
 
@@ -87,10 +84,7 @@ public class PubSubExample {
             final JSON value = jsonDataType.fromJsonString(
                 String.format("{\"count\" : %d }", i.getAndIncrement()));
 
-            updateControl.updater().update(
-                "counter",
-                value,
-                new Updater.UpdateCallback.Default());
+            topicUpdate.set("counter", JSON.class, value);
         }, 1000, 1000, TimeUnit.MILLISECONDS);
     }
 }

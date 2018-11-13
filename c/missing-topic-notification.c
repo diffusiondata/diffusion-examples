@@ -48,18 +48,21 @@ ARG_OPTS_T arg_opts[] = {
         END_OF_ARG_OPTS
 };
 
+/*
+ * Handlers for add_topic_from_specification() function.
+ */
 static int
-on_topic_added(SESSION_T *session, const SVC_ADD_TOPIC_RESPONSE_T *response, void *context)
+on_topic_added_with_specification(SESSION_T *session, TOPIC_ADD_RESULT_CODE result_code, void *context)
 {
         puts("Topic added");
         return HANDLER_SUCCESS;
 }
 
 static int
-on_topic_add_failed(SESSION_T *session, const SVC_ADD_TOPIC_RESPONSE_T *response, void *context)
+on_topic_add_failed_with_specification(SESSION_T *session, TOPIC_ADD_FAIL_RESULT_CODE result_code, const DIFFUSION_ERROR_T *error, void *context)
 {
         puts("Topic add failed");
-        printf("Reason code: %d\n", response->reason);
+        printf("Reason code: %d\n", result_code);
         return HANDLER_SUCCESS;
 }
 
@@ -70,20 +73,16 @@ on_topic_add_discard(SESSION_T *session, void *context)
         return HANDLER_SUCCESS;
 }
 
-static CONTENT_T *
-create_example_json_content()
+static ADD_TOPIC_CALLBACK_T
+create_topic_callback()
 {
-        CBOR_GENERATOR_T *cbor_generator = cbor_generator_create();
-        const char *json_message_str = "Hello world, this is a JSON string.";
-        cbor_write_text_string(cbor_generator, json_message_str, strlen(json_message_str));
-        BUF_T *cbor_buf = buf_create();
-        buf_write_bytes(cbor_buf, cbor_generator->data, cbor_generator->len);
+        ADD_TOPIC_CALLBACK_T callback = {
+                .on_topic_added_with_specification = on_topic_added_with_specification,
+                .on_topic_add_failed_with_specification = on_topic_add_failed_with_specification,
+                .on_discard = on_topic_add_discard
+        };
 
-        CONTENT_T *result = content_create(CONTENT_ENCODING_NONE, cbor_buf);
-        cbor_generator_free(cbor_generator);
-        buf_free(cbor_buf);
-
-        return result;
+        return callback;
 }
 
 /*
@@ -96,24 +95,11 @@ on_missing_topic(SESSION_T *session, const SVC_MISSING_TOPIC_REQUEST_T *request,
 {
         printf("Missing topic: %s\n", request->topic_selector);
 
-        BUF_T *sample_data_buf = buf_create();
-        buf_write_string(sample_data_buf, "Hello, world");
+        ADD_TOPIC_CALLBACK_T callback = create_topic_callback();
+        TOPIC_SPECIFICATION_T *spec = topic_specification_init(TOPIC_TYPE_JSON);
 
-        CONTENT_T *json_content = create_example_json_content();
-
-        // Add the missing topic.
-        ADD_TOPIC_PARAMS_T topic_params = {
-                .on_topic_added = on_topic_added,
-                .on_topic_add_failed = on_topic_add_failed,
-                .on_discard = on_topic_add_discard,
-                .topic_path = strdup(request->topic_selector+1),
-                .details = create_topic_details_json(),
-                .content = json_content
-        };
-
-        add_topic(session, topic_params);
-
-        content_free(json_content);
+        add_topic_from_specification(session, request->topic_selector+1, spec, callback);
+        topic_specification_free(spec);
 
         // Proceed with the client's subscription to the topic
         missing_topic_proceed(session, (SVC_MISSING_TOPIC_REQUEST_T *) request);

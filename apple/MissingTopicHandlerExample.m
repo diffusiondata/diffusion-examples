@@ -47,7 +47,7 @@
         NSLog(@"Connected.");
 
         // Set ivar to maintain a strong reference to the session.
-        _session = session;
+        self->_session = session;
 
         // Register as missing topic handler for a branch of the topic tree.
         [self registerAsMissingTopicHandlerForSession:session];

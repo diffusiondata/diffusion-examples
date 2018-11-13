@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2015 Push Technology Ltd.
+ * Copyright (C) 2014, 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,19 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
 
+import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
 import com.pushtechnology.diffusion.client.Diffusion;
-import com.pushtechnology.diffusion.client.details.SessionDetails.DetailType;
+import com.pushtechnology.diffusion.client.callbacks.Stream;
 import com.pushtechnology.diffusion.client.features.control.clients.AuthenticationControl;
+import com.pushtechnology.diffusion.client.features.control.clients.AuthenticationControl.ControlAuthenticator;
 import com.pushtechnology.diffusion.client.session.Session;
-import java.util.EnumSet;
+import com.pushtechnology.diffusion.client.types.Credentials;
 
 /**
  * This is a control client which registers an authentication handler with a
@@ -34,23 +42,23 @@ public final class ControlAuthenticationClient {
 
     /**
      * Main entry point for the control client.
-     *
-     * @param args Commandline arguments, currently ignored.
-     * @throws Exception Any exception causes abnormal program termination.
      */
     // CHECKSTYLE.OFF: UncommentedMain
     public static void main(final String[] args) throws Exception {
 
+        // The control client connects to the server using the principal 'admin'
+        // which is authenticated by the system authentication handler (see
+        // etc/SystemAuthentication.store).
+        // The principal must have REGISTER_HANDLER and AUTHENTICATE permissions.
         final Session session =
             Diffusion.sessions()
-                .principal("auth")
-                .password("auth_secret")
+                .principal("admin")
+                .password("password")
                 .open("ws://diffusion.example.com:80");
 
         session.feature(AuthenticationControl.class).setAuthenticationHandler(
-            "control-client-auth-handler-example",
-            EnumSet.allOf(DetailType.class),
-            new ExampleControlAuthenticationHandler());
+            "after-system-handler",
+            new ExampleControlAuthenticationHandler()).get(10, TimeUnit.SECONDS);
 
         while (true) {
             Thread.sleep(60000);
@@ -58,4 +66,63 @@ public final class ControlAuthenticationClient {
     }
     // CHECKSTYLE.ON: UncommentedMain
 
+    /**
+     * An example of a control authentication handler.
+     * <p>
+     * This shows a simple example using a table of permitted principals with
+     * their passwords. It also demonstrates how the handler can change the
+     * properties of the client being authenticated.
+     */
+    private static class ExampleControlAuthenticationHandler
+        extends Stream.Default
+        implements ControlAuthenticator {
+
+        private static final Map<String, byte[]> PASSWORDS = new HashMap<>();
+        static {
+            PASSWORDS.put("manager", "password".getBytes(Charset.forName("UTF-8")));
+            PASSWORDS.put("guest", "asecret".getBytes(Charset.forName("UTF-8")));
+            PASSWORDS.put("brian", "boru".getBytes(Charset.forName("UTF-8")));
+            PASSWORDS.put("another", "apassword".getBytes(Charset.forName("UTF-8")));
+        }
+
+        @Override
+        public void authenticate(
+            String principal,
+            Credentials credentials,
+            Map<String, String> sessionProperties,
+            Map<String, String> proposedProperties,
+            Callback callback) {
+
+            final byte[] passwordBytes = PASSWORDS.get(principal);
+
+            if (passwordBytes != null &&
+                credentials.getType() == Credentials.Type.PLAIN_PASSWORD &&
+                Arrays.equals(credentials.toBytes(), passwordBytes)) {
+                if ("manager".equals(principal)) {
+                    // manager allows all proposed properties
+                    callback.allow(proposedProperties);
+                }
+                else if ("brian".equals(principal)) {
+                    // brian is allowed all proposed properties and also gets
+                    // the 'super' role added
+                    final Map<String, String> result =
+                        new HashMap<>(proposedProperties);
+                    final Set<String> roles =
+                        Diffusion.stringToRoles(
+                            sessionProperties.get(Session.ROLES));
+                    roles.add("super");
+                    result.put(Session.ROLES, Diffusion.rolesToString(roles));
+                    callback.allow(result);
+                }
+                else {
+                    // all others authenticated but ignoring proposed properties
+                    callback.allow();
+                }
+            }
+            else {
+                // Any principal not in the table is denied.
+                callback.deny();
+            }
+        }
+    }
 }

@@ -28,7 +28,6 @@ endif
 
 ARFLAGS		+=
 SOURCES = subscribe.c fetch.c 	\
-		  send-msg.c send-msg-to-session.c send-msg-to-filter.c	\
 		  auth-service.c					\
 		  change-principal.c add-topics.c 			\
 		  update-topic.c update-value.c 			\
@@ -42,14 +41,15 @@ SOURCES = subscribe.c fetch.c 	\
 		  json/json-publishing-example.c			\
 		  json/json-subscribing-example.c			\
 		  value-stream.c recordv2-topics.c binary-topics.c	\
-		  int64-topics.c double-topics.c string-topics.c
+		  int64-topics.c double-topics.c string-topics.c	\
+		  send-request-to-session.c send-request-to-path.c	\
+		  send-request-to-filter.c				\
 
 TARGETDIR	= target
 OBJDIR		= $(TARGETDIR)/objs
 BINDIR		= $(TARGETDIR)/bin
 OBJECTS		= $(SOURCES:.c=.o)
 TARGETS = subscribe fetch \
-		  send-msg send-msg-to-session send-msg-to-filter	\
 		  auth-service change-principal add-topics		\
 		  update-topic update-value 				\
 		  subscribe-multiple update-record			\
@@ -61,7 +61,9 @@ TARGETS = subscribe fetch \
 		  subscription-control reconnect			\
 		  json-publishing-example json-subscribing-example	\
 		  value-stream recordv2-topics binary-topics		\
-		  int64-topics double-topics string-topics
+		  int64-topics double-topics string-topics		\
+		  send-request-to-session send-request-to-path		\
+		  send-request-to-filter				\
 
 all:		prepare $(TARGETS)
 .PHONY:		all
@@ -78,13 +80,13 @@ subscribe:	$(OBJDIR)/subscribe.o
 fetch:		$(OBJDIR)/fetch.o
 		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
 
-send-msg:	$(OBJDIR)/send-msg.o
+send-request-to-session:	$(OBJDIR)/send-request-to-session.o
 		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
 
-send-msg-to-session:	$(OBJDIR)/send-msg-to-session.o
+send-request-to-path:	$(OBJDIR)/send-request-to-path.o
 		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
 
-send-msg-to-filter:	$(OBJDIR)/send-msg-to-filter.o
+send-request-to-filter:	$(OBJDIR)/send-request-to-filter.o
 		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
 
 auth-service:	$(OBJDIR)/auth-service.o

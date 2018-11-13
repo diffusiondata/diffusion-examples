@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2015, 2016 Push Technology Ltd.
+ * Copyright (C) 2015, 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.control.clients.ClientControl;
 import com.pushtechnology.diffusion.client.features.control.topics.SubscriptionControl;
 import com.pushtechnology.diffusion.client.features.control.topics.SubscriptionControl.SubscriptionByFilterResult;
-import com.pushtechnology.diffusion.client.features.control.topics.SubscriptionControl.SubscriptionCallback;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionId;
 
@@ -47,9 +46,6 @@ public final class ControlClientUsingSessionProperties {
     private final SubscriptionControl subscriptionControl;
 
     private volatile String currentTopic = "ITAccounts";
-
-    private final SubscriptionCallback subscriptionCallback =
-        new SubscriptionCallback.Default();
 
     /**
      * Constructor.
@@ -81,8 +77,7 @@ public final class ControlClientUsingSessionProperties {
 
                         subscriptionControl.subscribe(
                             sessionId,
-                            currentTopic,
-                            subscriptionCallback);
+                            currentTopic);
                     }
                 }
             },

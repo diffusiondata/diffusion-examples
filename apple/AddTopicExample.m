@@ -45,7 +45,7 @@
         NSLog(@"Connected.");
 
         // Set ivar to maintain a strong reference to the session.
-        _session = session;
+        self->_session = session;
 
         // Add topics.
         [self addTopicsForSession:session];
@@ -59,9 +59,9 @@
                          completionHandler:^(PTDiffusionAddTopicResult *const result, NSError *const error)
     {
         if (error) {
-            NSLog(@"Failed to add single value topic. Error: %@", error);
+            NSLog(@"Failed to add topic. Error: %@", error);
         } else {
-            NSLog(@"Single value topic %@.", result);
+            NSLog(@"Add topic result: %@.", result);
         }
     }];
 }

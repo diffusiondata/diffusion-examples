@@ -27,9 +27,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.pushtechnology.diffusion.client.features.TopicUpdate;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateCallback;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.datatype.json.JSON;
@@ -43,8 +42,6 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
 public final class ProducingJson extends AbstractClient {
     private static final Logger LOG = LoggerFactory
         .getLogger(ProducingJson.class);
-    private static final UpdateCallback.Default UPDATE_CALLBACK =
-        new UpdateCallback.Default();
 
     private final ScheduledExecutorService executor = Executors
         .newSingleThreadScheduledExecutor();
@@ -72,10 +69,7 @@ public final class ProducingJson extends AbstractClient {
 
     @Override
     public void onConnected(Session session) {
-        final TopicUpdateControl.ValueUpdater<JSON> updater = session
-            .feature(TopicUpdateControl.class)
-            .updater()
-            .valueUpdater(JSON.class);
+        final TopicUpdate topicUpdate = session.feature(TopicUpdate.class);
 
         updateTask = executor.scheduleAtFixedRate(
             new Runnable() {
@@ -83,11 +77,11 @@ public final class ProducingJson extends AbstractClient {
                 public void run() {
                     try {
                         // Update the topic with random data
-                        updater.update(
+                        topicUpdate.set(
                             "json/random",
+                            JSON.class,
                             // Converts a RandomData object into a Json map
-                            RandomData.toJSON(RandomData.next()),
-                            UPDATE_CALLBACK);
+                            RandomData.toJSON(RandomData.next()));
                     }
                     catch (JsonProcessingException e) {
                         LOG.warn("Failed to transform data", e);

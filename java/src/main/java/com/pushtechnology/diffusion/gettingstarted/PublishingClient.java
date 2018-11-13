@@ -14,15 +14,14 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.gettingstarted;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeoutException;
 
 import com.pushtechnology.diffusion.client.Diffusion;
+import com.pushtechnology.diffusion.client.features.TopicUpdate;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateCallback;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 
@@ -45,11 +44,10 @@ public final class PublishingClient {
             Diffusion.sessions().principal("principal").password("password").
             open("ws://host:80");
 
-        // Get the TopicControl and TopicUpdateControl feature
+        // Get the TopicControl and TopicUpdate feature
         final TopicControl topicControl = session.feature(TopicControl.class);
 
-        final TopicUpdateControl updateControl =
-            session.feature(TopicUpdateControl.class);
+        final TopicUpdate topicUpdate = session.feature(TopicUpdate.class);
 
         // Create an int64 topic 'foo/counter'
         final CompletableFuture<TopicControl.AddTopicResult> future = topicControl.addTopic(
@@ -60,12 +58,10 @@ public final class PublishingClient {
         future.get(10, TimeUnit.SECONDS);
 
         // Update the topic
-        final UpdateCallback updateCallback = new UpdateCallback.Default();
         for (long i = 0; i < 1000; ++i) {
 
             // Use the non-exclusive updater to update the topic without locking it
-            updateControl.updater().valueUpdater(Long.class).update(
-                "foo/counter", i, updateCallback);
+            topicUpdate.set("foo/counter", Long.class, i);
 
             Thread.sleep(1000);
         }

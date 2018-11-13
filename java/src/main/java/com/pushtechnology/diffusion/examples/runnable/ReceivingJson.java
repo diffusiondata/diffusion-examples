@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2016, 2018 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +19,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.diffusion.client.Diffusion;
-import com.pushtechnology.diffusion.client.content.Content;
+import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.features.control.topics.MessagingControl;
-import com.pushtechnology.diffusion.client.features.control.topics.MessagingControl.MessageHandler;
+import com.pushtechnology.diffusion.client.features.control.topics.MessagingControl.RequestHandler;
 import com.pushtechnology.diffusion.client.session.Session;
-import com.pushtechnology.diffusion.client.session.SessionId;
-import com.pushtechnology.diffusion.client.types.ReceiveContext;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
- * A client that receives and responds to JSON messages.
+ * A control client that responds to JSON requests send by the
+ * {@link SendingJson} client.
  *
  * @author Push Technology Limited
  * @since 5.7
@@ -36,8 +35,6 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
 public final class ReceivingJson extends AbstractClient {
     private static final Logger LOG = LoggerFactory.
         getLogger(ConsumingJson.class);
-    private static final MessagingControl.SendCallback.Default SEND_CALLBACK =
-        new MessagingControl.SendCallback.Default();
 
     /**
      * Constructor.
@@ -50,35 +47,35 @@ public final class ReceivingJson extends AbstractClient {
 
     @Override
     public void onConnected(Session session) {
-        final MessagingControl messagingControl = session
-            .feature(MessagingControl.class);
+        final MessagingControl messagingControl =
+            session.feature(MessagingControl.class);
 
-        // Add a message handler for receiving messages sent to the server
-        messagingControl.addMessageHandler(
+        // Add a request handler for receiving messages sent to the server
+        messagingControl.addRequestHandler(
             "json",
-            new MessageHandler.Default() {
+            JSON.class,
+            JSON.class,
+            new RequestHandler<JSON, JSON>() {
                 @Override
-                public void onMessage(
-                    SessionId sessionId,
-                    String topicPath,
-                    Content content,
-                    ReceiveContext context) {
+                public void onRequest(JSON request, RequestContext context,
+                    Responder<JSON> responder) {
 
-                    // Convert the content to JSON
-                    final JSON json = Diffusion
-                        .dataTypes()
-                        .json()
-                        .readValue(content);
-
-                    LOG.info("Received request {}", json);
+                    LOG.info("Received request {}", request);
 
                     // Respond to the client that sent a message
-                    messagingControl.send(
-                        sessionId,
-                        "json/response",
+                    responder.respond(
                         // Create the JSON value 'true'
-                        Diffusion.dataTypes().json().fromJsonString("true"),
-                        SEND_CALLBACK);
+                        Diffusion.dataTypes().json().fromJsonString("true"));
+                }
+
+                @Override
+                public void onClose() {
+                    LOG.info("RequestHandler closed");
+                }
+
+                @Override
+                public void onError(ErrorReason errorReason) {
+                    LOG.info("RequestHandler error: {}", errorReason);
                 }
             });
     }

@@ -39,10 +39,10 @@ public final class ClientUsingPings {
     /**
      * Constructor.
      */
-    public ClientUsingPings() {
+    public ClientUsingPings(String serverUrl) {
         session =
             Diffusion.sessions().principal("client").password("password")
-                .open("ws://diffusion.example.com:80");
+                .open(serverUrl);
         pings = session.feature(Pings.class);
     }
 

@@ -17,6 +17,6 @@
  * This provides a number of examples of using the Diffusion API.
  *
  * @author Push Technology Limited
- * @since 5.10
+ * @since 6.0
  */
 package com.pushtechnology.diffusion.tutorials;

@@ -17,11 +17,11 @@ import static com.pushtechnology.diffusion.client.topics.details.TopicSpecificat
 import static com.pushtechnology.diffusion.client.topics.details.TopicType.STRING;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
+import java.util.concurrent.CompletableFuture;
+
 import com.pushtechnology.diffusion.client.Diffusion;
+import com.pushtechnology.diffusion.client.features.TopicUpdate;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.Updater.UpdateCallback;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicUpdateControl.ValueUpdater;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 
@@ -32,7 +32,7 @@ import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
  * update wins basis).
  * <P>
  * This uses the 'TopicControl' feature to create a topic and the
- * 'TopicUpdateControl' feature to send updates to it.
+ * 'TopicUpdate' feature to send updates to it.
  * <P>
  * To send updates to a topic, the client session requires the 'update_topic'
  * permission for that branch of the topic tree.
@@ -45,7 +45,6 @@ public final class ControlClientUpdatingSimpleTopics {
     private static final String TOPIC = "StringTopic";
 
     private final Session session;
-    private final ValueUpdater<String> valueUpdater;
 
     /**
      * Constructor.
@@ -69,21 +68,18 @@ public final class ControlClientUpdatingSimpleTopics {
                     "when this session closes remove '?" + TOPIC + "//'");
 
         topicControl.addTopic(TOPIC, specification).get(5, SECONDS);
-
-        final TopicUpdateControl updateControl =
-            session.feature(TopicUpdateControl.class);
-        valueUpdater = updateControl.updater().valueUpdater(String.class);
-
     }
 
     /**
      * Update the topic with a string value.
      *
      * @param value the update value
-     * @param callback the update callback
+     * @return a CompletableFuture that completes when a response is received
+     *         from the server
      */
-    public void update(String value, UpdateCallback callback) {
-        valueUpdater.update(TOPIC, value, callback);
+    public CompletableFuture<?> update(String value) {
+        return session.feature(TopicUpdate.class)
+            .set(TOPIC, String.class, value);
     }
 
     /**
