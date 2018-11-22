@@ -36,7 +36,7 @@ diffusion.connect({
 
     // 1. Create a new schema using the SchemaBuilder API
     var schema = RecordV2DataType.schemaBuilder()
-        .record("Row1").decimal("Field1").integer("Field2")
+        .record("Row1").decimal("Field1", 3).integer("Field2")
         .record("Row2").string("Field3")
         .build();
 
