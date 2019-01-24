@@ -48,9 +48,9 @@ To see the client working you must publish updates to `foo\counter`. You can upd
 
 #### Further information
 
-[Diffusion user guide](http://docs.pushtechnology.com/docs/latest/manual/html/developerguide/apis/javascript/getting_started.html/)
+[Diffusion user manual](https://docs.pushtechnology.com/docs/5.9/)
 
-[Diffusion Cloud user guide](http://docs.pushtechnology.com/cloud/latest/manual/html/developerguide/apis/javascript/getting_started.html/)
+[Diffusion Cloud user manual](https://docs.pushtechnology.com/cloud/latest/)
 
 
 ## Publishing client
@@ -96,7 +96,7 @@ To see the client working you must subscribe to the topic to receive the updates
 
 #### Further information
 
-[Diffusion user guide](http://docs.pushtechnology.com/docs/latest/manual/html/developerguide/apis/javascript/getting_started_publisher.html/)
+[Diffusion user manual](https://docs.pushtechnology.com/docs/5.9/)
 
-[Diffusion Cloud user guide](http://docs.pushtechnology.com/cloud/latest/manual/html/developerguide/apis/javascript/getting_started_publisher.html/)
+[Diffusion Cloud user manual](https://docs.pushtechnology.com/cloud/latest/)
 
