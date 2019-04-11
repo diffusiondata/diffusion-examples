@@ -21,6 +21,9 @@
 /*
  * This example creates a simple single-value topic and periodically updates
  * the data it contains.
+ *
+ * @deprecated The API functions used in this example are deprecated. The topic update
+ * examples are the preferred alternative to this.
  */
 #include <stdio.h>
 #include <stdlib.h>

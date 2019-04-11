@@ -43,7 +43,9 @@ SOURCES = subscribe.c fetch.c 	\
 		  value-stream.c recordv2-topics.c binary-topics.c	\
 		  int64-topics.c double-topics.c string-topics.c	\
 		  send-request-to-session.c send-request-to-path.c	\
-		  send-request-to-filter.c				\
+		  send-request-to-filter.c topic-update.c		\
+		  topic-update-with-constraint.c topic-update-stream.c	\
+		  topic-update-add-and-set				\
 
 TARGETDIR	= target
 OBJDIR		= $(TARGETDIR)/objs
@@ -63,7 +65,9 @@ TARGETS = subscribe fetch \
 		  value-stream recordv2-topics binary-topics		\
 		  int64-topics double-topics string-topics		\
 		  send-request-to-session send-request-to-path		\
-		  send-request-to-filter				\
+		  send-request-to-filter topic-update			\
+		  topic-update-with-constraint topic-update-stream	\
+		  topic-update-add-and-set				\
 
 all:		prepare $(TARGETS)
 .PHONY:		all
@@ -163,6 +167,19 @@ double-topics:	$(OBJDIR)/double-topics.o
 
 string-topics:	$(OBJDIR)/string-topics.o
 		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
+
+topic-update:	$(OBJDIR)/topic-update.o
+		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
+
+topic-update-with-constraint:	$(OBJDIR)/topic-update-with-constraint.o
+		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
+
+topic-update-stream:	$(OBJDIR)/topic-update-stream.o
+		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
+
+topic-update-add-and-set:	$(OBJDIR)/topic-update-add-and-set.o
+		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
+
 
 clean:
 		rm -rf $(TARGETS) $(OBJECTS) $(TARGETDIR) core a.out

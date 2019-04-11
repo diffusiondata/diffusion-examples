@@ -22,6 +22,9 @@
  * This example creates a "binary" or "json" topic, and updates it through the
  * use of update_value(), which sends deltas of change to the server instead
  * of the full topic content.
+ *
+ * @deprecated The API functions used in this example are deprecated. The topic update
+ * examples are the preferred alternative to this.
  */
 #include <stdio.h>
 #include <stdlib.h>
