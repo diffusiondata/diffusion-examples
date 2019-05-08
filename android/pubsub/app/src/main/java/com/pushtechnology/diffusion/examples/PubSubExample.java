@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017, 2018 Push Technology Ltd.
+ * Copyright (C) 2017, 2019 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.Locale;
 
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.Topics;
@@ -31,6 +32,7 @@ import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.TextView;
 
 import java8.util.concurrent.CompletableFuture;
 
@@ -40,11 +42,6 @@ import java8.util.concurrent.CompletableFuture;
  * <p>
  * Start a Diffusion server and the Android emulator on the same machine, then
  * build and deploy this example to the emulator.
- *
- * <p>
- * The example doesn't use Android UI features. To see it working, build and
- * deploy the example to the Android emulator and use Android Studio to example
- * the log.
  *
  * @author Push Technology Limited
  * @since 6.2
@@ -141,7 +138,14 @@ public class PubSubExample extends Activity {
                     Long oldValue,
                     Long newValue) {
 
-                Log.i("diffusion", topicPath + ": " + newValue);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        TextView valueView = (TextView)findViewById(R.id.value);
+                        valueView.setText(String.format(Locale.getDefault(),
+                            "Subscribed to 'counter' topic: %d", newValue));
+                    }
+                });
             }
         });
     }

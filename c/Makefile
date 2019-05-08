@@ -32,10 +32,10 @@ SOURCES = subscribe.c fetch.c 	\
 		  change-principal.c add-topics.c 			\
 		  update-topic.c update-value.c 			\
 		  subscribe-multiple.c update-record.c connect.c	\
-		  connect-async.c system-auth-control.c                 \
+		  connect-async.c system-auth-control.c			\
 		  msg-handler.c msg-listener.c				\
-		  session-properties-listener.c                         \
-		  get-session-properties.c                              \
+		  session-properties-listener.c				\
+		  get-session-properties.c				\
 	 	  missing-topic-notification.c				\
 		  subscription-control.c reconnect.c			\
 		  json/json-publishing-example.c			\
@@ -45,7 +45,8 @@ SOURCES = subscribe.c fetch.c 	\
 		  send-request-to-session.c send-request-to-path.c	\
 		  send-request-to-filter.c topic-update.c		\
 		  topic-update-with-constraint.c topic-update-stream.c	\
-		  topic-update-add-and-set				\
+		  topic-update-add-and-set.c time-series-append.c	\
+		  topic-views.c						\
 
 TARGETDIR	= target
 OBJDIR		= $(TARGETDIR)/objs
@@ -55,10 +56,10 @@ TARGETS = subscribe fetch \
 		  auth-service change-principal add-topics		\
 		  update-topic update-value 				\
 		  subscribe-multiple update-record			\
-		  connect connect-async system-auth-control             \
+		  connect connect-async system-auth-control		\
 		  msg-handler msg-listener				\
 		  session-properties-listener				\
-		  get-session-properties                                \
+		  get-session-properties				\
                   missing-topic-notification				\
 		  subscription-control reconnect			\
 		  json-publishing-example json-subscribing-example	\
@@ -67,7 +68,8 @@ TARGETS = subscribe fetch \
 		  send-request-to-session send-request-to-path		\
 		  send-request-to-filter topic-update			\
 		  topic-update-with-constraint topic-update-stream	\
-		  topic-update-add-and-set				\
+		  topic-update-add-and-set time-series-append		\
+		  topic-views						\
 
 all:		prepare $(TARGETS)
 .PHONY:		all
@@ -178,6 +180,12 @@ topic-update-stream:	$(OBJDIR)/topic-update-stream.o
 		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
 
 topic-update-add-and-set:	$(OBJDIR)/topic-update-add-and-set.o
+		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
+
+time-series-append:	$(OBJDIR)/time-series-append.o
+		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
+
+topic-views:	$(OBJDIR)/topic-views.o
 		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
 
 

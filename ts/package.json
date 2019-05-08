@@ -1,0 +1,17 @@
+{
+  "name": "diffusion-examples",
+  "version": "1.0.0",
+  "description": "Examples for using the Diffusion JavaScript client",
+  "main": "index.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+      "build": "tsc"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "diffusion": "6.3.0",
+    "typescript": "3.4.1"
+  }
+}

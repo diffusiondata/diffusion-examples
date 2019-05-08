@@ -25,30 +25,38 @@ diffusion.connect({
     secure : true,
     principal : 'control',
     credentials : 'password'
-}).then(function(session) {
+}).then(async function(session) {
 
     var TopicSpecification = diffusion.topics.TopicSpecification;
     var TopicType = diffusion.topics.TopicType;
 
     // 1. Like session.topics.add(), remove returns a promise, so we can chain together calls.
-    session.topics.add('foo', new TopicSpecification(TopicType.STRING))
-        .then(session.topics.remove('foo'))
-        .then(function() {
-            console.log('Removed topic foo');
-        }, function(reason) {
-            console.log('Failed to remove topic foo: ', reason);
-        });
-                           
-    // 2. Removing a topic will remove all topics underneath it.
-    
-    // Add a hierarchy of topics.
-    var added = session.topics.add('a').then(session.topics.add('a/b', new TopicSpecification(TopicType.STRING)))
-                                       .then(session.topics.add('a/b/c', new TopicSpecification(TopicType.STRING)))
-                                       .then(session.topics.add('a/b/c/d', new TopicSpecification(TopicType.STRING)));
+    await session.topics.add('foo', new TopicSpecification(TopicType.STRING));
+    try {
+        await session.topics.remove('foo');
+        console.log('Removed topic foo');
+    } catch (reason) {
+        console.log('Failed to remove topic foo: ', reason);
+    }
 
-    // Wait until we've added all the topics
-    added.then(session.topics.remove('a'))
-         .then(function() {
-            console.log('Removed all topics including & under "a"');
-         });
+    // 2. Removing a topic will not remove any topics underneath it.
+
+    // Add a hierarchy of topics.
+    await Promise.all([
+        session.topics.add('a', new TopicSpecification(TopicType.STRING),
+        session.topics.add('a/b', new TopicSpecification(TopicType.STRING)),
+        session.topics.add('a/b/c', new TopicSpecification(TopicType.STRING)),
+        session.topics.add('a/b/c/d', new TopicSpecification(TopicType.STRING))
+    ]);
+
+    // Wait until we've removed the root topics
+    await session.topics.remove('a');
+
+    // Child topic still exists
+    await session.topicUpdate.set('a/b', datatypes.string(), 'hello');
+
+    // Removing all topics using a topic selector expression
+    await session.topics.remove('?a//');
+
+    console.log('Removed all topics including & under "a"');
 });
