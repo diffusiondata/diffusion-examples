@@ -80,6 +80,9 @@ namespace PushTechnology.ClientInterface.Examples.Runner {
 
                 /// Start automatic topic removal
                 //runner.Start( new Removal(), secureUrl );
+
+                /// Start authentication example
+                //runner.Start( new Authentication(), secureUrl );
             }
         }
 
