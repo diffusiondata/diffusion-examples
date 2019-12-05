@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017, 2018 Push Technology Ltd.
+ * Copyright (C) 2017, 2019 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ public final class PublishingClient {
         // Create an int64 topic 'foo/counter'
         final CompletableFuture<TopicControl.AddTopicResult> future = topicControl.addTopic(
             "foo/counter",
-            topicControl.newSpecification(TopicType.INT64));
+            TopicType.INT64);
 
         // Wait for the CompletableFuture to complete
         future.get(10, TimeUnit.SECONDS);

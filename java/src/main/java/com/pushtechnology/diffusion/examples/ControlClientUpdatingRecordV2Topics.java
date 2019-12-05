@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017, 2018 Push Technology Ltd.
+ * Copyright (C) 2017, 2019 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
 
+import static com.pushtechnology.diffusion.client.Diffusion.newTopicSpecification;
 import static com.pushtechnology.diffusion.client.topics.details.TopicSpecification.REMOVAL;
 import static com.pushtechnology.diffusion.client.topics.details.TopicSpecification.SCHEMA;
 import static com.pushtechnology.diffusion.client.topics.details.TopicType.RECORD_V2;
@@ -25,7 +26,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import com.pushtechnology.diffusion.client.Diffusion;
-import com.pushtechnology.diffusion.client.callbacks.Registration;
 import com.pushtechnology.diffusion.client.features.TopicUpdate;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.session.Session;
@@ -60,7 +60,6 @@ public final class ControlClientUpdatingRecordV2Topics {
     private final Session session;
     private final TopicControl topicControl;
     private final TopicSpecification topicSpecification;
-    private volatile Registration updateSourceRegistration;
     private final Schema schema;
     private final RecordV2DataType dataType;
 
@@ -82,7 +81,7 @@ public final class ControlClientUpdatingRecordV2Topics {
 
         // Create the root topic that will remove itself when the session closes
         final TopicSpecification specification =
-            topicControl.newSpecification(STRING)
+            newTopicSpecification(STRING)
                 .withProperty(
                     REMOVAL,
                     "when this session closes remove '?" + ROOT_TOPIC + "//'");
@@ -96,7 +95,7 @@ public final class ControlClientUpdatingRecordV2Topics {
                 .record("Rates").decimal("Bid", 5).decimal("Ask", 5).build();
             // Create the topic specification to be used for all rates topics
             topicSpecification =
-                topicControl.newSpecification(RECORD_V2)
+                newTopicSpecification(RECORD_V2)
                     .withProperty(
                         SCHEMA,
                         schema.asJSONString());
@@ -105,7 +104,7 @@ public final class ControlClientUpdatingRecordV2Topics {
             schema = null;
             // Create the topic specification to be used for all rates topics
             topicSpecification =
-                topicControl.newSpecification(RECORD_V2);
+                newTopicSpecification(RECORD_V2);
         }
     }
 
@@ -204,11 +203,6 @@ public final class ControlClientUpdatingRecordV2Topics {
      * Close the session.
      */
     public void close() throws InterruptedException {
-        // Close the registered update source
-        final Registration registration = this.updateSourceRegistration;
-        if (registration != null) {
-            registration.close();
-        }
         session.close();
     }
 

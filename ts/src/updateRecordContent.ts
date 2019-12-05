@@ -57,13 +57,13 @@ export async function updateRecordContentExample() {
     model.set("Row1.Field2", "789");
     model.set("Row2.Field3", "Hello world");
 
-    session.topics.updateValue('topic/record', model.asValue(), RecordV2DataType);
+    session.topicUpdate.set('topic/record', RecordV2DataType, model.asValue());
 
     // 4. Subsequent updates can be produced from the same model
 
     model.set("Row2.Field3", "Hello everybody");
 
-    session.topics.updateValue('topic/record', model.asValue(), RecordV2DataType);
+    session.topicUpdate.set('topic/record', RecordV2DataType, model.asValue());
 
 
     // RecordV2 values can be easily consumed, too

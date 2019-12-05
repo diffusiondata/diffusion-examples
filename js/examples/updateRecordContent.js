@@ -55,7 +55,7 @@ diffusion.connect({
 
         var update1 = model.asValue();
 
-        session.topics.updateValue('topic/record', update1, RecordV2DataType);
+        session.topicUpdate.set('topic/record', RecordV2DataType, update1);
 
         // 4. Subsequent updates can be produced from the same model
 
@@ -63,7 +63,7 @@ diffusion.connect({
 
         var update2 = model.asValue();
 
-        session.topics.updateValue('topic/record', update2, RecordV2DataType);
+        session.topicUpdate.set('topic/record', RecordV2DataType, update2);
     });
 
 

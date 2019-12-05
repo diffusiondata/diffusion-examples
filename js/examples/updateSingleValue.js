@@ -29,21 +29,24 @@ diffusion.connect({
     var TopicSpecification = diffusion.topics.TopicSpecification;
     var TopicType = diffusion.topics.TopicType;
 
+    var stringDataType = diffusion.datatypes.string();
+    var doubleDataType = diffusion.datatypes.double();
+
     // A session may update any existing topic. Update values must be of the same type as the topic being updated.
 
     // Add a topic first with a string type
     session.topics.add('foo', new TopicSpecification(TopicType.STRING)).then(function() {
         // Update the topic
-        return session.topics.updateValue('foo', 'hello', diffusion.datatypes.string());
+        return session.topicUpdate.set('foo', stringDataType, 'hello');
     }).then(function() {
         // Update the topic again
-        return session.topics.updateValue('foo', 'world', diffusion.datatypes.string());
+        return session.topicUpdate.set('foo', stringDataType, 'world');
     });
 
     // Add a topic with a double type
     session.topics.add('bar', new TopicSpecification(TopicType.DOUBLE)).then(function() {
-        return session.topics.updateValue('bar', 123, diffusion.datatypes.double());
+        return session.topicUpdate.set('bar', doubleDataType, 123);
     }).then(function() {
-        return session.topics.updateValue('bar', 456.789, diffusion.datatypes.double());
+        return session.topicUpdate.set('bar', doubleDataType, 456.789);
     });
 });

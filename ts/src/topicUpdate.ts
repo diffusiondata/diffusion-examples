@@ -19,6 +19,7 @@
  export async function topicUpdateExample() {
 
     const stringDataType = datatypes.string();
+    const jsonDataType = datatypes.json();
     const TopicType = topics.TopicType;
 
 
@@ -37,6 +38,7 @@
 
     async function basicSetOperation() {
         await session.topicUpdate.set('foo_topic', stringDataType, 'hello');
+        await session.topicUpdate.set('bar_topic', jsonDataType, {foo: 'foo', qux: 'qux'})
     }
 
     async function setOperationWithValueConstraint() {
@@ -56,18 +58,18 @@
         const constraint = updateConstraints().jsonValue()
             .with('/foo', stringDataType, 'foo')
             .without('/bar');
-        await session.topicUpdate.set('foo_topic', datatypes.json(), {foo:'baz', bar:'bar'}, {constraint});
+        await session.topicUpdate.set('bar_topic', jsonDataType, {foo:'baz', bar:'bar'}, {constraint});
     }
 
     async function basicAddAndSetOperation() {
         const topicSpec = new topics.TopicSpecification(TopicType.STRING);
-        await session.topicUpdate.set('bar_topic', stringDataType, 'hello', {specification: topicSpec});
+        await session.topicUpdate.set('baz_topic', stringDataType, 'hello', {specification: topicSpec});
     }
 
     async function addAndSetOperationWithNoTopicConstraint() {
         const topicSpec = new topics.TopicSpecification(TopicType.STRING);
         const constraint = updateConstraints().noTopic();
-        await session.topicUpdate.set('bar_topic', stringDataType, 'hello', {specification: topicSpec, constraint});
+        await session.topicUpdate.set('qux_topic', stringDataType, 'hello', {specification: topicSpec, constraint});
     }
 
     async function createUpdateStream() {
@@ -79,7 +81,7 @@
     }
 
     async function createUpdateStreamWithValueConstraint() {
-        const constraint = updateConstraints().value('hello', stringDataType);
+        const constraint = updateConstraints().value('world', stringDataType);
         const stream = session.topicUpdate.createUpdateStream('foo_topic', stringDataType, {constraint});
         await stream.validate();
         await stream.set('hello');
@@ -90,17 +92,17 @@
 
     async function createUpdateStreamThatAddsTopic() {
         const topicSpec = new topics.TopicSpecification(TopicType.STRING);
-        const stream = session.topicUpdate.createUpdateStream('bar_topic', stringDataType, {specification: topicSpec});
+        const stream = session.topicUpdate.createUpdateStream('quux_topic', stringDataType, {specification: topicSpec});
         await stream.validate();
         await stream.set('hello');
         const cachedValue = stream.get();
         await stream.set('world');
     }
 
-    async function createUpdateStreamThatAddsTopicWithValueConstraint() {
+    async function createUpdateStreamThatAddsTopicWithNoTopicConstraint() {
         const topicSpec = new topics.TopicSpecification(TopicType.STRING);
         const constraint = updateConstraints().noTopic();
-        const stream = session.topicUpdate.createUpdateStream('baz_topic', stringDataType, {specification: topicSpec, constraint});
+        const stream = session.topicUpdate.createUpdateStream('quuz_topic', stringDataType, {specification: topicSpec, constraint});
         await stream.validate();
         await stream.set('hello');
         const cachedValue = stream.get();
@@ -108,6 +110,7 @@
     }
 
     await session.topics.add('foo_topic', TopicType.STRING);
+    await session.topics.add('bar_topic', TopicType.JSON);
 
     await basicSetOperation;
     await setOperationWithValueConstraint;
@@ -118,5 +121,5 @@
     await createUpdateStream;
     await createUpdateStreamWithValueConstraint;
     await createUpdateStreamThatAddsTopic;
-    await createUpdateStreamThatAddsTopicWithValueConstraint;
+    await createUpdateStreamThatAddsTopicWithNoTopicConstraint;
 }

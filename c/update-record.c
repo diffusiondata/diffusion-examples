@@ -55,7 +55,7 @@ ARG_OPTS_T arg_opts[] = {
         {'p', "principal", "Principal (username) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
         {'c', "credentials", "Credentials (password) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
         {'t', "topic", "Topic name to create and update", ARG_OPTIONAL, ARG_HAS_VALUE, "foo"},
-        {'f', "full", "Send full topic contents on update instead of just deltas", ARG_OPTIONAL, ARG_NO_VALUE, NULL},
+        {'s', "seconds", "Number of seconds to run for before exiting", ARG_OPTIONAL, ARG_HAS_VALUE, "30"},
         END_OF_ARG_OPTS
 };
 
@@ -84,98 +84,20 @@ on_topic_add_failed(SESSION_T *session, TOPIC_ADD_FAIL_RESULT_CODE result_code, 
         return HANDLER_SUCCESS;
 }
 
-/*
- * Handlers for registration of update source feature
- */
 static int
-on_update_source_init(SESSION_T *session,
-                      const CONVERSATION_ID_T *updater_id,
-                      const SVC_UPDATE_REGISTRATION_RESPONSE_T *response,
-                      void *context)
+on_topic_update(void *context)
 {
-        printf("Topic source \"%s\" in init state\n", conversation_id_to_string(*updater_id));
-        apr_thread_mutex_lock(mutex);
-        apr_thread_cond_broadcast(cond);
-        apr_thread_mutex_unlock(mutex);
+        printf("topic update success\n");
         return HANDLER_SUCCESS;
 }
 
 static int
-on_update_source_registered(SESSION_T *session,
-                            const CONVERSATION_ID_T *updater_id,
-                            const SVC_UPDATE_REGISTRATION_RESPONSE_T *response,
-                            void *context)
+on_error(SESSION_T *session, const DIFFUSION_ERROR_T *error)
 {
-        printf("Registered update source \"%s\"\n", conversation_id_to_string(*updater_id));
+        printf("topic update error: %s\n", error->message);
         return HANDLER_SUCCESS;
 }
 
-static int
-on_update_source_active(SESSION_T *session,
-                        const CONVERSATION_ID_T *updater_id,
-                        const SVC_UPDATE_REGISTRATION_RESPONSE_T *response,
-                        void *context)
-{
-        printf("Topic source \"%s\" active\n", conversation_id_to_string(*updater_id));
-        active = 1;
-        apr_thread_mutex_lock(mutex);
-        apr_thread_cond_broadcast(cond);
-        apr_thread_mutex_unlock(mutex);
-        return HANDLER_SUCCESS;
-}
-
-static int
-on_update_source_standby(SESSION_T *session,
-                         const CONVERSATION_ID_T *updater_id,
-                         const SVC_UPDATE_REGISTRATION_RESPONSE_T *response,
-                         void *context)
-{
-        printf("Topic source \"%s\" on standby\n", conversation_id_to_string(*updater_id));
-        apr_thread_mutex_lock(mutex);
-        apr_thread_cond_broadcast(cond);
-        apr_thread_mutex_unlock(mutex);
-        return HANDLER_SUCCESS;
-}
-
-static int
-on_update_source_closed(SESSION_T *session,
-                        const CONVERSATION_ID_T *updater_id,
-                        const SVC_UPDATE_REGISTRATION_RESPONSE_T *response,
-                        void *context)
-{
-        printf("Topic source \"%s\" closed\n", conversation_id_to_string(*updater_id));
-        apr_thread_mutex_lock(mutex);
-        apr_thread_cond_broadcast(cond);
-        apr_thread_mutex_unlock(mutex);
-        return HANDLER_SUCCESS;
-}
-
-/*
- * Handlers for update of data.
- */
-static int
-on_update_success(SESSION_T *session,
-                  const CONVERSATION_ID_T *updater_id,
-                  const SVC_UPDATE_RESPONSE_T *response,
-                  void *context)
-{
-        printf("on_update_success for updater \"%s\"\n", conversation_id_to_string(*updater_id));
-        return HANDLER_SUCCESS;
-}
-
-static int
-on_update_failure(SESSION_T *session,
-                  const CONVERSATION_ID_T *updater_id,
-                  const SVC_UPDATE_RESPONSE_T *response,
-                  void *context)
-{
-        printf("on_update_failure for updater \"%s\"\n", conversation_id_to_string(*updater_id));
-        return HANDLER_SUCCESS;
-}
-
-/*
- *
- */
 int
 main(int argc, char** argv)
 {
@@ -196,7 +118,7 @@ main(int argc, char** argv)
                 credentials = credentials_create_password(password);
         }
         const char *topic_name = hash_get(options, "topic");
-        const int send_full_data = (hash_get(options, "full") != NULL) ? 1 : 0;
+        const long seconds = atol(hash_get(options, "seconds"));
 
         /*
          * Setup for condition variable
@@ -256,46 +178,16 @@ main(int argc, char** argv)
         hash_free(properties, NULL, NULL);
 
         /*
-         * Define the handlers for add_update_source()
-         */
-        const UPDATE_SOURCE_REGISTRATION_PARAMS_T update_reg_params = {
-                .topic_path = topic_name,
-                .on_init = on_update_source_init,
-                .on_registered = on_update_source_registered,
-                .on_active = on_update_source_active,
-                .on_standby = on_update_source_standby,
-                .on_close = on_update_source_closed
-        };
-
-        /*
-         * Register an update source.
-         */
-        apr_thread_mutex_lock(mutex);
-        const CONVERSATION_ID_T *updater_id = register_update_source(session, update_reg_params);
-        apr_thread_cond_wait(cond, mutex);
-        apr_thread_mutex_unlock(mutex);
-
-        UPDATE_SOURCE_PARAMS_T update_source_params_base = {
-                .updater_id = updater_id,
-                .topic_path = topic_name,
-                .on_success = on_update_success,
-                .on_failure = on_update_failure
-        };
-
-        /*
          * Alternately update one field or both every second.
          */
         int count1 = 0;
         int count2 = 0;
 
-        CONTENT_T *content;
-        UPDATE_T *upd;
-        UPDATE_SOURCE_PARAMS_T update_source_params = update_source_params_base;
-
         DIFFUSION_RECORDV2_BUILDER_T *value_builder = diffusion_recordv2_builder_init();
         char **fields = calloc(3, sizeof(char *));
 
-        while(active) {
+        time_t end_time = time(NULL) + seconds;
+        while(time(NULL) < end_time) {
 
                 BUF_T *buf = buf_create();
 
@@ -323,33 +215,24 @@ main(int argc, char** argv)
 
                 if(!write_diffusion_recordv2_value(record_bytes, buf)) {
                         fprintf(stderr, "Unable to write the recordv2 update\n");
-
                         diffusion_recordv2_builder_free(value_builder);
                         free(fields);
                         buf_free(buf);
                         return EXIT_FAILURE;
                 }
 
-                /*
-                 * Prepare the structure that defines the update and
-                 * its contents.
-                 */
-                content = calloc(1, sizeof(CONTENT_T));
-                content->data = buf_dup(buf);
-                content->encoding = CONTENT_ENCODING_NONE;
-
-                upd = update_create(send_full_data ? UPDATE_ACTION_REFRESH : UPDATE_ACTION_UPDATE,
-                                    UPDATE_TYPE_CONTENT,
-                                    content);
-                content_free(content);
-
-                update_source_params.update = upd;
+                DIFFUSION_TOPIC_UPDATE_SET_PARAMS_T topic_update_params = {
+                        .topic_path = topic_name,
+                        .datatype = DATATYPE_RECORDV2,
+                        .update = buf,
+                        .on_topic_update = on_topic_update,
+                        .on_error = on_error
+                };
 
                 /*
-                 * Do the update.
+                 * Update the topic.
                  */
-                update(session, update_source_params);
-                update_free(upd);
+                diffusion_topic_update_set(session, topic_update_params);
 
                 diffusion_recordv2_builder_clear(value_builder);
                 free(record_bytes);

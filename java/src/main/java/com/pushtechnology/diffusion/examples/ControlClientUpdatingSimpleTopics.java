@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017, 2018 Push Technology Ltd.
+ * Copyright (C) 2017, 2019 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,8 @@
  * limitations under the License.
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
+
+import static com.pushtechnology.diffusion.client.Diffusion.newTopicSpecification;
 import static com.pushtechnology.diffusion.client.topics.details.TopicSpecification.REMOVAL;
 import static com.pushtechnology.diffusion.client.topics.details.TopicType.STRING;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -62,7 +64,7 @@ public final class ControlClientUpdatingSimpleTopics {
         // Create the topic and request that it is removed when the session
         // closes
         final TopicSpecification specification =
-            topicControl.newSpecification(STRING)
+            newTopicSpecification(STRING)
                 .withProperty(
                     REMOVAL,
                     "when this session closes remove '?" + TOPIC + "//'");

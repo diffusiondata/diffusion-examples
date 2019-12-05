@@ -109,6 +109,33 @@ on_topic_remove_discard(SESSION_T *session, void *context)
         return HANDLER_SUCCESS;
 }
 
+static int
+on_topic_view_created(const DIFFUSION_TOPIC_VIEW_T *topic_view, void *context)
+{
+        char *view_name = diffusion_topic_view_get_name(topic_view);
+        char *spec = diffusion_topic_view_get_specification(topic_view);
+
+        printf("Topic view \"%s\" created with specification \"%s\"\n", view_name, spec);
+        free(view_name);
+        free(spec);
+
+        apr_thread_mutex_lock(mutex);
+        apr_thread_cond_broadcast(cond);
+        apr_thread_mutex_unlock(mutex);
+        return HANDLER_SUCCESS;
+}
+
+static int
+on_error(SESSION_T *session, const DIFFUSION_ERROR_T *error)
+{
+        printf("Error: %s\n", error->message);
+
+        apr_thread_mutex_lock(mutex);
+        apr_thread_cond_broadcast(cond);
+        apr_thread_mutex_unlock(mutex);
+        return HANDLER_SUCCESS;
+}
+
 static ADD_TOPIC_CALLBACK_T
 create_topic_callback(char *topic_name)
 {
@@ -176,23 +203,32 @@ int main(int argc, char** argv)
         }
 
         /*
-        * Create a slave topic which is an alias for the string-data
-        * topic (its master topic).
+        * Create a topic view which is an alias for the "master"
+        * topic (its master topic). This is the preferred method of
+        * creating slave topics.
         */
         {
-                HASH_T *properties = hash_new(1);
-                hash_add(properties, DIFFUSION_SLAVE_MASTER_TOPIC, "string-data");
+                char *master_topic_name = "master";
+                TOPIC_SPECIFICATION_T *string_specification = topic_specification_init(TOPIC_TYPE_STRING);
 
-                char *slave_topic_name = "slave";
-                TOPIC_SPECIFICATION_T *slave_topic_specification = topic_specification_init_with_properties(TOPIC_TYPE_SLAVE, properties);
-        
                 apr_thread_mutex_lock(mutex);
-                add_topic_from_specification(session, slave_topic_name, slave_topic_specification, create_topic_callback(slave_topic_name));
+                add_topic_from_specification(session, master_topic_name, string_specification, create_topic_callback(master_topic_name));
                 apr_thread_cond_wait(cond, mutex);
                 apr_thread_mutex_unlock(mutex);
 
-                topic_specification_free(slave_topic_specification);
-                hash_free(properties, NULL, NULL);
+                DIFFUSION_CREATE_TOPIC_VIEW_PARAMS_T topic_view_params = {
+                        .view = "view0",
+                        .specification = "map master to slave",
+                        .on_topic_view_created = on_topic_view_created,
+                        .on_error = on_error
+                };
+
+                apr_thread_mutex_lock(mutex);
+                diffusion_topic_views_create_topic_view(session, topic_view_params, NULL);
+                apr_thread_cond_wait(cond, mutex);
+                apr_thread_mutex_unlock(mutex);
+
+                topic_specification_free(string_specification);
         }
 
         /*

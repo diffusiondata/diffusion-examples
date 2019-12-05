@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016, 2018 Push Technology Ltd.
+ * Copyright (C) 2016, 2019 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
 
+import static com.pushtechnology.diffusion.client.Diffusion.newTopicSpecification;
 import static com.pushtechnology.diffusion.client.topics.details.TopicSpecification.REMOVAL;
 import static com.pushtechnology.diffusion.client.topics.details.TopicType.JSON;
 import static java.util.Objects.requireNonNull;
@@ -91,7 +92,7 @@ public final class ControlClientUpdatingJSONTopics {
 
         // Create the root topic that will remove itself when the session closes
         final TopicSpecification specification =
-            topicControl.newSpecification(TopicType.STRING)
+            newTopicSpecification(TopicType.STRING)
                 .withProperty(REMOVAL,
                 "When this session closes remove '?" + ROOT_TOPIC + "//'");
 

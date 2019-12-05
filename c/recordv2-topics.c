@@ -141,34 +141,6 @@ on_value(const char *const topic_path,
         return HANDLER_SUCCESS;
 }
 
-static int
-on_update_failure(SESSION_T * session, const CONVERSATION_ID_T * updater_id, const SVC_UPDATE_RESPONSE_T * response,
-                  void *context)
-{
-        fprintf(stderr, "Update failed. Status: %d\n", response->status);
-        apr_thread_mutex_lock(mutex_value_stream);
-        apr_thread_cond_broadcast(cond_value_stream);
-        apr_thread_mutex_unlock(mutex_value_stream);
-        return HANDLER_SUCCESS;
-}
-
-static int
-register_updater_callback(SESSION_T *session,
-                          const CONVERSATION_ID_T *updater_id,
-                          const SVC_UPDATE_REGISTRATION_RESPONSE_T *response,
-                          void *context)
-{
-        if(response->state != UPDATE_SOURCE_STATE_ACTIVE) {
-                fprintf(stderr, "Update source not active. Status: %d\n", response->state);
-                return HANDLER_SUCCESS;
-        }
-
-        apr_thread_mutex_lock(mutex_value_stream);
-        apr_thread_cond_broadcast(cond_value_stream);
-        apr_thread_mutex_unlock(mutex_value_stream);
-        return HANDLER_SUCCESS;
-}
-
 static ADD_TOPIC_CALLBACK_T
 create_topic_callback()
 {
@@ -181,8 +153,22 @@ create_topic_callback()
         return callback;
 }
 
+static int
+on_topic_update(void *context)
+{
+        printf("topic update success\n");
+        return HANDLER_SUCCESS;
+}
+
+static int
+on_error(SESSION_T *session, const DIFFUSION_ERROR_T *error)
+{
+        printf("topic update error: %s\n", error->message);
+        return HANDLER_SUCCESS;
+}
+
 static void
-dispatch_recordv2_update(SESSION_T *session, CONVERSATION_ID_T *updater_id, const char *topic_path, int update_number)
+dispatch_recordv2_update(SESSION_T *session, const char *topic_path, int update_number)
 {
         // convert the update number into a string
         char update_number_string[20];
@@ -208,16 +194,16 @@ dispatch_recordv2_update(SESSION_T *session, CONVERSATION_ID_T *updater_id, cons
 
         char *topic_path_dup = strdup(topic_path);
 
-        // build and dispatch update
-        UPDATE_VALUE_PARAMS_T update_value_params = {
-                .updater_id = updater_id,
-                .on_failure = on_update_failure,
+        DIFFUSION_TOPIC_UPDATE_SET_PARAMS_T topic_update_params = {
                 .topic_path = topic_path_dup,
-                .data = buf
+                .datatype = DATATYPE_RECORDV2,
+                .update = buf,
+                .on_topic_update = on_topic_update,
+                .on_error = on_error
         };
 
         apr_thread_mutex_lock(mutex_value_stream);
-        update_value_with_datatype(session, DATATYPE_RECORDV2, update_value_params);
+        diffusion_topic_update_set(session, topic_update_params);
         if(apr_thread_cond_timedwait(cond_value_stream, mutex_value_stream, timeout * 1000) != APR_SUCCESS) {
                 fprintf(stderr, "Timed out while waiting for value stream on_value callback\n");
         }
@@ -324,33 +310,14 @@ int main(int argc, char** argv)
         }
         apr_thread_mutex_unlock(mutex_value_stream);
 
-        // Register an update source
-        const UPDATE_SOURCE_REGISTRATION_PARAMS_T update_reg_params = {
-                .topic_path = topic_path,
-                .on_active = register_updater_callback,
-                .on_standby = register_updater_callback,
-                .on_close = register_updater_callback
-        };
-
-        apr_thread_mutex_lock(mutex_value_stream);
-        CONVERSATION_ID_T *updater_id = register_update_source(session, update_reg_params);
-        if(apr_thread_cond_timedwait(cond_value_stream, mutex_value_stream, timeout * 1000) != APR_SUCCESS) {
-                fprintf(stderr, "Timed out while waiting to register an updater\n");
-                tear_down(session, specification);
-                conversation_id_free((CONVERSATION_ID_T *)updater_id);
-                return EXIT_FAILURE;
-        }
-        apr_thread_mutex_unlock(mutex_value_stream);
-
         // Dispatch 120 recordv2 topic updates at 1 second intervals.
         for(int i = 1; i <= 120; i++) {
-                dispatch_recordv2_update(session, updater_id, topic_path, i);
+                dispatch_recordv2_update(session, topic_path, i);
                 apr_sleep(sleep_timeout);
         }
 
         // Close our session, and release resources and memory.
         tear_down(session, specification);
-        conversation_id_free((CONVERSATION_ID_T *)updater_id);
 
         return EXIT_SUCCESS;
 }

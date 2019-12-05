@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017, 2018 Push Technology Ltd.
+ * Copyright (C) 2017, 2019 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
 
+import static com.pushtechnology.diffusion.client.Diffusion.newTopicSpecification;
 import static com.pushtechnology.diffusion.datatype.DataTypes.INT64_DATATYPE_NAME;
 
 import java.util.concurrent.ExecutionException;
@@ -65,7 +66,7 @@ public class ControlClientUpdatingTimeSeriesTopics {
         timeSeries = session.feature(TimeSeries.class);
         topicControl = session.feature(TopicControl.class);
 
-        final TopicSpecification spec = topicControl.newSpecification(TopicType.TIME_SERIES)
+        final TopicSpecification spec = newTopicSpecification(TopicType.TIME_SERIES)
             .withProperty(TopicSpecification.TIME_SERIES_EVENT_VALUE_TYPE, INT64_DATATYPE_NAME);
 
         topicControl.addTopic(TOPIC_PATH, spec)

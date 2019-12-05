@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2018 Push Technology Ltd.
+ * Copyright (C) 2014, 2019 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
 
+import static com.pushtechnology.diffusion.client.Diffusion.newTopicSpecification;
 import static com.pushtechnology.diffusion.client.topics.details.TopicSpecification.REMOVAL;
-import static com.pushtechnology.diffusion.client.topics.details.TopicSpecification.SLAVE_MASTER_TOPIC;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import java.util.concurrent.CompletableFuture;
@@ -101,27 +101,6 @@ public class ControlClientAddingAndRemovingTopics {
     }
 
     /**
-     * This shows the action of adding a slave topic which must be added with a
-     * specification because it requires the master topic property to be set.
-     *
-     * @param topicPath the path of the slave topic
-     * @param masterTopicPath the path of the master topic
-     * @throws ExecutionException if adding the topic fails
-     * @throws TimeoutException if operation does not complete within 5 seconds
-     * @throws InterruptedException if the current thread is interrupted whilst
-     *         waiting for the result
-     * @since 6.0
-     */
-    public void addSlaveTopic(String topicPath, String masterTopicPath)
-        throws InterruptedException, ExecutionException, TimeoutException {
-        topicControl.addTopic(
-            topicPath,
-            topicControl.newSpecification(TopicType.SLAVE)
-                .withProperty(SLAVE_MASTER_TOPIC, masterTopicPath))
-            .get(5, SECONDS);
-    }
-
-    /**
      * This shows how to create a topic that will be automatically removed,
      * along with all of its descendants, when the session closes.
      *
@@ -138,7 +117,7 @@ public class ControlClientAddingAndRemovingTopics {
         throws ExecutionException, TimeoutException, InterruptedException {
 
         final TopicSpecification specification =
-            topicControl.newSpecification(topicType).withProperty(
+            newTopicSpecification(topicType).withProperty(
                 REMOVAL,
                 "when this session closes remove '?" + topicPath + "//'");
 

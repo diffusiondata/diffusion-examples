@@ -40,11 +40,11 @@ export async function updateJsonExample() {
     await session.topics.add('foo', new TopicSpecification(TopicType.JSON));
 
     // Update the topic with JSON content
-    await session.topics.updateValue('foo', jsonDataType.from({ "hello": "bar", "foo": "world" }), jsonDataType);
+    await session.topicUpdate.set('foo', jsonDataType, jsonDataType.from({ "hello": "bar", "foo": "world" }));
 
     // Update the topic again with JSON converted from a JSON string
-    await session.topics.updateValue('foo', jsonDataType.fromJsonString("{ \"hello\": \"foo\", \"foo\": \"hello\" }"), jsonDataType);
+    await session.topicUpdate.set('foo', jsonDataType, jsonDataType.fromJsonString("{ \"hello\": \"foo\", \"foo\": \"hello\" }"));
 
     // Update the topic again with a standard JavaScript JSON object
-    await session.topics.updateValue('foo', { hello: "world", foo: "bar"}, jsonDataType);
+    await session.topicUpdate.set('foo', jsonDataType, { hello: "world", foo: "bar" });
 }

@@ -31,6 +31,6 @@ diffusion.connect({
     var count = 0;
 
     setInterval(function() {
-        session.topics.updateValue('foo/counter', count++, diffusion.datatypes.double());
+        session.topicUpdate.set('foo/counter', diffusion.datatypes.double(), count++);
     }, 1000);
 });

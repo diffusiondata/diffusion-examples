@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017, 2018 Push Technology Ltd.
+ * Copyright (C) 2017, 2019 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-
 package com.pushtechnology.diffusion.tutorials;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -68,9 +68,7 @@ public class PubSubExample {
         /**
          * Add the "counter" topic
          */
-        topicControl.addTopic(
-            "counter",
-            topicControl.newSpecification(TopicType.JSON));
+        topicControl.addTopic("counter", TopicType.JSON);
 
         final JSONDataType jsonDataType = Diffusion.dataTypes().json();
         final TopicUpdate topicUpdate = session.feature(TopicUpdate.class);

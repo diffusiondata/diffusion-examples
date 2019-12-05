@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Push Technology Ltd.
+ * Copyright (C) 2018, 2019 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
 
+import static com.pushtechnology.diffusion.client.Diffusion.newTopicSpecification;
 import static com.pushtechnology.diffusion.client.topics.details.TopicSpecification.OWNER;
 import static com.pushtechnology.diffusion.client.topics.details.TopicSpecification.PERSISTENT;
 import static com.pushtechnology.diffusion.client.topics.details.TopicSpecification.REMOVAL;
@@ -65,7 +66,7 @@ public final class ControlClientUsingTopicLifecycleProperties {
 
         topicControl = session.feature(TopicControl.class);
 
-        stringSpecification = topicControl.newSpecification(STRING);
+        stringSpecification = newTopicSpecification(STRING);
 
     }
 
@@ -180,9 +181,7 @@ public final class ControlClientUsingTopicLifecycleProperties {
      * with the 'Department' session property set to 'Accounts' for 1 hour but
      * only checking after 1 day has elapsed.
      */
-    public void createTopicRemovedWhenNoAccountsSession(
-        String topicPath,
-        String principal)
+    public void createTopicRemovedWhenNoAccountsSession(String topicPath)
         throws IllegalArgumentException, InterruptedException,
         ExecutionException, TimeoutException {
 

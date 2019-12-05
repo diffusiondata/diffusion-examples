@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2018 Push Technology Ltd.
+ * Copyright © 2018, 2019 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ namespace PushTechnology.ClientInterface.Example.Publishing {
             var serverUrl = args[ 0 ];
             var session = Diffusion.Sessions.Principal( "control" ).Password( "password" ).Open( serverUrl );
             var topicControl = session.TopicControl;
-            var updateControl = session.TopicUpdateControl;
+            var topicUpdate = session.TopicUpdate;
 
             var random = new Random();
 
@@ -55,17 +55,20 @@ namespace PushTechnology.ClientInterface.Example.Publishing {
             }
 
             // Update topic every 300 ms until user requests cancellation of example
-            var updateCallback = new UpdateCallback( topic );
-            var valueUpdater = updateControl.Updater.ValueUpdater<IRecordV2>();
-
             while ( !cancellationToken.IsCancellationRequested ) {
                 var builder = Diffusion.DataTypes.RecordV2.CreateValueBuilder();
                 var fields = new List<string>() { DateTime.Now.ToLongTimeString(), "this", "is", "an", "example" };
                 builder.AddFields( fields );
                 var newValue = builder.Build();
-                valueUpdater.Update( topic, newValue, updateCallback );
 
-                await Task.Delay( 300 );
+                try {
+                    await topicUpdate.SetAsync( topic, newValue, cancellationToken );
+                    Console.WriteLine( $"Topic {topic} updated successfully." );
+
+                    await Task.Delay( TimeSpan.FromMilliseconds( 300 ) );
+                } catch ( Exception ex ) {
+                    Console.WriteLine( $"Topic {topic} could not be updated : {ex}." );
+                }
             }
 
             // Remove the RecordV2 topic 'random/RecordV2'
@@ -77,37 +80,6 @@ namespace PushTechnology.ClientInterface.Example.Publishing {
 
             // Close the session
             session.Close();
-        }
-
-        /// <summary>
-        /// A simple ITopicUpdaterUpdateCallback implementation that prints confirmation of the actions completed.
-        /// </summary>
-        private sealed class UpdateCallback : ITopicUpdaterUpdateCallback {
-            private readonly string topicPath;
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="UpdateCallback"/> class.
-            /// </summary>
-            /// <param name="topicPath">The topic path.</param>
-            public UpdateCallback( string topicPath )
-                => this.topicPath = topicPath;
-
-            /// <summary>
-            /// Notification of a contextual error related to this callback.
-            /// </summary>
-            /// <remarks>
-            /// Situations in which <code>OnError</code> is called include the session being closed, a communication
-            /// timeout, or a problem with the provided parameters. No further calls will be made to this callback.
-            /// </remarks>
-            /// <param name="errorReason">A value representing the error.</param>
-            public void OnError( ErrorReason errorReason )
-                => WriteLine( $"Topic {topicPath} could not be updated : {errorReason}." );
-
-            /// <summary>
-            /// Indicates a successful update.
-            /// </summary>
-            public void OnSuccess()
-                => WriteLine( $"Topic {topicPath} updated successfully." );
         }
     }
 }

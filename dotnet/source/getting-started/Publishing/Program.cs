@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2016, 2017 Push Technology Ltd.
+ * Copyright © 2016, 2019 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ namespace PushTechnology.ClientInterface.Example {
             // Get the TopicControl and TopicUpdateControl features
             var topicControl = session.TopicControl;
             var updateControl = session.TopicUpdateControl;
+            var topicUpdate = session.TopicUpdate;
 
             // Create a JSON topic 'foo/counter'
             var topic = "foo/counter";
@@ -45,49 +46,17 @@ namespace PushTechnology.ClientInterface.Example {
             }
 
             // Update topic every 300 ms for 30 minutes
-            var updateCallback = new UpdateCallback( topic );
             for ( var i = 0; i < 3600; ++i ) {
                 var newValue = Diffusion.DataTypes.JSON.FromJSONString(
                     "{\"date\":\"" + DateTime.Today.Date.ToString( "D" ) + "\"," +
                     "\"time\":\"" + DateTime.Now.TimeOfDay.ToString( "g" ) + "\"}" );
-                updateControl.Updater.ValueUpdater<IJSON>().Update( topic, newValue, updateCallback );
+                topicUpdate.SetAsync( topic, newValue );
 
                 Thread.Sleep( 300 );
             }
 
             // Close session
             session.Close();
-        }
-
-        /// <summary>
-        /// A simple ITopicUpdaterUpdateCallback implementation that prints confimation of the actions completed.
-        /// </summary>
-        class UpdateCallback : ITopicUpdaterUpdateCallback {
-            private readonly string topicPath;
-
-            /// <summary>
-            /// Constructor.
-            /// </summary>
-            /// <param name="topicPath">The topic path.</param>
-            public UpdateCallback( string topicPath ) 
-                => this.topicPath = topicPath;
-
-            /// <summary>
-            /// Notification of a contextual error related to this callback.
-            /// </summary>
-            /// <remarks>
-            /// Situations in which <code>OnError</code> is called include the session being closed, a communication
-            /// timeout, or a problem with the provided parameters. No further calls will be made to this callback.
-            /// </remarks>
-            /// <param name="errorReason">A value representing the error.</param>
-            public void OnError( ErrorReason errorReason )
-                => Console.WriteLine( $"Topic {topicPath} could not be updated : {errorReason}" );
-
-            /// <summary>
-            /// Indicates a successful update.
-            /// </summary>
-            public void OnSuccess() 
-                => Console.WriteLine( $"Topic {topicPath} updated successfully." );
         }
     }
 }

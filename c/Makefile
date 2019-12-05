@@ -27,13 +27,11 @@ LDFLAGS     += -lssl -lcrypto
 endif
 
 ARFLAGS		+=
-SOURCES = subscribe.c fetch.c 	\
+SOURCES = subscribe.c fetch-request.c 	\
 		  auth-service.c					\
 		  change-principal.c add-topics.c 			\
-		  update-topic.c update-value.c 			\
 		  subscribe-multiple.c update-record.c connect.c	\
 		  connect-async.c system-auth-control.c			\
-		  msg-handler.c msg-listener.c				\
 		  session-properties-listener.c				\
 		  get-session-properties.c				\
 	 	  missing-topic-notification.c				\
@@ -52,12 +50,10 @@ TARGETDIR	= target
 OBJDIR		= $(TARGETDIR)/objs
 BINDIR		= $(TARGETDIR)/bin
 OBJECTS		= $(SOURCES:.c=.o)
-TARGETS = subscribe fetch \
+TARGETS = subscribe fetch-request \
 		  auth-service change-principal add-topics		\
-		  update-topic update-value 				\
 		  subscribe-multiple update-record			\
 		  connect connect-async system-auth-control		\
-		  msg-handler msg-listener				\
 		  session-properties-listener				\
 		  get-session-properties				\
                   missing-topic-notification				\
@@ -83,7 +79,7 @@ $(OBJDIR)/%.o:	%.c
 subscribe:	$(OBJDIR)/subscribe.o
 		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
 
-fetch:		$(OBJDIR)/fetch.o
+fetch-request:		$(OBJDIR)/fetch-request.o
 		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
 
 send-request-to-session:	$(OBJDIR)/send-request-to-session.o
@@ -104,13 +100,7 @@ change-principal:   $(OBJDIR)/change-principal.o
 add-topics:	$(OBJDIR)/add-topics.o
 		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
 
-update-topic:	$(OBJDIR)/update-topic.o
-		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
-
 update-record:	$(OBJDIR)/update-record.o
-		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
-
-update-value:	$(OBJDIR)/update-value.o
 		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
 
 subscribe-multiple:	$(OBJDIR)/subscribe-multiple.o
@@ -123,12 +113,6 @@ connect-async:	$(OBJDIR)/connect-async.o
 		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
 
 system-auth-control:	$(OBJDIR)/system-auth-control.o
-		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
-
-msg-handler:	$(OBJDIR)/msg-handler.o
-		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
-
-msg-listener:	$(OBJDIR)/msg-listener.o
 		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
 
 session-properties-listener:	$(OBJDIR)/session-properties-listener.o

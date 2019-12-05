@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2018 Push Technology Ltd.
+ * Copyright (C) 2014, 2019 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
 
+import static com.pushtechnology.diffusion.client.Diffusion.newTopicSpecification;
 import static com.pushtechnology.diffusion.client.Diffusion.updateConstraints;
 import static com.pushtechnology.diffusion.client.topics.details.TopicSpecification.REMOVAL;
 import static com.pushtechnology.diffusion.client.topics.details.TopicType.STRING;
@@ -83,7 +84,7 @@ public class ControlClientAsExclusiveUpdater {
         final TopicControl topicControl = session.feature(TopicControl.class);
 
         final TopicSpecification specification =
-            topicControl.newSpecification(STRING)
+            newTopicSpecification(STRING)
                 .withProperty(REMOVAL, "when this session closes");
 
         topicControl.addTopic(
@@ -98,7 +99,7 @@ public class ControlClientAsExclusiveUpdater {
             .thenAccept(lock -> onLockAcquired(lock, provider, scheduler, topicUpdate));
     }
 
-    private void onLockAcquired(
+    private static void onLockAcquired(
         Session.SessionLock lock,
         PriceProvider provider,
         ScheduledExecutorService scheduler,

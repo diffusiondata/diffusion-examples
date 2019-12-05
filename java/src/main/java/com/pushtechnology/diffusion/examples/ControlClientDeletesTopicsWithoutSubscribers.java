@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Push Technology Ltd.
+ * Copyright (C) 2018, 2019 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
 
+import static com.pushtechnology.diffusion.client.Diffusion.newTopicSpecification;
 import static com.pushtechnology.diffusion.client.topics.details.TopicSpecification.REMOVAL;
 import static com.pushtechnology.diffusion.client.topics.details.TopicType.JSON;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -54,7 +55,7 @@ public final class ControlClientDeletesTopicsWithoutSubscribers {
         topicControl = session.feature(TopicControl.class);
 
         specification =
-            topicControl.newSpecification(JSON)
+            newTopicSpecification(JSON)
                 .withProperty(REMOVAL, "when subscriptions < 1 for 10s");
 
     }

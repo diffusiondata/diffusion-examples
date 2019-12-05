@@ -17,11 +17,15 @@ var diffusion = require('diffusion');
 var session;
 
 var stringDataType = diffusion.datatypes.string();
+var jsonDataType = diffusion.datatypes.json();
 var TopicType = diffusion.topics.TopicType;
 
 
 function basicSetOperation() {
-    return session.topicUpdate.set('foo_topic', stringDataType, 'hello');
+    return Promise.all([
+        session.topicUpdate.set('foo_topic', stringDataType, 'hello'),
+        session.topicUpdate.set('bar_topic', jsonDataType, {foo: 'foo', qux: 'qux'})
+    ]);
 }
 
 function setOperationWithValueConstraint() {
@@ -43,19 +47,19 @@ function setOperationWithPartialJSONConstraint() {
             var constraint = diffusion.updateConstraints().jsonValue()
                 .with('/foo', 'foo', stringDataType)
                 .without('/bar');
-            return session.topicUpdate.set('foo_topic', diffusion.datatypes.json(), {foo:'baz', bar:'bar'}, {constraint});
+            return session.topicUpdate.set('bar_topic', jsonDataType, {foo:'baz', bar:'bar'}, {constraint});
         });
 }
 
 function basicAddAndSetOperation() {
     var topicSpec = new diffusion.topics.TopicSpecification(TopicType.STRING);
-    return session.topicUpdate.set('bar_topic', stringDataType, 'hello', {specification: topicSpec});
+    return session.topicUpdate.set('baz_topic', stringDataType, 'hello', {specification: topicSpec});
 }
 
 function addAndSetOperationWithNoTopicConstraint() {
     var topicSpec = new diffusion.topics.TopicSpecification(TopicType.STRING);
     var constraint = diffusion.updateConstraints().noTopic();
-    return session.topicUpdate.set('bar_topic', stringDataType, 'hello', {specification: topicSpec, constraint});
+    return session.topicUpdate.set('qux_topic', stringDataType, 'hello', {specification: topicSpec, constraint});
 }
 
 function createUpdateStream() {
@@ -67,7 +71,7 @@ function createUpdateStream() {
 }
 
 function createUpdateStreamWithValueConstraint() {
-    var constraint = diffusion.updateConstraints().value('hello', stringDataType);
+    var constraint = diffusion.updateConstraints().value('world', stringDataType);
     var stream = session.topicUpdate.createUpdateStream('foo_topic', stringDataType, {constraint});
     stream.validate();
     stream.set('hello');
@@ -77,16 +81,18 @@ function createUpdateStreamWithValueConstraint() {
 
 
 function createUpdateStreamThatAddsTopic() {
-    var stream = session.topicUpdate.createUpdateStream('bar_topic', stringDataType, {specification: topicSpec});
+    var topicSpec = new diffusion.topics.TopicSpecification(TopicType.STRING);
+    var stream = session.topicUpdate.createUpdateStream('quux_topic', stringDataType, {specification: topicSpec});
     stream.validate();
     stream.set('hello');
     var cachedValue = stream.get();
     return stream.set('world');
 }
 
-function createUpdateStreamThatAddsTopicWithValueConstraint() {
+function createUpdateStreamThatAddsTopicWithNoTopicConstraint() {
+    var topicSpec = new diffusion.topics.TopicSpecification(TopicType.STRING);
     var constraint = diffusion.updateConstraints().noTopic();
-    var stream = session.topicUpdate.createUpdateStream('baz_topic', stringDataType, {specification: topicSpec, constraint});
+    var stream = session.topicUpdate.createUpdateStream('quuz_topic', stringDataType, {specification: topicSpec, constraint});
     stream.validate();
     stream.set('hello');
     var cachedValue = stream.get();
@@ -106,7 +112,10 @@ diffusion.connect({
 })
 .then(function(sess) {
     session = sess;
-    return session.topics.add('foo_topic', TopicType.STRING);
+    return Promise.all([
+        session.topics.add('foo_topic', TopicType.STRING),
+        session.topics.add('bar_topic', TopicType.JSON)
+    ]);
 })
 .then(basicSetOperation)
 .then(setOperationWithValueConstraint)
@@ -117,4 +126,4 @@ diffusion.connect({
 .then(createUpdateStream)
 .then(createUpdateStreamWithValueConstraint)
 .then(createUpdateStreamThatAddsTopic)
-.then(createUpdateStreamThatAddsTopicWithValueConstraint);
+.then(createUpdateStreamThatAddsTopicWithNoTopicConstraint);
