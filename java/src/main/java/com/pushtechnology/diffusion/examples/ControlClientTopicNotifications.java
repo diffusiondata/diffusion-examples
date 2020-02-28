@@ -197,7 +197,7 @@ public class ControlClientTopicNotifications {
      *      void onTopicAdded(
      *          String topicPath,
      *          TopicSpecification specification,
-     *          Consumer<Boolean> selectDescendants) {
+     *          Consumer&lt;Boolean&gt; selectDescendants) {
      *          ...
      *      }
      *

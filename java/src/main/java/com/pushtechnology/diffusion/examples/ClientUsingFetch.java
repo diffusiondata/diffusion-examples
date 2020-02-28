@@ -184,6 +184,21 @@ public final class ClientUsingFetch {
     }
 
     /**
+     * Shows how to utilise deep branching limits, with values, from
+     * a start point and limiting the number of matching topics.
+     * <p>
+     * This demonstrates how one could easily limit the number of results of similar
+     * topics, or children of topics.
+     */
+    public FetchResult<Bytes> limitDeepBranches(String start, int limitTopLevel, int limitPerBranch)
+        throws InterruptedException, ExecutionException, TimeoutException {
+            return topics.fetchRequest()
+            .withValues(Bytes.class)
+            .limitDeepBranches(limitTopLevel, limitPerBranch)
+            .fetch(start).get(5, SECONDS);
+        }
+
+    /**
      * This example shows how to log the values of all STRING topics, grouped
      * into pages of size as specified.
      */

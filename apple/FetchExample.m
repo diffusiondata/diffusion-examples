@@ -56,6 +56,32 @@
                 NSLog(@"Fetch failed with error: %@", error);
             }
         }];
+
+        // perform the same operation as above but use limitDeepbranches.
+        // A deep branch has a root path that has a
+        // number of parts equal to the deep_branch_depth parameter. 
+        // The deep_branch_limit specifies the maximum number of results for each deep branch.
+        PTDiffusionFetchRequest *const request =
+            [session.topics.fetchRequest limitDeepBranches:3
+                                                     limit:3];
+
+            [request fetchBinaryValuesWithTopicSelectorExpression:@"?.//"
+                                                completionHandler:
+            ^(PTDiffusionBinaryFetchResult *const result, NSError *const error)
+            {
+            if (result) {
+                for (PTDiffusionFetchTopicResult* topicResult in result.results) {
+                    NSLog(@"Fetch topic result, \"%@\": %@",
+                        topicResult.path,
+                        topicResult.specification);
+                }
+            } else {
+                NSLog(@"Fetch failed with error: %@", error);
+            }
+        }];
+
+        
+        
     }];
 }
 

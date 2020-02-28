@@ -113,6 +113,13 @@ namespace PushTechnology.ClientInterface.Example.Features {
             foreach ( var topic in resPrior.Results ) {
                 Console.WriteLine( topic.Path );
             }
+
+            var resLimit = await topics.FetchRequest.LimitDeepBranches(3, 3).FetchAsync( "?.//" );
+            Console.WriteLine("\nProduce results that are at most 3 parts deep, with a maximum of 3 results per deep branch.");
+            foreach (var topic in resLimit.Results)
+            {
+                Console.WriteLine(topic.Path);
+            }
         }
 
 

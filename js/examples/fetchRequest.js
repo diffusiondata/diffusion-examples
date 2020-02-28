@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Push Technology Ltd.
+ * Copyright (C) 2018, 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,31 @@ diffusion.connect({
         .fetch("*SomeTopic//")      // perform the fetch request using a topic selector
         .then(function(fetchResult) {
             var results = fetchResult.results();
+            console.log("Fetch Request returned "+results.length+" topics");
+
+            results.forEach(function(topicResult) {
+                console.log("Path: "+topicResult.path());
+                console.log("Type: "+topicResult.type());
+                console.log("Value: "+topicResult.value().get());
+            });
+
+            if (fetchResult.hasMore()) {
+                console.log("There are more topics");
+            }
+        });
+
+    session
+        .fetchRequest()             // obtain a FetchRequest
+        .limitBranchDepth(3, 3)     // A deep branch has a root path that has a
+                                    // number of parts equal to the deep_branch_depth parameter. 
+                                    // The deep_branch_limit specifies the maximum number of results for each deep branch.
+        .withProperties()           // get the topic properties
+        .topicTypes([TopicType.STRING, TopicType.INT64]) // limit to string and integer topic types
+        .withValues(jsonDataType)   // fetch values return them as JSON objects
+        .fetch("?.//")              // permform the fetch using a topic selector
+        .then(function(fetchResult) {
+            var results = fetchResult
+
             console.log("Fetch Request returned "+results.length+" topics");
 
             results.forEach(function(topicResult) {

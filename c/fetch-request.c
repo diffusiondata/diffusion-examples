@@ -175,6 +175,7 @@ main(int argc, char **argv)
         diffusion_fetch_request_to(fetch_request, topic, NULL);
         diffusion_fetch_request_first(fetch_request, 1, NULL);
         diffusion_fetch_request_maximum_result_size(fetch_request, 1000, NULL);
+        diffusion_fetch_request_limit_deep_branches(fetch_request, 3 ,3, NULL); // this limits results to a max depth of 3, with each result having maximum 3 results.
 
         DIFFUSION_FETCH_REQUEST_PARAMS_T params = {
                 .topic_selector = topic,

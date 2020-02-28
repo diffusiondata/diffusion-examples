@@ -1,5 +1,5 @@
 /**
- * Copyright © 2014, 2016 Push Technology Ltd.
+ * Copyright © 2014, 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ on_topic_add_discard(SESSION_T *session, void *context)
 }
 
 static int
-on_topic_removed(SESSION_T *session, const SVC_REMOVE_TOPICS_RESPONSE_T *response, void *context)
+on_topic_removed(SESSION_T *session, const SVC_TOPIC_REMOVAL_RESPONSE_T *response, void *context)
 {
         puts("on_topic_removed");
         apr_thread_mutex_lock(mutex);
@@ -287,14 +287,14 @@ int main(int argc, char** argv)
                 puts("Removing topics in 5 seconds...");
                 sleep(5);
 
-                REMOVE_TOPICS_PARAMS_T remove_params = {
+                TOPIC_REMOVAL_PARAMS_T remove_params = {
                         .on_removed = on_topic_removed,
                         .on_discard = on_topic_remove_discard,
                         .topic_selector = "#json" DELIM "slave" DELIM "recordv2" DELIM "binary"
                 };
 
                 apr_thread_mutex_lock(mutex);
-                remove_topics(session, remove_params);
+                topic_removal(session, remove_params);
                 apr_thread_cond_wait(cond, mutex);
                 apr_thread_mutex_unlock(mutex);
         }
