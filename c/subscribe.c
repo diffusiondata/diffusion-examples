@@ -1,5 +1,5 @@
 /**
- * Copyright © 2014, 2016 Push Technology Ltd.
+ * Copyright © 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,14 @@
  * This example is written in C99. Please use an appropriate C99 capable compiler
  *
  * @author Push Technology Limited
- * @since 5.0
+ * @since 6.1
  */
 
 /*
- * This is a sample client which connects to Diffusion and subscribes
- * to topics using a user-specified selector. Any messages received on
- * those topics are then displayed to standard output.
+ * This example shows how to add a JSON value stream and subscribe to a selector.
  */
-
 #include <stdio.h>
+#include <stdlib.h>
 #ifndef WIN32
 #include <unistd.h>
 #else
@@ -37,125 +35,65 @@
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
         {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "ws://localhost:8080"},
-        {'t', "topic_selector", "Topic selector", ARG_REQUIRED, ARG_HAS_VALUE, NULL},
+        {'p', "principal", "Principal (username) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, "client"},
+        {'c', "credentials", "Credentials (password) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, "password"},
+        {'t', "topic", "Topic selector to subscribe to", ARG_REQUIRED, ARG_HAS_VALUE, "time"},
         END_OF_ARG_OPTS
 };
 
-/*
- * This callback is used when the session state changes, e.g. when a session
- * moves from a "connecting" to a "connected" state, or from "connected" to
- * "closed".
- */
-static void
-on_session_state_changed(SESSION_T *session,
-                         const SESSION_STATE_T old_state,
-                         const SESSION_STATE_T new_state)
+static int on_subscription(const char* topic_path,
+                    const TOPIC_SPECIFICATION_T *specification,
+                    void *context)
 {
-        printf("Session state changed from %s (%d) to %s (%d)\n",
-               session_state_as_string(old_state), old_state,
-               session_state_as_string(new_state), new_state);
+        printf("Subscribed to topic: %s\n", topic_path);
+        return HANDLER_SUCCESS;
 }
 
-/*
- * When a subscribed message is received, this callback is invoked.
- */
-static int
-on_topic_message(SESSION_T *session, const TOPIC_MESSAGE_T *msg)
+static int on_unsubscription(const char* topic_path,
+                      const TOPIC_SPECIFICATION_T *specification,
+                      NOTIFY_UNSUBSCRIPTION_REASON_T reason,
+                      void *context)
 {
-        printf("Received message for topic %s (%ld bytes)\n", msg->name, msg->payload->len);
+        printf("Unsubscribed from topic: %s\n", topic_path);
+        return HANDLER_SUCCESS;
+}
 
-        if(msg->details != NULL) {
-                if(msg->details->topic_type == TOPIC_TYPE_JSON) {
-                        // Convert payload to a JSON string
-                        BUF_T *json = cbor_to_json(msg->payload->data, msg->payload->len);
-                        printf("As JSON: %.*s\n", (int)json->len, json->data);
-                        buf_free(json);
+static int on_value(const char* topic_path,
+             const TOPIC_SPECIFICATION_T *const specification,
+             const DIFFUSION_DATATYPE datatype,
+             const DIFFUSION_VALUE_T *const old_value,
+             const DIFFUSION_VALUE_T *const new_value,
+             void *context)
+{
+        DIFFUSION_API_ERROR api_error;
+        char *result;
+        bool success = to_diffusion_json_string(new_value, &result, &api_error);
 
-                }
-                else {
-                        printf("Hexdump of binary data:\n");
-                        hexdump_buf(msg->payload);
-                }
-        }
-        else {
-                printf("Payload: %.*s\n",
-                       (int)msg->payload->len,
-                       msg->payload->data);
+        if(success) {
+                printf("Received value: %s\n", result);
+                free(result);
+                return HANDLER_SUCCESS;
         }
 
+        printf("Error during diffusion value read: %s\n",
+                get_diffusion_api_error_description(api_error));
+        diffusion_api_error_free(api_error);
         return HANDLER_SUCCESS;
+}
+
+static void on_close() 
+{
+        printf("Value stream closed\n");
 }
 
 /*
- * This callback is fired when Diffusion responds to say that a topic
- * subscription request has been received and processed.
+ * Entry point for the example.
  */
-static int
-on_subscribe(SESSION_T *session, void *context_data)
-{
-        printf("on_subscribe\n");
-        return HANDLER_SUCCESS;
-}
-
-/*
- * This is callback is for when Diffusion response to an unsubscription
- * request to a topic, and only indicates that the request has been received.
- */
-static int
-on_unsubscribe(SESSION_T *session, void *context_data)
-{
-        printf("on_unsubscribe\n");
-        return HANDLER_SUCCESS;
-}
-
-/*
- * Publishers and control clients may choose to subscribe any other client to
- * a topic of their choice at any time. We register this callback to capture
- * messages from these topics and display them.
- */
-static int
-on_unexpected_topic_message(SESSION_T *session, const TOPIC_MESSAGE_T *msg)
-{
-        printf("Received a message for a topic we didn't subscribe to (%s)\n", msg->name);
-        printf("Payload: %.*s\n", (int)msg->payload->len, msg->payload->data);
-        return HANDLER_SUCCESS;
-}
-
-/*
- * We use this callback when Diffusion notifies us that we've been subscribed
- * to a topic. Note that this could be called for topics that we haven't
- * explicitly subscribed to - other control clients or publishers may ask to
- * subscribe us to a topic.
- */
-static int
-on_notify_subscription(SESSION_T *session, const SVC_NOTIFY_SUBSCRIPTION_REQUEST_T *request, void *context)
-{
-        printf("on_notify_subscription: %d: \"%s\"\n",
-               request->topic_info.topic_id,
-               request->topic_info.topic_path);
-        return HANDLER_SUCCESS;
-}
-
-/*
- * This callback is used when we receive notification that this client has been
- * unsubscribed from a specific topic. Causes of the unsubscription are the same
- * as those for subscription.
- */
-static int
-on_notify_unsubscription(SESSION_T *session, const SVC_NOTIFY_UNSUBSCRIPTION_REQUEST_T *request, void *context)
-{
-        printf("on_notify_unsubscription: ID: %d, Path: %s, Reason: %d\n",
-               request->topic_id,
-               request->topic_path,
-               request->reason);
-        return HANDLER_SUCCESS;
-}
-
 int
 main(int argc, char **argv)
 {
         /*
-         * Standard command-line parsing
+         * Standard command-line parsing.
          */
         HASH_T *options = parse_cmdline(argc, argv, arg_opts);
         if(options == NULL || hash_get(options, "help") != NULL) {
@@ -163,75 +101,79 @@ main(int argc, char **argv)
                 return EXIT_FAILURE;
         }
 
-        char *url = hash_get(options, "url");
-        char *topic = hash_get(options, "topic_selector");
+        const char *url = hash_get(options, "url");
+        const char *principal = hash_get(options, "principal");
+        CREDENTIALS_T *credentials = NULL;
+        const char *password = hash_get(options, "credentials");
+        if(password != NULL) {
+                credentials = credentials_create_password(password);
+        }
+        const char *selector = hash_get(options, "topic");
 
-        /*
-         * A SESSION_LISTENER_T holds callbacks to inform the client
-         * about changes to the state. Used here for informational
-         * purposes only.
-         */
-        SESSION_LISTENER_T session_listener = { 0 };
-        session_listener.on_state_changed = &on_session_state_changed;
-
-        /*
-         * Creating a session requires at least a URL. Creating a
-         * session initiates a connection with Diffusion.
-         */
+        SESSION_T *session;
         DIFFUSION_ERROR_T error = { 0 };
-        SESSION_T *session = NULL;
-        session = session_create(url, NULL, NULL, &session_listener, NULL, &error);
-        if(session == NULL) {
-                fprintf(stderr, "TEST: Failed to create session\n");
-                fprintf(stderr, "ERR : %s\n", error.message);
+
+        /*
+         * Create a session, synchronously.
+         */
+        session = session_create(url, principal, credentials, NULL, NULL, &error);
+        if(session != NULL) {
+                char *sid_str = session_id_to_string(session->id);
+                printf("Session created (state=%d, id=%s)\n",
+                       session_state_get(session),
+                       sid_str);
+                free(sid_str);
+        }
+        else {
+                printf("Failed to create session: %s\n", error.message);
+                free(error.message);
+                credentials_free(credentials);
                 return EXIT_FAILURE;
         }
 
         /*
-         * When issuing commands to Diffusion (in this case, subscribe
-         * to a topic), it's typical that more than one message may be
-         * received in response and a handler can be installed for
-         * each message type. In the case of subscription, we can
-         * install handlers for:
-         * 1. The topic message data (on_topic_message).
-         * 2. Notification that the subscription has been received
-         *    (on_subscribe).
-         * 3. Topic details (on_topic_details).
+         * Create a value stream
          */
-        notify_subscription_register(session,(NOTIFY_SUBSCRIPTION_PARAMS_T) { .on_notify_subscription = on_notify_subscription });
-        notify_unsubscription_register(session, (NOTIFY_UNSUBSCRIPTION_PARAMS_T) { .on_notify_unsubscription = on_notify_unsubscription });
+        VALUE_STREAM_T value_stream = {
+                .datatype = DATATYPE_JSON,
+                .on_subscription = on_subscription,
+                .on_unsubscription = on_unsubscription,
+                .on_value = on_value,
+                .on_close = on_close
+        };
 
-        subscribe(session, (SUBSCRIPTION_PARAMS_T) { .topic_selector = topic, .on_topic_message = on_topic_message, .on_subscribe = on_subscribe });
+        add_stream(session, selector, &value_stream);
+        SUBSCRIPTION_PARAMS_T params = {
+                .topic_selector = selector
+        };
 
         /*
-         * Install a global topic handler to capture messages for
-         * topics we haven't explicitly subscribed to, and therefore
-         * don't have a specific handler for.
+         * Subscribe to topics matching the selector
          */
-        session->global_topic_handler = on_unexpected_topic_message;
+        subscribe(session, params);
+
+        UNSUBSCRIPTION_PARAMS_T unsub_params = {
+                .topic_selector = selector
+        };
 
         /*
-         * Receive messages for 5 seconds.
+         * Unsubscribe to topics matching the selector
          */
-        sleep(60);
+        unsubscribe(session, unsub_params);
 
         /*
-         * Unsubscribe from the topic
+         * Sleep for 2 seconds.
          */
-        unsubscribe(session, (UNSUBSCRIPTION_PARAMS_T) {.topic_selector = topic, .on_unsubscribe = on_unsubscribe} );
+        sleep(2);
 
         /*
-         * Wait for any unsubscription notifications to be received.
-         */
-        sleep(5);
-
-        /*
-         * Politely tell Diffusion we're closing down.
+         * Close the session, and release resources and memory.
          */
         session_close(session, NULL);
         session_free(session);
-
         hash_free(options, NULL, free);
+
+        credentials_free(credentials);
 
         return EXIT_SUCCESS;
 }

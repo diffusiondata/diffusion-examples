@@ -19,7 +19,7 @@ CC		= gcc
 # Extra definitions from parent directory, if they exist.
 -include ../makefile.defs
 
-CFLAGS		+= -g -Wall -Werror -std=c99 -D_POSIX_C_SOURCE=200112L -D_XOPEN_SOURCE=700 -I$(DIFFUSION_C_CLIENT_INCDIR)
+CFLAGS		+= -g -Wall -Werror -Wno-error=deprecated-declarations -std=c99 -D_POSIX_C_SOURCE=200112L -D_XOPEN_SOURCE=700 -I$(DIFFUSION_C_CLIENT_INCDIR)
 LDFLAGS		+= $(DIFFUSION_C_CLIENT_LIBDIR)/libdiffusion.a -lpthread -lpcre -lz $(LIBS)
 # If you have openssl installed then you can uncomment these.
 ifdef HAVE_OPEN_SSL
@@ -38,7 +38,7 @@ SOURCES = subscribe.c fetch-request.c 	\
 		  subscription-control.c reconnect.c			\
 		  json/json-publishing-example.c			\
 		  json/json-subscribing-example.c			\
-		  value-stream.c recordv2-topics.c binary-topics.c	\
+		  recordv2-topics.c binary-topics.c			\
 		  int64-topics.c double-topics.c string-topics.c	\
 		  send-request-to-session.c send-request-to-path.c	\
 		  send-request-to-filter.c topic-update.c		\
@@ -59,7 +59,7 @@ TARGETS = subscribe fetch-request \
                   missing-topic-notification				\
 		  subscription-control reconnect			\
 		  json-publishing-example json-subscribing-example	\
-		  value-stream recordv2-topics binary-topics		\
+		  recordv2-topics binary-topics				\
 		  int64-topics double-topics string-topics		\
 		  send-request-to-session send-request-to-path		\
 		  send-request-to-filter topic-update			\
@@ -135,9 +135,6 @@ json-publishing-example:	json/json-publishing-example.c
 
 json-subscribing-example:	json/json-subscribing-example.c
 		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-value-stream:	$(OBJDIR)/value-stream.o
-		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
 
 recordv2-topics:	$(OBJDIR)/recordv2-topics.o
 		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
