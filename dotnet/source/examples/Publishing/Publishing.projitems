@@ -9,6 +9,7 @@
     <Import_RootNamespace>PushTechnology.ClientInterface.Example.Publishing</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AddAndSetTopic.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RecordV2Topics.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BinaryTopics.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DoubleTopics.cs" />

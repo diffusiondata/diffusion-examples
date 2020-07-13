@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Push Technology Ltd.
+ * Copyright (C) 2018, 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.Session.SessionLock;
 import com.pushtechnology.diffusion.client.session.Session.SessionLockScope;
 import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
-import com.pushtechnology.diffusion.client.types.TopicPermission;
+import com.pushtechnology.diffusion.client.types.PathPermission;
 
 /**
  * An example of a client that uses session locks to coordinate actions with
@@ -59,7 +59,7 @@ import com.pushtechnology.diffusion.client.types.TopicPermission;
  *
  * <p>
  * To run this example, the "client" principal must be granted
- * {@link TopicPermission#ACQUIRE_LOCK ACQUIRE_LOCK} permission to
+ * {@link PathPermission#ACQUIRE_LOCK ACQUIRE_LOCK} permission to
  * {@code lockA}.
  *
  * @author Push Technology Limited

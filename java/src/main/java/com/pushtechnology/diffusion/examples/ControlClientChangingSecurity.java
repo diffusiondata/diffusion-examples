@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2016 Push Technology Ltd.
+ * Copyright (C) 2014, 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import com.pushtechnology.diffusion.client.features.control.clients.SecurityCont
 import com.pushtechnology.diffusion.client.features.control.clients.SecurityControl.ScriptBuilder;
 import com.pushtechnology.diffusion.client.features.control.clients.SecurityControl.SecurityConfiguration;
 import com.pushtechnology.diffusion.client.session.Session;
-import com.pushtechnology.diffusion.client.types.TopicPermission;
+import com.pushtechnology.diffusion.client.types.PathPermission;
 
 /**
  * An example of using a control client to alter the security configuration.
@@ -134,27 +134,26 @@ public class ControlClientChangingSecurity {
                         newName, role.getGlobalPermissions());
             }
 
-            if (!role.getDefaultTopicPermissions().isEmpty()) {
+            if (!role.getDefaultPathPermissions().isEmpty()) {
                 builder = builder
-                    // Remove default topic permissions for old role
-                    .setDefaultTopicPermissions(oldName, emptySet())
-                    // Set default topic permissions for new role
-                    .setDefaultTopicPermissions(
-                        newName, role.getDefaultTopicPermissions());
+                    // Remove default path permissions for old role
+                    .setDefaultPathPermissions(oldName, emptySet())
+                    // Set default path permissions for new role
+                    .setDefaultPathPermissions(
+                        newName, role.getDefaultPathPermissions());
             }
 
             builder = builder.append(
-                role.getTopicPermissions().entrySet().stream().map(
+                role.getPathPermissions().entrySet().stream().map(
                     entry -> {
-                        final String topicPath = entry.getKey();
-                        final Set<TopicPermission> permissions = entry.getValue();
+                        final String path = entry.getKey();
+                        final Set<PathPermission> permissions = entry.getValue();
 
                         return emptyScript
-                            // Remove topic permissions for old role
-                            .removeTopicPermissions(oldName, topicPath)
-                            // Set topic permissions for new role
-                            .setTopicPermissions(
-                                newName, topicPath, permissions);
+                            // Remove path permissions for old role
+                            .removePathPermissions(oldName, path)
+                            // Set path permissions for new role
+                            .setPathPermissions(newName, path, permissions);
                     })
                     .reduce(emptyScript, (sb1, sb2) -> sb1.append(sb2)));
         }

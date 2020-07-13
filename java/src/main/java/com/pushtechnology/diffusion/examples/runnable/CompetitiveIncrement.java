@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Push Technology Ltd.
+ * Copyright (C) 2018, 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.diffusion.client.Diffusion;
-import com.pushtechnology.diffusion.client.features.ClusterRepartitionException;
+import com.pushtechnology.diffusion.client.features.ClusterRoutingException;
 import com.pushtechnology.diffusion.client.features.IncompatibleTopicException;
 import com.pushtechnology.diffusion.client.features.IncompatibleTopicStateException;
 import com.pushtechnology.diffusion.client.features.NoSuchTopicException;
@@ -201,8 +201,8 @@ public final class CompetitiveIncrement extends AbstractClient {
 
     private void handleIncrementFailure(Topics topics, Throwable ex) {
         final Throwable cause = ex.getCause();
-        if (cause instanceof ClusterRepartitionException) {
-            // The cluster was repartitioning during the increment.
+        if (cause instanceof ClusterRoutingException) {
+            // A transient cluster failure ooccured during the increment.
             // Retry incrementing the topic until successful.
             performIncrement(topics);
         }

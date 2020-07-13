@@ -114,7 +114,7 @@ namespace PushTechnology.ClientInterface.Example.Features {
                 Console.WriteLine( topic.Path );
             }
 
-            var resLimit = await topics.FetchRequest.LimitDeepBranches(3, 3).FetchAsync( "?.//" );
+            var resLimit = limitDeep(3, 3);
             Console.WriteLine("\nProduce results that are at most 3 parts deep, with a maximum of 3 results per deep branch.");
             foreach (var topic in resLimit.Results)
             {
@@ -197,6 +197,15 @@ namespace PushTechnology.ClientInterface.Example.Features {
     /// <param name="before"> The topic selector to be used as a starting point </param>
     /// <param name="limit"> The number of topics to fetch before the starting point </param>
     public IFetchResult<IBytes> prior( string before, int limit) => topics.FetchRequest.Before(before).WithValues<IBytes>().Last(limit).FetchAsync("*.*").Result;
+
+    ///<summary>
+    ///Shows how to specify a limit on the number of results returned for each deep branch.
+    ///This demonstrates a method that could be particularly useful for incrementally 
+    ///exploring a topic tree from the root, allowing a breadth-first search strategy.
+    ///</summary>
+    /// <param name="deepBranchDepth"> The number of parts in the root path of a branch for it to be considered deep </param>
+    /// <param name="deepBranchLimit "> The maximum number of results to return for each deep branch </param>
+    public IFetchResult<IBytes> limitDeep(int deepBranchDepth, int deepBranchLimit) => topics.FetchRequest.LimitDeepBranches(deepBranchDepth, deepBranchLimit).WithValues<IBytes>().FetchAsync("*.*").Result;
 
     }
 

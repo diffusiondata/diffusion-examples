@@ -18,7 +18,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using PushTechnology.ClientInterface.Client.Callbacks;
 using PushTechnology.ClientInterface.Client.Factories;
-using PushTechnology.ClientInterface.Client.Features.Control.Topics;
+using PushTechnology.ClientInterface.Client.Features;
 using PushTechnology.ClientInterface.Client.Session;
 using static System.Console;
 using static PushTechnology.ClientInterface.Examples.Runner.Program;
@@ -39,11 +39,11 @@ namespace PushTechnology.ClientInterface.Example.Publishing {
         public async Task Run( CancellationToken cancellationToken, string[] args ) {
             var serverUrl = args[ 0 ];
             var session = Diffusion.Sessions.Principal( "control" ).Password( "password" ).Open( serverUrl );
-            var messagingControl = session.MessagingControl;
+            var messaging = session.Messaging;
             var requestCallback = new RequestCallback();
 
             while ( !cancellationToken.IsCancellationRequested ) {
-                int requestsSent = await messagingControl.SendRequestToFilterAsync(
+                int requestsSent = await messaging.SendRequestToFilterAsync(
                     "$Principal EQ 'client'",
                     messagingPath,
                     "Time",

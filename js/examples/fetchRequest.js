@@ -57,14 +57,14 @@ diffusion.connect({
     session
         .fetchRequest()             // obtain a FetchRequest
         .limitBranchDepth(3, 3)     // A deep branch has a root path that has a
-                                    // number of parts equal to the deep_branch_depth parameter. 
+                                    // number of parts equal to the deep_branch_depth parameter.
                                     // The deep_branch_limit specifies the maximum number of results for each deep branch.
         .withProperties()           // get the topic properties
         .topicTypes([TopicType.STRING, TopicType.INT64]) // limit to string and integer topic types
         .withValues(jsonDataType)   // fetch values return them as JSON objects
         .fetch("?.//")              // permform the fetch using a topic selector
         .then(function(fetchResult) {
-            var results = fetchResult
+            var results = fetchResult.results()
 
             console.log("Fetch Request returned "+results.length+" topics");
 

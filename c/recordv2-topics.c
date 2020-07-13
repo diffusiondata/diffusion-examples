@@ -319,5 +319,8 @@ int main(int argc, char** argv)
         // Close our session, and release resources and memory.
         tear_down(session, specification);
 
+        credentials_free(credentials);
+        hash_free(options, NULL, free);
+
         return EXIT_SUCCESS;
 }

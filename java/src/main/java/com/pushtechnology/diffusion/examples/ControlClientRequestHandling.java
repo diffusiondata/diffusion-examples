@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2017, 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,14 @@ import org.slf4j.LoggerFactory;
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.callbacks.Registration;
-import com.pushtechnology.diffusion.client.features.control.topics.MessagingControl;
+import com.pushtechnology.diffusion.client.features.Messaging;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionId;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
 /**
- * This is an example of a control client using the 'MessagingControl' feature
- * to receive requests from clients and also send requests to clients.
+ * This is an example of a control client using the 'Messaging' feature
+ * to receive requests from clients and send requests to clients.
  * <P>
  * It is a trivial example that simply responds to all requests on a particular
  * branch of the topic tree by echoing them back to the client exactly as they
@@ -48,7 +48,7 @@ public class ControlClientRequestHandling {
         LoggerFactory.getLogger(ControlClientRequestHandling.class);
 
     private final Session session;
-    private final MessagingControl messagingControl;
+    private final Messaging messaging;
 
     /**
      * Constructor.
@@ -58,7 +58,7 @@ public class ControlClientRequestHandling {
     public ControlClientRequestHandling(String serverURL) {
         session = Diffusion.sessions().principal("control").password("password")
             .open(serverURL);
-        messagingControl = session.feature(MessagingControl.class);
+        messaging = session.feature(Messaging.class);
     }
 
     /**
@@ -69,7 +69,7 @@ public class ControlClientRequestHandling {
      */
     public Registration addRequestHandler(String messagePath)
         throws InterruptedException, ExecutionException, TimeoutException {
-        return messagingControl.addRequestHandler(
+        return messaging.addRequestHandler(
             messagePath, JSON.class, JSON.class, new JSONRequestHandler()).get(5, TimeUnit.SECONDS);
     }
 
@@ -84,7 +84,7 @@ public class ControlClientRequestHandling {
      */
     public JSON sendRequest(SessionId sessionId, String messagePath, JSON request)
         throws InterruptedException, ExecutionException, TimeoutException {
-        final JSON response = messagingControl.sendRequest(
+        final JSON response = messaging.sendRequest(
                 sessionId, messagePath, request, JSON.class, JSON.class).get(5, TimeUnit.SECONDS);
         LOG.info("Response received: {}", response.toJsonString());
 
@@ -109,7 +109,7 @@ public class ControlClientRequestHandling {
      */
     public int sendRequestToFilter(String messagePath, JSON request, String filter)
         throws InterruptedException, ExecutionException, TimeoutException {
-        final int numberSent = messagingControl.sendRequestToFilter(filter, messagePath, request,
+        final int numberSent = messaging.sendRequestToFilter(filter, messagePath, request,
                 JSON.class, JSON.class, new JSONFilterRequestCallback()).get(5, TimeUnit.SECONDS);
         LOG.info("{} requests sent", numberSent);
 
@@ -119,7 +119,7 @@ public class ControlClientRequestHandling {
     /**
      * Request handler that logs received requests and echoes them back to the original session.
      */
-    private final class JSONRequestHandler implements MessagingControl.RequestHandler<JSON, JSON> {
+    private final class JSONRequestHandler implements Messaging.RequestHandler<JSON, JSON> {
 
         @Override
         public void onClose() {
@@ -142,16 +142,18 @@ public class ControlClientRequestHandling {
     /**
      * Filter callback that logs responses to the request.
      */
-    private final class JSONFilterRequestCallback implements MessagingControl.FilteredRequestCallback<JSON> {
+    private final class JSONFilterRequestCallback implements Messaging.FilteredRequestCallback<JSON> {
 
         @Override
         public void onClose() {
-            LOG.info("JSONFilterRequestCallback closed");
+            // This method was deprecated in 6.5 and is no longer called. It
+            // will be removed in a future release.
         }
 
         @Override
         public void onError(ErrorReason errorReason) {
-            LOG.info("JSONFilterRequestCallback error: {}", errorReason);
+            // This method was deprecated in 6.5 and is no longer called. It
+            // will be removed in a future release.
         }
 
         @Override

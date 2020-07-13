@@ -37,7 +37,7 @@
 static const long timeout = 5000;
 static const long sleep_timeout = 1000 * 1000;
 
-char random_bytes[50];
+char random_bytes[51];
 
 apr_pool_t *pool = NULL;
 
@@ -175,9 +175,11 @@ dispatch_binary_update(SESSION_T *session, const char *topic_path)
 {
         // Generate 50 bytes of random values
         srand(time(NULL));
-        for(unsigned long i = 0; i < sizeof(random_bytes); i++) {
+        for(unsigned long i = 0; i < sizeof(random_bytes) - 1; i++) {
                 random_bytes[i] = (char)(33 + (rand() % 94));
         }
+
+        random_bytes[50] = '\0';
 
         BUF_T *buf = buf_create();
         if(!write_diffusion_binary_value(random_bytes, buf, sizeof(random_bytes))) {
@@ -309,6 +311,8 @@ int main(int argc, char** argv)
 
         // Close our session, and release resources and memory.
         tear_down(session, specification);
+        credentials_free(credentials);
+        hash_free(options, NULL, free);
 
         return EXIT_SUCCESS;
 }

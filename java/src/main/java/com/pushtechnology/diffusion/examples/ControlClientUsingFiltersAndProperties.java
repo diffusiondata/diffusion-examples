@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2015, 2018 Push Technology Ltd.
+ * Copyright (C) 2015, 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,15 @@ import java.util.concurrent.TimeoutException;
 
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
-import com.pushtechnology.diffusion.client.features.control.topics.MessagingControl;
-import com.pushtechnology.diffusion.client.features.control.topics.MessagingControl.FilteredRequestCallback;
-import com.pushtechnology.diffusion.client.features.control.topics.MessagingControl.RequestHandler;
+import com.pushtechnology.diffusion.client.features.Messaging;
+import com.pushtechnology.diffusion.client.features.Messaging.FilteredRequestCallback;
+import com.pushtechnology.diffusion.client.features.Messaging.RequestHandler;
 import com.pushtechnology.diffusion.client.session.Session;
 
 /**
- * This is an example of a control client using the 'MessagingControl' feature
- * to send messages to clients using message filters. It also demonstrates the
- * ability to register a request handler with an interest in session property
- * values.
+ * This is an example of a control client using the 'Messaging' feature to send
+ * messages to clients using message filters. It also demonstrates the ability
+ * to register a request handler with an interest in session property values.
  *
  * @author Push Technology Limited
  * @since 5.5
@@ -37,7 +36,7 @@ import com.pushtechnology.diffusion.client.session.Session;
 public final class ControlClientUsingFiltersAndProperties {
 
     private final Session session;
-    private final MessagingControl messagingControl;
+    private final Messaging messaging;
 
     private static final FilteredRequestCallback<String> FILTERED_CALLBACK =
         new FilteredRequestCallback.Default<>();
@@ -55,13 +54,13 @@ public final class ControlClientUsingFiltersAndProperties {
             Diffusion.sessions().principal("control").password("password")
                 .open(serverUrl);
 
-        messagingControl = session.feature(MessagingControl.class);
+        messaging = session.feature(Messaging.class);
 
         // Register to receive all messages sent by clients on the "foo" branch
         // and include the "JobTitle" session property value with each message.
         // To do this, the client session must have the 'register_handler'
         // permission.
-        messagingControl.addRequestHandler(
+        messaging.addRequestHandler(
             "foo",
             String.class,
             String.class,
@@ -91,7 +90,7 @@ public final class ControlClientUsingFiltersAndProperties {
 
             if ("Manager".equals(
                 context.getSessionProperties().get("JobTitle"))) {
-                messagingControl.sendRequestToFilter(
+                messaging.sendRequestToFilter(
                     "JobTitle is 'Staff'",
                     "foo",
                     request,
@@ -113,7 +112,6 @@ public final class ControlClientUsingFiltersAndProperties {
         @Override
         public void onError(ErrorReason errorReason) {
         }
-
     }
 
 }

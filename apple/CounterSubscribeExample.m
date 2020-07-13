@@ -1,6 +1,6 @@
 //  Diffusion Client Library for iOS, tvOS and OS X / macOS - Examples
 //
-//  Copyright (C) 2015, 2018 Push Technology Ltd.
+//  Copyright (C) 2015, 2020 Push Technology Ltd.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -45,7 +45,10 @@
         // Register self as the fallback handler for topic updates.
         PTDiffusionValueStream *const stream =
             [PTDiffusionPrimitive int64NumberValueStreamWithDelegate:self];
-        [session.topics addFallbackStream:stream];
+        NSError *fallbackError;
+        if (![session.topics addFallbackStream:stream error:&fallbackError]) {
+            NSLog(@"Error while adding fallback stream: %@", fallbackError.description);
+        }
 
         NSLog(@"Subscribing...");
         [session.topics subscribeWithTopicSelectorExpression:@"foo/counter"

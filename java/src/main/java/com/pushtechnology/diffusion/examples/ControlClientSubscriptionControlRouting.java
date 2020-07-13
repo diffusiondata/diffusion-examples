@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2016 Push Technology Ltd.
+ * Copyright (C) 2014, 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,16 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
 
+import java.util.concurrent.CompletableFuture;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.pushtechnology.diffusion.client.Diffusion;
+import com.pushtechnology.diffusion.client.callbacks.Registration;
 import com.pushtechnology.diffusion.client.features.control.topics.SubscriptionControl;
 import com.pushtechnology.diffusion.client.features.control.topics.SubscriptionControl.RoutingSubscriptionRequest;
 import com.pushtechnology.diffusion.client.features.control.topics.SubscriptionControl.RoutingSubscriptionRequest.RoutingHandler;
-import com.pushtechnology.diffusion.client.features.control.topics.SubscriptionControl.SubscriptionCallback;
 import com.pushtechnology.diffusion.client.session.Session;
 
 /**
@@ -32,37 +37,51 @@ import com.pushtechnology.diffusion.client.session.Session;
  */
 public class ControlClientSubscriptionControlRouting {
 
+    private static final Logger LOG =
+        LoggerFactory.getLogger(ControlClientSubscriptionControlRouting.class);
+
     private final Session session;
+    private final SubscriptionControl subscriptionControl;
 
     /**
      * Constructor.
-     *
-     * @param routingCallback for routing subscription requests
      */
-    public ControlClientSubscriptionControlRouting(
-        final SubscriptionCallback routingCallback, String serverUrl) {
+    public ControlClientSubscriptionControlRouting(String serverUrl) {
 
         session =
             Diffusion.sessions().principal("control").password("password")
                 .open(serverUrl);
 
-        final SubscriptionControl subscriptionControl =
+        subscriptionControl =
             session.feature(SubscriptionControl.class);
 
-        // Sets up a handler so that all subscriptions to topic a/b are routed
-        // to routing/target/topic
+    }
+
+    /**
+     * Route a subscription from one topic to another.
+     *
+     * @param topic the topic to receive data from its routed subscription
+     * @param sourceTopic the topic to route subscriptions to
+     * @return a CompletableFuture that completes when a response is received
+     *         from the server
+     */
+    public CompletableFuture<Registration> addRoute(String topic, String sourceTopic) {
+        // Sets up a handler so that all subscriptions to topic are routed
+        // to sourceTopic
         // To do this, the client session requires the 'view_session',
         // 'modify_session', and 'register_handler' permissions.
-        subscriptionControl.addRoutingSubscriptionHandler(
-            "a/b",
+        return subscriptionControl.addRoutingSubscriptionHandler(
+            topic,
             new RoutingHandler.Default() {
                 @Override
                 public void onSubscriptionRequest(
                     final RoutingSubscriptionRequest request) {
 
-                    request.route(
-                        "routing/target/topic",
-                        routingCallback);
+                    request.route(sourceTopic).whenComplete((voidResult, exception) -> {
+                            if (exception != null) {
+                                LOG.info("subscription routing failed", exception);
+                            }
+                    });
                 }
             });
     }

@@ -18,7 +18,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using PushTechnology.ClientInterface.Client.Callbacks;
 using PushTechnology.ClientInterface.Client.Factories;
-using PushTechnology.ClientInterface.Client.Features.Control.Topics;
+using PushTechnology.ClientInterface.Client.Features;
 using PushTechnology.ClientInterface.Client.Session;
 using static System.Console;
 using static PushTechnology.ClientInterface.Examples.Runner.Program;
@@ -39,12 +39,12 @@ namespace PushTechnology.ClientInterface.Example.Publishing {
         public async Task Run( CancellationToken cancellationToken, string[] args ) {
             var serverUrl = args[ 0 ];
             var session = Diffusion.Sessions.Principal( "control" ).Password( "password" ).Open( serverUrl );
-            var messagingControl = session.MessagingControl;
+            var messaging = session.Messaging;
             var requestCallback = new RequestCallback();
 
             while ( !cancellationToken.IsCancellationRequested ) {
                 // To obtain session IDs we will use in this example request to filter messaging
-                int requestsSent = await messagingControl.SendRequestToFilterAsync(
+                int requestsSent = await messaging.SendRequestToFilterAsync(
                     "$Principal EQ 'client'",
                     messagingPath,
                     "Hello?",
@@ -55,7 +55,7 @@ namespace PushTechnology.ClientInterface.Example.Publishing {
                     requestCallback.ResponseEvent.WaitOne();
 
                     // Send message to a session using obtained session ID
-                    var response = await messagingControl.SendRequestAsync<string, string>(
+                    var response = await messaging.SendRequestAsync<string, string>(
                         requestCallback.SessionId, messagingPath, "Time", cancellationToken );
                     WriteLine( $"Received response: '{response}'." );
                 }

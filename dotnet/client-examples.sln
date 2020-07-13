@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2010
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{1F4E79D7-6CBD-4E2C-8001-56C6DD086FB9}"
 EndProject
@@ -28,6 +28,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		source\examples\Consuming\Consuming.projitems*{1efbf419-9bee-4e12-9c91-fb2c7738b524}*SharedItemsImports = 5
+		source\examples\Features\Features.projitems*{1efbf419-9bee-4e12-9c91-fb2c7738b524}*SharedItemsImports = 5
+		source\examples\Publishing\Publishing.projitems*{1efbf419-9bee-4e12-9c91-fb2c7738b524}*SharedItemsImports = 5
 		source\examples\Consuming\Consuming.projitems*{6e978dc0-d636-4883-b0d8-4ba93667865c}*SharedItemsImports = 13
 		source\examples\Publishing\Publishing.projitems*{960603fe-de40-42fe-a1e7-1284e3af1a15}*SharedItemsImports = 13
 		source\examples\Features\Features.projitems*{cbf43c7f-76a7-4476-8f01-ab2f4c89f90e}*SharedItemsImports = 13

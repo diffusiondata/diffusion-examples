@@ -262,6 +262,7 @@ main(int argc, char** argv)
 
         session_close(session, NULL);
         session_free(session);
+        hash_free(options, NULL, free);
 
         return EXIT_SUCCESS;
 }

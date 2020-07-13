@@ -305,6 +305,9 @@ int main(int argc, char** argv)
         session_close(session, NULL);
         session_free(session);
 
+        credentials_free(credentials);
+        hash_free(options, NULL, free);
+
         apr_thread_mutex_destroy(mutex);
         apr_thread_cond_destroy(cond);
         apr_pool_destroy(pool);

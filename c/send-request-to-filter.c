@@ -174,6 +174,8 @@ main(int argc, char **argv)
         session_free(sender);
 
         buf_free(request);
+        credentials_free(credentials);
+        hash_free(options, NULL, free);
 
         return EXIT_SUCCESS;
 }

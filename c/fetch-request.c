@@ -57,7 +57,9 @@ on_session_state_changed(SESSION_T *session, const SESSION_STATE_T old_state, co
                session_state_as_string(old_state), old_state,
                session_state_as_string(new_state), new_state);
         if(new_state == CONNECTED_ACTIVE) {
-                printf("Session ID=%s\n", session_id_to_string(session->id));
+                char *session_id = session_id_to_string(session->id);
+                printf("Session ID=%s\n", session_id);
+                free(session_id);
         }
 }
 
@@ -200,6 +202,7 @@ main(int argc, char **argv)
         session_free(session);
 
         credentials_free(credentials);
+        hash_free(options, NULL, free);
         diffusion_fetch_request_free(fetch_request);
 
         return EXIT_SUCCESS;

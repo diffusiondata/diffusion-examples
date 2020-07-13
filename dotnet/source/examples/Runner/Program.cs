@@ -83,6 +83,9 @@ namespace PushTechnology.ClientInterface.Examples.Runner {
 
                 /// Start authentication example
                 //runner.Start( new Authentication(), secureUrl );
+
+                /// Start AddAndSet example
+                //runner.Start( new AddAndSetTopic(), secureUrl );
             }
         }
 

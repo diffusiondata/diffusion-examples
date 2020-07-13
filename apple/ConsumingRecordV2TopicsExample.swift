@@ -1,6 +1,6 @@
 //  Diffusion Client Library for iOS, tvOS and OS X / macOS - Examples
 //
-//  Copyright (C) 2017 Push Technology Ltd.
+//  Copyright (C) 2017, 2020 Push Technology Ltd.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -90,7 +90,12 @@ public class ClientConsumingRecordV2Topics {
                 with: valueStreamDelegate)
             let topics = session.topics
             let topicSelector = "?" + rootTopic + "//"
-            topics.add(valueStream, withSelectorExpression: topicSelector)
+            do {
+                try topics.add(valueStream, withSelectorExpression: topicSelector, error:())
+            }
+            catch {
+                print("Error while adding stream with selector expression")
+            }
             topics.subscribe(withTopicSelectorExpression: topicSelector)
             { (error) in
                 if let subscriptionError = error {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Push Technology Ltd.
+ * Copyright (C) 2018, 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pushtechnology.diffusion.client.features.ClusterRepartitionException;
+import com.pushtechnology.diffusion.client.features.ClusterRoutingException;
 import com.pushtechnology.diffusion.client.features.IncompatibleTopicException;
 import com.pushtechnology.diffusion.client.features.InvalidUpdateStreamException;
 import com.pushtechnology.diffusion.client.features.NoSuchTopicException;
@@ -160,7 +160,7 @@ public final class CoordinatingSessionExample extends AbstractClient {
 
         private void handleUpdateFailure(long value, Throwable ex) {
             final Throwable cause = ex.getCause();
-            if (cause instanceof ClusterRepartitionException) {
+            if (cause instanceof ClusterRoutingException) {
                 // Replace stream and retry the update
                 updateStream = updateStreamFactory.get();
                 performUpdate(value);

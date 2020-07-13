@@ -101,7 +101,7 @@ main(int argc, char **argv)
         /*
          * Standard command-line parsing.
          */
-        const HASH_T *options = parse_cmdline(argc, argv, arg_opts);
+        HASH_T *options = parse_cmdline(argc, argv, arg_opts);
         if(options == NULL || hash_get(options, "help") != NULL) {
                 show_usage(argc, argv, arg_opts);
                 return EXIT_FAILURE;
@@ -154,6 +154,7 @@ main(int argc, char **argv)
          */
         session_close(session, NULL);
         session_free(session);
+        hash_free(options, NULL, free);
 
         apr_thread_mutex_destroy(mutex);
         apr_thread_cond_destroy(cond);

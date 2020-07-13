@@ -121,7 +121,7 @@ main(int argc, char** argv)
         /*
          * Standard command-line parsing.
          */
-        const HASH_T *options = parse_cmdline(argc, argv, arg_opts);
+        HASH_T *options = parse_cmdline(argc, argv, arg_opts);
         if(options == NULL || hash_get(options, "help") != NULL) {
                 show_usage(argc, argv, arg_opts);
                 return EXIT_FAILURE;
@@ -191,6 +191,7 @@ main(int argc, char** argv)
                         char *value;
                         read_diffusion_string_value(current_value, &value, NULL);
                         printf("current topic value: %s", value);
+                        diffusion_value_free(current_value);
                         free(value);
                 }
 
@@ -223,6 +224,7 @@ main(int argc, char** argv)
 
         credentials_free(credentials);
         diffusion_topic_update_stream_free(update_stream);
+        hash_free(options, NULL, free);
 
         apr_thread_mutex_destroy(mutex);
         apr_thread_cond_destroy(cond);

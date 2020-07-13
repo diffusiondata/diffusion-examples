@@ -137,9 +137,10 @@ main(int argc, char **argv)
 
         session = session_create(url, principal, credentials, NULL, NULL, &error);
         if(session != NULL) {
+                char *session_id = session_id_to_string(session->id);
                 printf("Session created (state=%d, id=%s)\n",
-                       session_state_get(session),
-                       session_id_to_string(session->id));
+                       session_state_get(session), session_id);
+                free(session_id);
         }
         else {
                 printf("Failed to create session: %s\n", error.message);
@@ -170,6 +171,7 @@ main(int argc, char **argv)
         session_free(session);
 
         hash_free(options, NULL, free);
+        credentials_free(credentials);
 
         return EXIT_SUCCESS;
 }

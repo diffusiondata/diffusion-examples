@@ -140,5 +140,9 @@ main(int argc, char **argv)
         session_close(session, NULL);
         session_free(session);
 
+        credentials_free(credentials);
+        hash_free(options, NULL, free);
+        free_reconnection_strategy(reconnection_strategy);
+
         return EXIT_SUCCESS;
 }

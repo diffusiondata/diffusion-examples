@@ -36,11 +36,11 @@ namespace PushTechnology.ClientInterface.Example.Consuming {
         public async Task Run( CancellationToken cancellationToken, string[] args ) {
             var serverUrl = args[ 0 ];
             var session = Diffusion.Sessions.Principal( "control" ).Password( "password" ).Open( serverUrl );
-            var messagingControl = session.MessagingControl;
+            var messaging = session.Messaging;
             var messagingPath = ">random/requestResponse";
 
             var requestHandler = new SimpleRequestHandler();
-            var requestHandlerRegistration = await messagingControl.AddRequestHandlerAsync(
+            var requestHandlerRegistration = await messaging.AddRequestHandlerAsync(
                 messagingPath, requestHandler, cancellationToken );
 
             try {

@@ -188,5 +188,9 @@ main(int argc, char **argv)
         apr_pool_destroy(pool);
         apr_terminate();
 
+        credentials_free(credentials);
+        hash_free(options, NULL, free);
+        free(callbacks);
+
         return EXIT_SUCCESS;
 }
