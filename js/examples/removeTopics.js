@@ -43,7 +43,7 @@ diffusion.connect({
 
     // Add a hierarchy of topics.
     await Promise.all([
-        session.topics.add('a', new TopicSpecification(TopicType.STRING),
+        session.topics.add('a', new TopicSpecification(TopicType.STRING)),
         session.topics.add('a/b', new TopicSpecification(TopicType.STRING)),
         session.topics.add('a/b/c', new TopicSpecification(TopicType.STRING)),
         session.topics.add('a/b/c/d', new TopicSpecification(TopicType.STRING))
@@ -53,7 +53,7 @@ diffusion.connect({
     await session.topics.remove('a');
 
     // Child topic still exists
-    await session.topicUpdate.set('a/b', datatypes.string(), 'hello');
+    await session.topicUpdate.set('a/b', diffusion.datatypes.string(), 'hello');
 
     // Removing all topics using a topic selector expression
     await session.topics.remove('?a//');
