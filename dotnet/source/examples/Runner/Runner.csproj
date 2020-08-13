@@ -20,7 +20,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\target\Diffusion.Client.dll</HintPath>
     </Reference>
-    <PackageReference Include="NLog" Version="4.5.9" />
+    <PackageReference Include="NLog" Version="4.6.8" />
   </ItemGroup>
 
   <Import Project="..\Consuming\Consuming.projitems" Label="Shared" />

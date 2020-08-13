@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2017 Push Technology Ltd.
+ * Copyright (C) 2014, 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,12 +71,7 @@ public final class ControlClientHandlingMissingTopicNotification {
             topicControl.addTopic(
                 notification.getTopicPath(),
                 TopicType.STRING).whenComplete((result, ex) -> {
-                    if (ex == null) {
-                        notification.proceed();
-                    }
-                    else {
-                        notification.cancel();
-                    }
+                    notification.proceed();
                 });
         }
     }
