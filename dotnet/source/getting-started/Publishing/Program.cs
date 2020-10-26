@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2016, 2019 Push Technology Ltd.
+ * Copyright © 2016, 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,8 @@ namespace PushTechnology.ClientInterface.Example {
             // Connect using a principal with 'modify_topic' and 'update_topic' permissions
             var session = Diffusion.Sessions.Principal( "control" ).Password( "password" ).Open( "ws://localhost:8080" );
 
-            // Get the TopicControl and TopicUpdateControl features
+            // Get the TopicControl and TopicUpdate features
             var topicControl = session.TopicControl;
-            var updateControl = session.TopicUpdateControl;
             var topicUpdate = session.TopicUpdate;
 
             // Create a JSON topic 'foo/counter'

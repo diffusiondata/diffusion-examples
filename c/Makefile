@@ -44,7 +44,9 @@ SOURCES = subscribe.c fetch-request.c 	\
 		  send-request-to-filter.c topic-update.c		\
 		  topic-update-with-constraint.c topic-update-stream.c	\
 		  topic-update-add-and-set.c time-series-append.c	\
-		  topic-views.c						\
+		  topic-views.c time-series-edit.c			\
+		  time-series-range-query.c topic-views-list.c		\
+		  topic-views-remove.c time-series-timestamp-append.c	\
 
 TARGETDIR	= target
 OBJDIR		= $(TARGETDIR)/objs
@@ -65,7 +67,9 @@ TARGETS = subscribe fetch-request \
 		  send-request-to-filter topic-update			\
 		  topic-update-with-constraint topic-update-stream	\
 		  topic-update-add-and-set time-series-append		\
-		  topic-views						\
+		  topic-views time-series-edit				\
+		  time-series-range-query topic-views-list		\
+		  topic-views-remove time-series-timestamp-append	\
 
 all:		prepare $(TARGETS)
 .PHONY:		all
@@ -165,8 +169,23 @@ topic-update-add-and-set:	$(OBJDIR)/topic-update-add-and-set.o
 
 time-series-append:	$(OBJDIR)/time-series-append.o
 		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
+		
+time-series-timestamp-append:	$(OBJDIR)/time-series-timestamp-append.o
+		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
+
+time-series-edit:	$(OBJDIR)/time-series-edit.o
+		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
+
+time-series-range-query:	$(OBJDIR)/time-series-range-query.o
+		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
 
 topic-views:	$(OBJDIR)/topic-views.o
+		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
+
+topic-views-list:	$(OBJDIR)/topic-views-list.o
+		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
+
+topic-views-remove:	$(OBJDIR)/topic-views-remove.o
 		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
 
 

@@ -18,5 +18,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)SessionRequestMessages.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PathRequestMessages.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StringTopics.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimeseriesTopics.cs" />
   </ItemGroup>
 </Project>

@@ -203,22 +203,21 @@ int main(int argc, char** argv)
         }
 
         /*
-        * Create a topic view which is an alias for the "master"
-        * topic (its master topic). This is the preferred method of
-        * creating slave topics.
+        * Create a topic view which is an alias for the "source"
+        * topic.
         */
         {
-                char *master_topic_name = "master";
+                char *source_topic_name = "source_topic";
                 TOPIC_SPECIFICATION_T *string_specification = topic_specification_init(TOPIC_TYPE_STRING);
 
                 apr_thread_mutex_lock(mutex);
-                add_topic_from_specification(session, master_topic_name, string_specification, create_topic_callback(master_topic_name));
+                add_topic_from_specification(session, source_topic_name, string_specification, create_topic_callback(source_topic_name));
                 apr_thread_cond_wait(cond, mutex);
                 apr_thread_mutex_unlock(mutex);
 
                 DIFFUSION_CREATE_TOPIC_VIEW_PARAMS_T topic_view_params = {
                         .view = "view0",
-                        .specification = "map master to slave",
+                        .specification = "map source_topic to topic_view",
                         .on_topic_view_created = on_topic_view_created,
                         .on_error = on_error
                 };
@@ -290,7 +289,7 @@ int main(int argc, char** argv)
                 TOPIC_REMOVAL_PARAMS_T remove_params = {
                         .on_removed = on_topic_removed,
                         .on_discard = on_topic_remove_discard,
-                        .topic_selector = "#json" DELIM "slave" DELIM "recordv2" DELIM "binary"
+                        .topic_selector = "#json" DELIM "topic_view" DELIM "recordv2" DELIM "binary"
                 };
 
                 apr_thread_mutex_lock(mutex);

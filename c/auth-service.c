@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014, 2017 Push Technology Ltd.
+ * Copyright © 2014, 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,6 +76,8 @@ static const struct user_credentials_s USERS[] = {
         { NULL, NULL }
 };
 
+DIFFUSION_REGISTRATION_T *g_registration = NULL;
+
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
         {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "ws://localhost:8080"},
@@ -86,89 +88,94 @@ ARG_OPTS_T arg_opts[] = {
 };
 
 /*
- * When the authentication service has been registered, this function will be
+ * When the authenticator handler is active, this function will be
  * called.
  */
 static int
-on_registration(SESSION_T *session, void *context)
+on_authenticator_active(SESSION_T *session, const DIFFUSION_REGISTRATION_T *registration)
 {
+        g_registration = diffusion_registration_dup(registration);
+        
         printf("Registered authentication handler\n");
         return HANDLER_SUCCESS;
 }
 
 /*
- * When the authentication service has be deregistered, this function will be
+ * When the authenticator handler is closed, this function will be
  * called.
  */
-static int
-on_deregistration(SESSION_T *session, void *context)
+static void on_authenticator_close()
 {
-        printf("Deregistered authentication handler\n");
-        return HANDLER_SUCCESS;
+        printf("Closed authentication handler\n");
 }
 
 /*
  * This is the function that is called when authentication has been delegated
  * from Diffusion.
  *
+ * The available methods for an authentication response are:
+ * diffusion_authenticator_allow: The user is authenticated without user-defined
+ * properties
+ * diffusion_authenticator_allow_with_properties: The user is authenticated with
+ * modifications to the session properties.
+ * diffusion_authenticator_abstain: Allow another handler to make the decision
+ * diffusion_authenticator_deny: The user is NOT authenticated
  * The response may return one of three values via the response parameter:
- * ALLOW:   The user is authenticated.
- * ALLOW_WITH_RESULT: The user is authenticated, and additional roles are
- *                    to be applied to the user.
- * DENY:    The user is NOT authenticated.
- * ABSTAIN: Allow another handler to make the decision.
  *
  * The handler should return HANDLER_SUCCESS in all cases, unless an actual
  * error occurs during the authentication process (in which case,
  * HANDLER_FAILURE is appropriate).
  */
-static int
-on_authentication(SESSION_T *session,
-                  const SVC_AUTHENTICATION_REQUEST_T *request,
-                  SVC_AUTHENTICATION_RESPONSE_T *response,
-                  void *context)
+ static int 
+ on_authenticator_authenticate(SESSION_T *session,
+                               const char *principal,
+                               const CREDENTIALS_T *credentials,
+                               const HASH_T *session_properties,
+                               const HASH_T *proposed_session_properties,
+                               const DIFFUSION_AUTHENTICATOR_T *authenticator)
 {
         // No credentials, or not password type. We're not an authority for
         // this type of authentication so abstain in case some other registered
         // authentication handler can deal with the request.
-        if(request->credentials == NULL) {
+        if(credentials == NULL) {
                 printf("No credentials specified, abstaining\n");
-                response->value = AUTHENTICATION_ABSTAIN;
+                diffusion_authenticator_abstain(session, authenticator, NULL);
                 return HANDLER_SUCCESS;
         }
-        if(request->credentials->type != PLAIN_PASSWORD) {
+        if(credentials->type != PLAIN_PASSWORD) {
                 printf("Credentials are not PLAIN_PASSWORD, abstaining\n");
-                response->value = AUTHENTICATION_ABSTAIN;
+                diffusion_authenticator_abstain(session, authenticator, NULL);
                 return HANDLER_SUCCESS;
         }
 
-        printf("principal = %s\n", request->principal);
+        printf("principal = %s\n", principal);
         printf("credentials = %*s\n",
-               (int)request->credentials->data->len,
-               request->credentials->data->data);
+               (int)credentials->data->len,
+               credentials->data->data);
 
-        if(request->principal == NULL || strlen(request->principal) == 0) {
+        if(principal == NULL || strlen(principal) == 0) {
                 printf("Denying anonymous connection (no principal)\n");
-                response->value = AUTHENTICATION_DENY; // Deny anon connections
+                // Deny anonymous connections
+                diffusion_authenticator_deny(session, authenticator, NULL);
                 return HANDLER_SUCCESS;
         }
 
-        char *password = malloc(request->credentials->data->len + 1);
-        memmove(password, request->credentials->data->data, request->credentials->data->len);
-        password[request->credentials->data->len] = '\0';
+        char *password = malloc(credentials->data->len + 1);
+        memmove(password, credentials->data->data, credentials->data->len);
+        password[credentials->data->len] = '\0';
 
         int auth_decided = 0;
         int i = 0;
         while(USERS[i].username != NULL) {
 
-                printf("Checking username %s vs %s\n", request->principal, USERS[i].username);
+                printf("Checking username %s vs %s\n", principal, USERS[i].username);
                 printf("     and password %s vs %s\n", password, USERS[i].password);
 
-                if(strcmp(USERS[i].username, request->principal) == 0 &&
+                if(strcmp(USERS[i].username, principal) == 0 &&
                    strcmp(USERS[i].password, password) == 0) {
 
                         puts("Allowed");
-                        response->value = AUTHENTICATION_ALLOW;
+                        diffusion_authenticator_allow(session, authenticator, NULL);
                         auth_decided = 1;
                         break;
                 }
@@ -180,7 +187,7 @@ on_authentication(SESSION_T *session,
 
         if(auth_decided == 0) {
                 puts("Abstained");
-                response->value = AUTHENTICATION_ABSTAIN;
+                diffusion_authenticator_abstain(session, authenticator, NULL);
         }
 
         return HANDLER_SUCCESS;
@@ -217,52 +224,39 @@ main(int argc, char** argv)
         }
 
         /*
-         * Provide a set (via a hash map containing keys and NULL
-         * values) to indicate what information about the connecting
-         * client that we'd like Diffusion to send us.
-         */
-        HASH_T *detail_set = hash_new(5);
-        char buf[2];
-        sprintf(buf, "%d", SESSION_DETAIL_SUMMARY);
-        hash_add(detail_set, strdup(buf), NULL);
-        sprintf(buf, "%d", SESSION_DETAIL_LOCATION);
-        hash_add(detail_set, strdup(buf), NULL);
-        sprintf(buf, "%d", SESSION_DETAIL_CONNECTOR_NAME);
-        hash_add(detail_set, strdup(buf), NULL);
-
-        /*
          * Register the authentication handler.
          */
-        AUTHENTICATION_REGISTRATION_PARAMS_T auth_registration_params = {
-                .name = name,
-                .detail_set = detail_set,
-                .on_registration = on_registration,
-                .authentication_handlers.on_authentication = on_authentication
-        };
+         DIFFUSION_AUTHENTICATION_HANDLER_T handler = {
+                 .handler_name = name,
+                 .on_active = on_authenticator_active,
+                 .on_authenticate = on_authenticator_authenticate,
+                 .on_close = on_authenticator_close
+         };
+         
+         DIFFUSION_AUTHENTICATION_HANDLER_PARAMS_T params = {
+                 .handler = &handler
+         };
 
-        puts("Sending registration request");
-        SVC_AUTHENTICATION_REGISTER_REQUEST_T *reg_request =
-                authentication_register(session, auth_registration_params);
+        puts("Setting authentication handler");
+        diffusion_set_authentication_handler(session, params);
 
         /*
          *  Wait a while before moving on to deregistration.
          */
         sleep(30);
 
-        AUTHENTICATION_DEREGISTRATION_PARAMS_T auth_deregistration_params = {
-                .on_deregistration = on_deregistration,
-                .original_request = reg_request
-        };
-
         /*
          * Deregister the authentication handler.
          */
-        printf("Deregistering authentication handler\n");
-        authentication_deregister(session, auth_deregistration_params);
+        printf("Closing authentication handler\n");
+        diffusion_registration_close(session, g_registration);
 
         session_close(session, NULL);
         session_free(session);
         hash_free(options, NULL, free);
+        
+        diffusion_registration_free(g_registration);
+        g_registration = NULL;
 
         return EXIT_SUCCESS;
 }

@@ -59,53 +59,20 @@ ARG_OPTS_T arg_opts[] = {
 };
 
 /*
- * Handler for processing updater registration callbacks.
- */
-static int
-register_updater_callback(SESSION_T *session,
-                          const CONVERSATION_ID_T *updater_id,
-                          const SVC_UPDATE_REGISTRATION_RESPONSE_T *response,
-                          void *context)
-{
-        apr_thread_mutex_lock(mutex);
-
-        switch(response->state) {
-        case UPDATE_SOURCE_STATE_ACTIVE:
-                g_active = 1;
-                break;
-        default:
-                g_active = 0;
-                break;
-        }
-        apr_thread_cond_broadcast(cond);
-        apr_thread_mutex_unlock(mutex);
-        return HANDLER_SUCCESS;
-}
-
-/*
  * Handlers for update of data.
  */
 static int
-on_update_success(SESSION_T *session,
-                  const CONVERSATION_ID_T *updater_id,
-                  const SVC_UPDATE_RESPONSE_T *response,
-                  void *context)
+on_update_success(void *context)
 {
-        char *id_str = conversation_id_to_string(*updater_id);
-        printf("on_update_success for updater \"%s\"\n", id_str);
-        free(id_str);
+        printf("on_update_success\n");
         return HANDLER_SUCCESS;
 }
 
 static int
 on_update_failure(SESSION_T *session,
-                  const CONVERSATION_ID_T *updater_id,
-                  const SVC_UPDATE_RESPONSE_T *response,
-                  void *context)
+                  const DIFFUSION_ERROR_T *error)
 {
-        char *id_str = conversation_id_to_string(*updater_id);
-        printf("on_update_failure for updater \"%s\"\n", id_str);
-        free(id_str);
+        printf("on_update_failure\n");
         return HANDLER_SUCCESS;
 }
 
@@ -200,33 +167,14 @@ main(int argc, char **argv)
         }
 
         /*
-         * Register an updater for the topic.
-         */
-        const UPDATE_SOURCE_REGISTRATION_PARAMS_T update_reg_params = {
-                .topic_path = topic_name,
-                .on_active = register_updater_callback,
-                .on_standby = register_updater_callback,
-                .on_close = register_updater_callback
-        };
-
-        apr_thread_mutex_lock(mutex);
-        g_updater_id = register_update_source(session, update_reg_params);
-        rc = apr_thread_cond_timedwait(cond, mutex, SYNC_DEFAULT_TIMEOUT);
-        apr_thread_mutex_unlock(mutex);
-        if(rc != APR_SUCCESS) {
-                fprintf(stderr, "Timed out while waiting to register an updater\n");
-                return EXIT_FAILURE;
-        }
-
-        /*
          * Define default parameters for an update source.
          */
-        UPDATE_VALUE_PARAMS_T update_value_params_base = {
-                .updater_id = (CONVERSATION_ID_T *)g_updater_id,
+         DIFFUSION_TOPIC_UPDATE_SET_PARAMS_T update_value_params_base = {
                 .topic_path = (char *)topic_name,
-                .on_success = on_update_success,
-                .on_failure = on_update_failure
-        };
+                .datatype = DATATYPE_JSON,
+                .on_topic_update = on_update_success,
+                .on_error = on_update_failure
+         };
 
         time_t current_time;
         struct tm *time_info;
@@ -266,10 +214,10 @@ main(int argc, char **argv)
                 // Issue an update request to Diffusion. Under the covers,
                 // this transmits a binary delta of changes, assuming those
                 // changes are smaller than sending the entire value.
-                UPDATE_VALUE_PARAMS_T update_value_params = update_value_params_base;
-                update_value_params.data = buf;
+                DIFFUSION_TOPIC_UPDATE_SET_PARAMS_T update_value_params = update_value_params_base;
+                update_value_params.update = buf;
 
-                update_value_with_datatype(session, DATATYPE_JSON, update_value_params);
+                diffusion_topic_update_set(session, update_value_params);
                 buf_free(buf);
 
                 // Sleep for a second

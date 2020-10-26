@@ -13,5 +13,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Authentication.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ClientUsingFetch.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PingServer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TopicViewsList.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TopicViewsCreate.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TopicViewsRemove.cs" />
   </ItemGroup>
 </Project>

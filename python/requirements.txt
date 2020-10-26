@@ -1,0 +1,2 @@
+diffusion==6.6.0rc1
+jupyter

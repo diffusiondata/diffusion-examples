@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2016, 2018 Push Technology Ltd.
+ * Copyright © 2016, 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,6 +86,53 @@ namespace PushTechnology.ClientInterface.Examples.Runner {
 
                 /// Start AddAndSet example
                 //runner.Start( new AddAndSetTopic(), secureUrl );
+
+                /// Start time series add topics example
+                //runner.Start(new PublishingTimeSeriesAddTopics(), secureUrl);
+                //runner.Start(new ConsumingTimeSeriesTopics(), url);
+
+                /// Start time series topic append example
+                //runner.Start(new PublishingTimeSeriesAppend(), secureUrl);
+                //runner.Start(new ConsumingTimeSeriesTopics(), url);
+
+                /// Start time series topic append with timestamp example
+                //runner.Start(new PublishingTimeSeriesAppendWithTimestamp(), secureUrl);
+                //runner.Start(new ConsumingTimeSeriesTopics(), url);
+
+                /// Start time series topic edit example
+                //runner.Start(new PublishingTimeSeriesEdit(), secureUrl);
+                //runner.Start(new ConsumingTimeSeriesTopics(), url);
+
+                /// Start time series range query example
+                //runner.Start(new PublishingTimeSeriesRangeQuery(), secureUrl);
+                //runner.Start(new ConsumingTimeSeriesTopics(), url);
+
+                /// Start create topic view example
+                //runner.Start( new TopicViewsCreate(), secureUrl );
+
+                /// Start list topic view example
+                //runner.Start( new TopicViewsList(), secureUrl);
+
+                /// Start list topic view example
+                //runner.Start( new TopicViewsRemove(), secureUrl);
+
+                /// Start create update stream example
+                //runner.Start(new UpdateStreamCreate(), secureUrl);
+
+                /// Start create update stream with constraint example
+                //runner.Start(new UpdateStreamCreateWithConstraint(), secureUrl);
+
+                /// Start remove topics example
+                //runner.Start(new RemoveTopics(), secureUrl);
+
+                /// Start set topic with constraint example
+                //runner.Start(new SetTopicWithConstraint(), secureUrl);
+
+                /// Start add and set topic with constraint example
+                //runner.Start(new AddAndSetTopicWithConstraint(), secureUrl);
+
+                /// Start apply JSON patch example
+                //runner.Start(new ApplyJSONPatch(), secureUrl);
             }
         }
 

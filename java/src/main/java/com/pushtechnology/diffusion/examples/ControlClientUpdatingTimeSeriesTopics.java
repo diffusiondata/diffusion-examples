@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017, 2019 Push Technology Ltd.
+ * Copyright (C) 2017, 2020 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package com.pushtechnology.diffusion.examples;
 import static com.pushtechnology.diffusion.client.Diffusion.newTopicSpecification;
 import static com.pushtechnology.diffusion.datatype.DataTypes.INT64_DATATYPE_NAME;
 
+import java.time.Instant;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -27,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.TimeSeries;
 import com.pushtechnology.diffusion.client.features.TimeSeries.EventMetadata;
+import com.pushtechnology.diffusion.client.features.TopicUpdate;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
@@ -36,6 +38,8 @@ import com.pushtechnology.diffusion.client.topics.details.TopicType;
  * This example shows a control client creating a {@link TimeSeries} topic.
  * Values can be appended to the topic using {@link #appendValue(long)}, and
  * the last value of the topic can be edited using {@link #editLast(long)}.
+ * Alternatively, the methods provided by the {@link TopicUpdate} feature can be
+ * used. See {@link TopicUpdateExample} for example usages of this API.
  *
  * @author Push Technology Limited
  * @since 6.0
@@ -118,5 +122,19 @@ public class ControlClientUpdatingTimeSeriesTopics {
                     });
                 });
             });
+    }
+
+    /**
+     * Appends a value to the time series topic. Allows for creation of events
+     * with a custom timestamp. This can be used for loading historic or future
+     * values.
+     *
+     * @param value value to append
+     * @param timestamp the user supplied timestamp
+     * @return the event metadata from the successful append
+     */
+    public EventMetadata appendValue(long value, Instant timestamp)
+        throws IllegalArgumentException, InterruptedException, ExecutionException, TimeoutException {
+        return timeSeries.append(TOPIC_PATH, Long.class, value, timestamp).get(5, TimeUnit.SECONDS);
     }
 }

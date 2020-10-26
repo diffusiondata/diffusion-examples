@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AddAndSetTopic.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApplyJSONPatch.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RecordV2Topics.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BinaryTopics.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DoubleTopics.cs" />
@@ -18,6 +19,16 @@
     <Compile Include="$(MSBuildThisFileDirectory)FilterRequestMessages.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SessionRequestMessages.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PathRequestMessages.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RemoveTopics.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AddAndSetTopicWithConstraint.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UpdateStreamCreateWithConstraint.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SetTopicWithConstraint.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UpdateStreamCreate.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimeSeriesRangeQuery.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimeSeriesEdit.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimeSeriesAppend.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimeSeriesAddTopics.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StringTopics.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimeSeriesAppendWithTimestamp.cs" />
   </ItemGroup>
 </Project>
