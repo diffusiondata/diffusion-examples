@@ -144,6 +144,7 @@ recordv2-topics:	$(OBJDIR)/recordv2-topics.o
 		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
 
 binary-topics:	$(OBJDIR)/binary-topics.o
+	
 		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
 
 int64-topics:	$(OBJDIR)/int64-topics.o

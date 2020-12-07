@@ -23,13 +23,10 @@ async def main():
         url=server_url, principal=principal, credentials=credentials
     ) as session:
 
-        # Instantiating the messaging component.
-        messaging = diffusion.Messaging(session)
-
         # Sending the request and receiving the response.
         print(f"Sending request: '{request}'...")
         try:
-            response = await messaging.send_request_to_path(
+            response = await session.messaging.send_request_to_path(
                 path=path, request=request_type(request)
             )
         except diffusion.DiffusionError as ex:

@@ -34,6 +34,14 @@ topic_type = diffusion.datatypes.STRING
 
 session_duration = 30
 
+# fallback stream object
+fallback_stream = diffusion.topics.ValueStreamHandler(
+    data_type=topic_type,
+    update=on_update,
+    subscribe=on_subscribe,
+    unsubscribe=on_unsubscribe,
+)
+
 
 # Because Python SDK for Diffusion is async, all the code needs to be
 # wrapped inside a coroutine function, and executed using asyncio.run.
@@ -43,23 +51,17 @@ async def main():
     async with diffusion.Session(
         url=server_url, principal=principal, credentials=credentials
     ) as session:
-        topics = diffusion.Topics(session)
 
         print("Adding fallback stream")
-        topics.add_fallback_stream(
-            topic_type=topic_type,
-            update=on_update,
-            subscribe=on_subscribe,
-            unsubscribe=on_unsubscribe,
-        )
+        session.topics.add_fallback_stream(fallback_stream)
 
         print(f"Subscribing to {topic_selector}")
-        await topics.subscribe(topic_selector)
+        await session.topics.subscribe(topic_selector)
 
         await asyncio.sleep(session_duration)
 
         print(f"Unsubscribing from {topic_selector}")
-        await topics.unsubscribe(topic_selector)
+        await session.topics.unsubscribe(topic_selector)
 
         await asyncio.sleep(1)  # keep alive to display the unsubscription message
 

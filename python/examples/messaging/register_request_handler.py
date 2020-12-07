@@ -26,11 +26,8 @@ async def main():
         url=server_url, principal=principal, credentials=credentials
     ) as session:
 
-        # instantiating the messaging component
-        messaging = diffusion.Messaging(session)
-
         # registering the request handler
-        await messaging.register_request_handler(
+        await session.messaging.register_request_handler(
             path,
             callback=path_request_handler,
             request_type=diffusion.datatypes.STRING,

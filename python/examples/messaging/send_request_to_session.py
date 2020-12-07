@@ -23,9 +23,6 @@ async def main():
         url=server_url, principal=principal, credentials=credentials
     ) as session:
 
-        # instantiating the messaging component
-        messaging = diffusion.Messaging(session)
-
         # Specifying the recipient session ID. In this example, the session
         # simply sends a request to itself; change as needed.
         session_id = session.session_id
@@ -33,7 +30,7 @@ async def main():
         # Sending the request and receiving the response.
         print(f"Sending request: '{request}' to session {session_id}...")
         try:
-            response = await messaging.send_request_to_session(
+            response = await session.messaging.send_request_to_session(
                 path=path, session_id=session_id, request=request_type(request)
             )
         except diffusion.DiffusionError as ex:
