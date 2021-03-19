@@ -1,2 +1,2 @@
-diffusion==6.6.0rc2
+diffusion==6.6.0
 jupyter

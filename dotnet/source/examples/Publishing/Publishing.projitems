@@ -10,6 +10,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AddAndSetTopic.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AddFallbackStream.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AddMissingTopicHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApplyJSONPatch.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RecordV2Topics.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BinaryTopics.cs" />
@@ -21,6 +23,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)PathRequestMessages.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RemoveTopics.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AddAndSetTopicWithConstraint.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TopicNotificationListener.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UpdateStreamCreateWithConstraint.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SetTopicWithConstraint.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UpdateStreamCreate.cs" />

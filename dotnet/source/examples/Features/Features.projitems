@@ -11,8 +11,23 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AutomaticRemoval.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Authentication.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ClientControlChangeRoles.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ClientControlChangeRolesFilter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ClientControlCloseSession.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ClientControlCloseSessionFilter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ClientControlGetSessionProperties.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ClientControlSetConflated.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ClientControlSetConflatedFilter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ClientControlSetSessionProperties.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ClientControlSetSessionPropertiesFilter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ClientControlSetSessionPropertiesListener.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ClientUsingFetch.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ControlAuthenticationClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PingServer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RemoteServers.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SubscriptionControlRoutingHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SubscriptionControlSubscribe.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SubscriptionControlSubscribeFilter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TopicViewsList.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TopicViewsCreate.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TopicViewsRemove.cs" />

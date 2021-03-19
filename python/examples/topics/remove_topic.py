@@ -5,7 +5,8 @@ server_url = "ws://localhost:8080"
 principal = "admin"
 credentials = diffusion.Credentials("password")
 
-selector = "foo/bar"
+path = "foo/bar"
+topic_type = diffusion.datatypes.STRING
 
 
 # Because Python SDK for Diffusion is async, all the code needs to be
@@ -16,7 +17,11 @@ async def main():
         url=server_url, principal=principal, credentials=credentials
     ) as session:
 
-        removed = await session.topics.remove_topic(selector)
+        # adding a topic
+        await session.topics.add_topic(path, topic_type)
+
+        # removing the topic
+        removed = await session.topics.remove_topic(path)
         print(f"Removed {removed} topic(s)")
 
 

@@ -2,6 +2,8 @@
 import asyncio
 import diffusion
 
+from diffusion.messaging import RequestHandler
+
 # Diffusion server connection information; same for both sessions
 # adjust as needed for the server used in practice
 server_url = "ws://localhost:8080"
@@ -12,14 +14,26 @@ credentials = diffusion.Credentials("password")
 # filter response handler function
 def on_filter_response(response, **kwargs):
     print("Received response from session '{session_id}':".format(**kwargs))
-    print(f"    {response}")
-    print(" - Request was sent to {filter} on path {path}".format(**kwargs))
+    print(f" - Response: {response}")
+    print(" - Request was sent to {filter} on path '{path}'".format(**kwargs))
     print(" - Received {received} of {expected} response(s).".format(**kwargs))
 
 
+# error handler function
+def on_error(code: int, description: str):
+    print("ERROR received via filter response handler {code}: {description}")
+
+
 filter_response_handler = diffusion.handlers.EventStreamHandler(
-    response=on_filter_response
+    response=on_filter_response,
+    on_error=on_error
 )
+
+
+# Messaging request callback function
+def callback(request: str, **kwargs) -> str:
+    return f"Hello there, {request}!"
+
 
 # request properties
 request = "Pushme Pullyou"
@@ -41,9 +55,17 @@ async def main():
         # with the same principal as the current session
         session_filter = f"$Principal is '{principal}'"
 
+        # Register handler to receive the request
+        handler = RequestHandler(
+            callback,
+            request_type=request_type,
+            response_type=request_type
+        )
+        session.messaging.add_stream_handler(path, handler=handler, addressed=True)
+
         # adding filter response handler
         session.messaging.add_filter_response_handler(
-            session_filter=session_filter, callback=on_filter_response
+            session_filter=session_filter, handler=filter_response_handler
         )
 
         # sending the request and receiving the number of expected responses
@@ -55,7 +77,7 @@ async def main():
                 request=request_type(request),
             )
         except diffusion.DiffusionError as ex:
-            print(f"ERROR: {ex}")
+            print(f"ERROR while sending request to session filter: {ex}")
         else:
             print(f"... expecting {response} response(s) ...")
 
@@ -66,7 +88,7 @@ async def main():
         # added above.
 
         # keeping the session alive to provide time for all responses to arrive
-        await asyncio.sleep(60)
+        await asyncio.sleep(15)
 
 
 if __name__ == "__main__":

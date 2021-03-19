@@ -1,6 +1,6 @@
 //  Diffusion Client Library for iOS, tvOS and OS X / macOS - Examples
 //
-//  Copyright (C) 2016, 2018 Push Technology Ltd.
+//  Copyright (C) 2016, 2021 Push Technology Ltd.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -49,13 +49,13 @@
 
         // Remove topic.
         NSString *const topicPath = @"Example/Some Topic";
-        [session.topicControl removeDiscreteWithTopicSelectorExpression:topicPath
-                                                      completionHandler:^(NSError *const error)
+        [session.topicControl removeTopicsWithTopicSelectorExpression:topicPath
+                                                    completionHandler:^(PTDiffusionTopicRemovalResult * _Nullable result, NSError * _Nullable error)
         {
             if (error) {
                 NSLog(@"Failed to remove topic. Error: %@", error);
             } else {
-                NSLog(@"Topic removal request succeeded.");
+                NSLog(@"Topic removal request succeeded. [%d] topic(s) removed.", (int) result.removedCount);
             }
         }];
     }];

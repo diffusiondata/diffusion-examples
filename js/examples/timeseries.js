@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Push Technology Ltd.
+ * Copyright (C) 2018, 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ var diffusion = require('diffusion');
 
 var TopicSpecification = diffusion.topics.TopicSpecification;
 var TopicType = diffusion.topics.TopicType;
-var dataType = diffusion.datatypes.int64();
+var dataType = diffusion.datatypes.double();
 
 // Connect to the server. Change these options to suit your own environment.
 // Node.js does not accept self-signed certificates by default. If you have
@@ -31,9 +31,9 @@ diffusion.connect({
     credentials : 'password'
 }).then(function(session) {
     // 1. Create a time series topic specification with events
-    // of type int64
+    // of type double
     var specification = new TopicSpecification(TopicType.TIME_SERIES, {
-        TIME_SERIES_EVENT_VALUE_TYPE : "int64"
+        TIME_SERIES_EVENT_VALUE_TYPE : "double"
     });
 
     // 2. Create a time series topic
@@ -55,12 +55,16 @@ diffusion.connect({
 
         for (var i = 0; i < 10; i++) {
             // 4. Append values 0-9 to the topic
-            session.timeseries.append("topic/timeseries", i, dataType.Int64);
+            session.timeseries.append("topic/timeseries", i, dataType);
         }
 
+        for (var i = 10; i < 20; i++) {
+            // 5. Append values 10 - 19 to the topic using a value constructor to specify the datatype
+            session.timeseries.append("topic/timeseries", i, Number);
+        }
         // 5. Retrieve the last time series event and edit it
         session.timeseries.rangeQuery().as(dataType).fromLast(1).selectFrom("topic/timeseries").then(function(result) {
-            session.timeseries.edit("topic/timeseries", result.events[0].sequence, 999, dataType.Int64);
+            session.timeseries.edit("topic/timeseries", result.events[0].sequence, 999, dataType);
         });
     });
 });

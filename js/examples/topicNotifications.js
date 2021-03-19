@@ -38,16 +38,16 @@ diffusion.connect({
         onDescendantNotification: (path, type) => {
             switch (type) {
                 case TopicNotificationType.ADDED:
-                    console.log(`Topic ${path} has been added`);
+                    console.log(`Topic ${path} has been added as a descendant of a selected topic`);
                     break;
                 case TopicNotificationType.REMOVED:
-                    console.log(`Topic ${path} has been removed`);
+                    console.log(`Topic ${path} has been removed as a descendant of a selected topic`);
                     break;
                 case TopicNotificationType.SELECTED:
-                    console.log(`Topic ${path} existed at the time of the selector registration.`);
+                    console.log(`Topic ${path} existed as a descendant of a selected topic at the time of the selector registration.`);
                     break;
                 case TopicNotificationType.DESELECTED:
-                    console.log(`Topic ${path} has been deselected`);
+                    console.log(`Topic ${path} has been deselected as a descendant of a selected topic`);
                     break;
                 }
         },

@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2020 Push Technology Ltd.
+ * Copyright © 2020, 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,9 +75,11 @@ namespace PushTechnology.ClientInterface.Example.Publishing {
             // Remove the string topic
             try
             {
-                await topicControl.RemoveTopicsAsync($"?{TOPIC_PREFIX}/", cancellationToken );
+                WriteLine($"Removing topic '{topicPath}'.");
 
-                WriteLine($"Topic '{topicPath}' successfully removed.");
+                var result = await topicControl.RemoveTopicsAsync($"?{TOPIC_PREFIX}/", cancellationToken );
+
+                WriteLine($"{result.RemovedCount} topic successfully removed.");
             }
             catch (Exception ex) {
                 WriteLine( $"Failed to remove topic '{topicPath}' : {ex}." );

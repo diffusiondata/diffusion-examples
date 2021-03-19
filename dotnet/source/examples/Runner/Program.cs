@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2016, 2020 Push Technology Ltd.
+ * Copyright © 2016, 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,6 +133,60 @@ namespace PushTechnology.ClientInterface.Examples.Runner {
 
                 /// Start apply JSON patch example
                 //runner.Start(new ApplyJSONPatch(), secureUrl);
+
+                /// Start Control Authentication Client example
+                //runner.Start(new ControlClientChangingSystemAuthentication(), secureUrl);
+
+                /// Start add fallback stream example
+                //runner.Start(new AddFallbackStream(), secureUrl);
+
+                /// Start add missing topic handler example
+                //runner.Start(new AddMissingTopicHandler(), secureUrl);
+
+                /// Start topic notification listener example
+                //runner.Start(new TopicNotificationListener(), secureUrl);
+
+                /// Start client control change roles example
+                //runner.Start(new ClientControlChangeRoles(), secureUrl);
+
+                /// Start client control change roles filter example
+                //runner.Start(new ClientControlChangeRolesFilter(), secureUrl);
+
+                /// Start client control close session example
+                //runner.Start(new ClientControlCloseSession(), secureUrl);
+
+                /// Start client control close session filter example
+                //runner.Start(new ClientControlCloseSessionFilter(), secureUrl);
+
+                /// Start client control get session properties example
+                //runner.Start(new ClientControlGetSessionProperties(), secureUrl);
+
+                /// Start client control set conflated example
+                //runner.Start(new ClientControlSetConflated(), secureUrl);
+
+                /// Start client control set conflated filter example
+                //runner.Start(new ClientControlSetConflatedFilter(), secureUrl);
+
+                /// Start client control set session properties example
+                //runner.Start(new ClientControlSetSessionProperties(), secureUrl);
+
+                /// Start client control set session properties filter example
+                //runner.Start(new ClientControlSetSessionPropertiesFilter(), secureUrl);
+
+                /// Start client control set session properties listener example
+                //runner.Start(new ClientControlSetSessionPropertiesListener(), secureUrl);
+
+                /// Start subscription control routing handler example
+                //runner.Start(new SubscriptionControlRoutingHandler(), secureUrl);
+
+                /// Start subscription control subscribe example
+                //runner.Start(new SubscriptionControlSubscribe(), secureUrl);
+
+                /// Start subscription control subscribe with a filter example
+                //runner.Start(new SubscriptionControlSubscribeFilter(), secureUrl);
+
+                /// Start Remote Servers example
+                //runner.Start(new RemoteServers(), secureUrl);
             }
         }
 

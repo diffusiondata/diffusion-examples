@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2020 Push Technology Ltd.
+ * Copyright (C) 2014, 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
@@ -34,7 +37,9 @@ import com.pushtechnology.diffusion.client.topics.details.TopicType;
  */
 public final class ControlClientHandlingMissingTopicNotification {
 
-    // UCI features
+    private static final Logger LOG =
+        LoggerFactory.getLogger(ControlClientHandlingMissingTopicNotification.class);
+
     private final Session session;
     private final TopicControl topicControl;
 
@@ -68,10 +73,16 @@ public final class ControlClientHandlingMissingTopicNotification {
 
         @Override
         public void onMissingTopic(MissingTopicNotification notification) {
+            final String topicPath = notification.getTopicPath();
             topicControl.addTopic(
-                notification.getTopicPath(),
+                topicPath,
                 TopicType.STRING).whenComplete((result, ex) -> {
-                    notification.proceed();
+                    if (ex == null) {
+                        LOG.info("Missing topic " + topicPath + " " + result);
+                    }
+                    else {
+                        LOG.warn("Failed to create missing topic", ex);
+                    }
                 });
         }
     }

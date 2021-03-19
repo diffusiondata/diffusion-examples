@@ -31,10 +31,6 @@
 #define sleep(x) Sleep(1000 * x)
 #endif
 
-#include <apr.h>
-#include <apr_thread_mutex.h>
-#include <apr_thread_cond.h>
-
 #include "diffusion.h"
 #include "args.h"
 #include "utils.h"
@@ -42,13 +38,8 @@
 // Topic selector, selector set delimiter
 #define DELIM "////"
 
-/*
- * We use a mutex and a condition variable to help synchronize the
- * flow so that it becomes linear and easier to follow the core logic.
- */
-apr_pool_t *pool = NULL;
-apr_thread_mutex_t *mutex = NULL;
-apr_thread_cond_t *cond = NULL;
+static int default_sleep_time = 3;
+
 
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
@@ -63,9 +54,6 @@ static int
 on_topic_added(SESSION_T *session, TOPIC_ADD_RESULT_CODE result_code, void *context)
 {
         printf("on_topic_added: %s\n", (const char *)context);
-        apr_thread_mutex_lock(mutex);
-        apr_thread_cond_broadcast(cond);
-        apr_thread_mutex_unlock(mutex);
         return HANDLER_SUCCESS;
 }
 
@@ -73,9 +61,6 @@ static int
 on_topic_add_failed(SESSION_T *session, TOPIC_ADD_FAIL_RESULT_CODE result_code, const DIFFUSION_ERROR_T *error, void *context)
 {
         printf("on_topic_add_failed: %s -> %d\n", (const char *)context, result_code);
-        apr_thread_mutex_lock(mutex);
-        apr_thread_cond_broadcast(cond);
-        apr_thread_mutex_unlock(mutex);
         return HANDLER_SUCCESS;
 }
 
@@ -83,19 +68,14 @@ static int
 on_topic_add_discard(SESSION_T *session, void *context)
 {
         puts("on_topic_add_discard");
-        apr_thread_mutex_lock(mutex);
-        apr_thread_cond_broadcast(cond);
-        apr_thread_mutex_unlock(mutex);
         return HANDLER_SUCCESS;
 }
 
 static int
-on_topic_removed(SESSION_T *session, const SVC_TOPIC_REMOVAL_RESPONSE_T *response, void *context)
+on_topic_removed(SESSION_T *session, const DIFFUSION_TOPIC_REMOVAL_RESULT_T *response, void *context)
 {
-        puts("on_topic_removed");
-        apr_thread_mutex_lock(mutex);
-        apr_thread_cond_broadcast(cond);
-        apr_thread_mutex_unlock(mutex);
+        int removed_topic_count = diffusion_topic_removal_result_removed_count(response);
+        printf("on_topic_removed: removed %d topic(s).\n", removed_topic_count);
         return HANDLER_SUCCESS;
 }
 
@@ -103,9 +83,6 @@ static int
 on_topic_remove_discard(SESSION_T *session, void *context)
 {
         puts("on_topic_remove_discard");
-        apr_thread_mutex_lock(mutex);
-        apr_thread_cond_broadcast(cond);
-        apr_thread_mutex_unlock(mutex);
         return HANDLER_SUCCESS;
 }
 
@@ -119,9 +96,6 @@ on_topic_view_created(const DIFFUSION_TOPIC_VIEW_T *topic_view, void *context)
         free(view_name);
         free(spec);
 
-        apr_thread_mutex_lock(mutex);
-        apr_thread_cond_broadcast(cond);
-        apr_thread_mutex_unlock(mutex);
         return HANDLER_SUCCESS;
 }
 
@@ -130,9 +104,6 @@ on_error(SESSION_T *session, const DIFFUSION_ERROR_T *error)
 {
         printf("Error: %s\n", error->message);
 
-        apr_thread_mutex_lock(mutex);
-        apr_thread_cond_broadcast(cond);
-        apr_thread_mutex_unlock(mutex);
         return HANDLER_SUCCESS;
 }
 
@@ -171,12 +142,6 @@ int main(int argc, char** argv)
                 credentials = credentials_create_password(password);
         }
 
-        // Setup for condition variable
-        apr_initialize();
-        apr_pool_create(&pool, NULL);
-        apr_thread_mutex_create(&mutex, APR_THREAD_MUTEX_UNNESTED, pool);
-        apr_thread_cond_create(&cond, pool);
-
         // Setup for session
         SESSION_T *session;
         DIFFUSION_ERROR_T error = { 0 };
@@ -194,10 +159,8 @@ int main(int argc, char** argv)
                 char *json_topic_name = "json";
                 TOPIC_SPECIFICATION_T *json_specification = topic_specification_init(TOPIC_TYPE_JSON);
 
-                apr_thread_mutex_lock(mutex);
                 add_topic_from_specification(session, json_topic_name, json_specification, create_topic_callback(json_topic_name));
-                apr_thread_cond_wait(cond, mutex);
-                apr_thread_mutex_unlock(mutex);
+                sleep(default_sleep_time);
 
                 topic_specification_free(json_specification);
         }
@@ -210,10 +173,8 @@ int main(int argc, char** argv)
                 char *source_topic_name = "source_topic";
                 TOPIC_SPECIFICATION_T *string_specification = topic_specification_init(TOPIC_TYPE_STRING);
 
-                apr_thread_mutex_lock(mutex);
                 add_topic_from_specification(session, source_topic_name, string_specification, create_topic_callback(source_topic_name));
-                apr_thread_cond_wait(cond, mutex);
-                apr_thread_mutex_unlock(mutex);
+                sleep(default_sleep_time);
 
                 DIFFUSION_CREATE_TOPIC_VIEW_PARAMS_T topic_view_params = {
                         .view = "view0",
@@ -222,10 +183,8 @@ int main(int argc, char** argv)
                         .on_error = on_error
                 };
 
-                apr_thread_mutex_lock(mutex);
                 diffusion_topic_views_create_topic_view(session, topic_view_params, NULL);
-                apr_thread_cond_wait(cond, mutex);
-                apr_thread_mutex_unlock(mutex);
+                sleep(default_sleep_time);
 
                 topic_specification_free(string_specification);
         }
@@ -251,10 +210,8 @@ int main(int argc, char** argv)
                 char *recordv2_topic_name = "recordv2";
                 TOPIC_SPECIFICATION_T *recordv2_specification = topic_specification_init_with_properties(TOPIC_TYPE_RECORDV2, properties);
 
-                apr_thread_mutex_lock(mutex);
                 add_topic_from_specification(session, recordv2_topic_name, recordv2_specification, create_topic_callback(recordv2_topic_name));
-                apr_thread_cond_wait(cond, mutex);
-                apr_thread_mutex_unlock(mutex);
+                sleep(default_sleep_time);
 
                 diffusion_recordv2_schema_builder_free(schema_builder);
                 diffusion_recordv2_schema_free(schema);
@@ -271,10 +228,8 @@ int main(int argc, char** argv)
                 char *binary_topic_name = "binary";
                 TOPIC_SPECIFICATION_T *binary_specification = topic_specification_init(TOPIC_TYPE_BINARY);
 
-                apr_thread_mutex_lock(mutex);
                 add_topic_from_specification(session, binary_topic_name, binary_specification, create_topic_callback(binary_topic_name));
-                apr_thread_cond_wait(cond, mutex);
-                apr_thread_mutex_unlock(mutex);
+                sleep(default_sleep_time);
 
                 topic_specification_free(binary_specification);
         }
@@ -292,10 +247,8 @@ int main(int argc, char** argv)
                         .topic_selector = "#json" DELIM "topic_view" DELIM "recordv2" DELIM "binary"
                 };
 
-                apr_thread_mutex_lock(mutex);
                 topic_removal(session, remove_params);
-                apr_thread_cond_wait(cond, mutex);
-                apr_thread_mutex_unlock(mutex);
+                sleep(default_sleep_time);
         }
 
         /*
@@ -306,11 +259,6 @@ int main(int argc, char** argv)
 
         credentials_free(credentials);
         hash_free(options, NULL, free);
-
-        apr_thread_mutex_destroy(mutex);
-        apr_thread_cond_destroy(cond);
-        apr_pool_destroy(pool);
-        apr_terminate();
 
         return EXIT_SUCCESS;
 }

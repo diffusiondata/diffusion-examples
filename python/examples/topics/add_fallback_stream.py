@@ -32,7 +32,7 @@ def on_unsubscribe(*, reason, topic_path, **kwargs):
 topic_selector = "foo/bar"
 topic_type = diffusion.datatypes.STRING
 
-session_duration = 30
+session_duration = 15
 
 # fallback stream object
 fallback_stream = diffusion.topics.ValueStreamHandler(
@@ -63,7 +63,7 @@ async def main():
         print(f"Unsubscribing from {topic_selector}")
         await session.topics.unsubscribe(topic_selector)
 
-        await asyncio.sleep(1)  # keep alive to display the unsubscription message
+        await asyncio.sleep(5)  # keep alive to display the unsubscription message
 
 
 if __name__ == "__main__":
