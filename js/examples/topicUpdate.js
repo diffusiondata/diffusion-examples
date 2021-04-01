@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Push Technology Ltd.
+ * Copyright (C) 2018, 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,8 +77,16 @@ function createUpdateStreamWithValueConstraint() {
 
 
 function createUpdateStreamThatAddsTopic() {
-    var stream = session.topicUpdate.createUpdateStream('bar_topic', stringDataType, {specification: topicSpec});
-    stream.validate();
+    var topicSpec = new diffusion.topics.TopicSpecification(TopicType.STRING);
+    var stream = session.topicUpdate.createUpdateStream('quux_topic', stringDataType, {specification: topicSpec});
+    // the first call to validate() or set() resolves in a TopicCreationResult
+    stream.validate().then((result) => {
+        if (result === diffusion.topicUpdate.TopicCreationResult.CREATED) {
+            console.log('A new topic has been created!');
+        } else {
+            console.log('The topic already existed.');
+        }
+    });
     stream.set('hello');
     var cachedValue = stream.get();
     return stream.set('world');
@@ -86,8 +94,15 @@ function createUpdateStreamThatAddsTopic() {
 
 function createUpdateStreamThatAddsTopicWithValueConstraint() {
     var constraint = diffusion.updateConstraints().noTopic();
-    var stream = session.topicUpdate.createUpdateStream('baz_topic', stringDataType, {specification: topicSpec, constraint});
-    stream.validate();
+    var stream = session.topicUpdate.createUpdateStream('quuz_topic', stringDataType, {specification: topicSpec, constraint});
+    // the first call to validate() or set() resolves in a TopicCreationResult
+    stream.validate().then((result) => {
+        if (result === diffusion.topicUpdate.TopicCreationResult.CREATED) {
+            console.log('A new topic has been created!');
+        } else {
+            console.log('The topic already existed.');
+        }
+    });
     stream.set('hello');
     var cachedValue = stream.get();
     return stream.set('world');

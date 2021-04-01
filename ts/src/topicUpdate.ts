@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019 Push Technology Ltd.
+ * Copyright (C) 2019, 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * limitations under the License.
  *******************************************************************************/
 
- import { connect, datatypes, topics, updateConstraints, Session, SessionLock } from 'diffusion';
+ import { connect, datatypes, topics, topicUpdate, updateConstraints, Session, SessionLock } from 'diffusion';
 
  // example showcasing how to update topics using session.topicUpdate.set or topic update streams
  export async function topicUpdateExample() {
@@ -90,8 +90,14 @@
 
     async function createUpdateStreamThatAddsTopic() {
         const topicSpec = new topics.TopicSpecification(TopicType.STRING);
-        const stream = session.topicUpdate.createUpdateStream('bar_topic', stringDataType, {specification: topicSpec});
-        await stream.validate();
+        const stream = session.topicUpdate.createUpdateStream('quux_topic', stringDataType, {specification: topicSpec});
+        // the first call to validate() or set() resolves in a TopicCreationResult
+        const result = await stream.validate();
+        if (result === topicUpdate.TopicCreationResult.CREATED) {
+            console.log('A new topic has been created!');
+        } else {
+            console.log('The topic already existed.');
+        }
         await stream.set('hello');
         const cachedValue = stream.get();
         await stream.set('world');
@@ -100,8 +106,14 @@
     async function createUpdateStreamThatAddsTopicWithValueConstraint() {
         const topicSpec = new topics.TopicSpecification(TopicType.STRING);
         const constraint = updateConstraints().noTopic();
-        const stream = session.topicUpdate.createUpdateStream('baz_topic', stringDataType, {specification: topicSpec, constraint});
-        await stream.validate();
+        const stream = session.topicUpdate.createUpdateStream('quuz_topic', stringDataType, {specification: topicSpec, constraint});
+        // the first call to validate() or set() resolves in a TopicCreationResult
+        const result = await stream.validate();
+        if (result === topicUpdate.TopicCreationResult.CREATED) {
+            console.log('A new topic has been created!');
+        } else {
+            console.log('The topic already existed.');
+        }
         await stream.set('hello');
         const cachedValue = stream.get();
         await stream.set('world');
