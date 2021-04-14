@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019 Push Technology Ltd.
+ * Copyright (C) 2019, 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ export async function messagesExample() {
 
     // Send a message to another session. It is the application's responsibility
     // to find the SessionID of the intended recipient.
-    const responseFoo = await session.messages.sendRequest('foo/bar', 'Hello World', 'another-session-id');
+    const responseFoo = await session.messages.sendRequest('foo/bar', 'Hello World', 'another-session-id', datatypes.string(), datatypes.string());
     console.log("Received response " + responseFoo);
 
     // 3. Messages can also be sent without a recipient, in which case they will be dispatched to any Message Handlers
@@ -66,6 +66,17 @@ export async function messagesExample() {
     // message will only be dispatched to one handler.
 
     // Send a message at a lower path, without an explicit recipient - this will be received by the Handler.
-    const responseBar = await session.messages.sendRequest('foo/bar', 'Hello World');
+    const responseBar = await session.messages.sendRequest('foo/bar', 'Hello World', datatypes.string(), datatypes.string());
     console.log("Received response " + responseBar);
+
+    // 4. The datatype of the message and the response can be specified using topic types or omitted altogether.
+    // In the latter case, the datatype is inferred from the value passed to sendRequest()
+
+    // Send a message using topic types to specify the datatype
+    const responseBaz = await session.messages.sendRequest('foo/bar', 'Hello World', topics.TopicType.STRING, topics.TopicType.STRING);
+    console.log("Received response " + responseBaz);
+
+    // Send a message leaving out the datatype
+    const responseQux = await session.messages.sendRequest('foo/bar', 'Hello World')
+    console.log("Received response " + responseQux);
 }

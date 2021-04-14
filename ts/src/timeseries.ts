@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019 Push Technology Ltd.
+ * Copyright (C) 2019, 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 
     const TopicSpecification = topics.TopicSpecification;
     const TopicType = topics.TopicType;
-    const dataType = datatypes.int64();
+    const dataType = datatypes.double();
 
     // Connect to the server. Change these options to suit your own environment.
     // Node.js does not accept self-signed certificates by default. If you have
@@ -35,9 +35,9 @@
     });
 
     // 1. Create a time series topic specification with events
-    // of type int64
+    // of type double
     const specification: TopicSpecification = new TopicSpecification(TopicType.TIME_SERIES, {
-        TIME_SERIES_EVENT_VALUE_TYPE: "int64"
+        TIME_SERIES_EVENT_VALUE_TYPE: "double"
     });
 
     // 2. Create a time series topic
@@ -47,15 +47,20 @@
     session.addStream('topic/timeseries', dataType).on('value', function(topic, specification, newValue, oldValue) {
         var value = newValue.toString();
 
-        console.log(`New value ${newValue.isEditEvent?"editted on":"appended to"} topic: ${value}`);
+        console.log(`New value ${newValue.isEditEvent?"edited on":"appended to"} topic: ${value}`);
     });
 
     // 4. Subscribe
     session.select('topic/timeseries');
 
     for (var i = 0; i < 10; i++) {
-        // 4. Append values 0-9 to the topic
+        // 4. Append values 0 - 9 to the topic
         session.timeseries.append("topic/timeseries", i, dataType);
+    }
+
+    for (var i = 10; i < 20; i++) {
+        // 5. Append values 10 - 19 to the topic using a value constructor to specify the datatype
+        session.timeseries.append("topic/timeseries", i, Number);
     }
 
     // 5. Retrieve the last time series event and edit it
