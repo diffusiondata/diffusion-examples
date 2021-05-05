@@ -1,6 +1,6 @@
 {
   "name": "diffusion-examples",
-  "version": "6.6.0",
+  "version": "6.6.1",
   "description": "Examples for using the Diffusion JavaScript client",
   "main": "index.js",
   "directories": {
@@ -8,6 +8,6 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "diffusion": "6.6.0"
+    "diffusion": "6.6.1"
   }
 }
