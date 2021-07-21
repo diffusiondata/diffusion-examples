@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018, 2020 Push Technology Ltd.
+ * Copyright (C) 2018, 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ diffusion.connect({
         .withProperties()           // get the topic properties
         .topicTypes([TopicType.STRING, TopicType.INT64]) // limit to string and integer topic types
         .withValues(jsonDataType)   // fetch values return them as JSON objects
-        .fetch("?.//")              // permform the fetch using a topic selector
+        .fetch("?.//")              // perform the fetch using a topic selector
         .then(function(fetchResult) {
             var results = fetchResult.results()
 
