@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019 Push Technology Ltd.
+ * Copyright (C) 2019, 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,46 +36,41 @@ export async function missingTopicNotificationExample() {
     const handler: MissingTopicHandler = {
     	// Called when a handler is successfully registered
     	onRegister: function(path, close) {
-    		console.log("Registered missing topic handler on path: " + path);
+    		console.log(`Registered missing topic handler on path: ${path}`);
 
-    		// Once we've registered the handler, we subscribe with the selector "?example/topic/.*"
-    		session.select("?example/topic/.*");
+    		// Once we've registered the handler, we subscribe with the selector '?example/topic/.*'
+    		session.select('?example/topic/.*');
 
     		// Register a stream to listen for a subscription event
-    		session.addStream("?example/topic/.*", stringDataType).on('subscribe', function(topic, specification) {
-    			console.log("Subscribed to topic: " + topic);
+    		session.addStream('?example/topic/.*', stringDataType).on('subscribe', function(topic, specification) {
+    			console.log(`Subscribed to topic: ${topic}`);
     		});
     	},
     	// Called when the handler is closed
     	onClose: function(path) {
-    		console.log("Missing topic handler on path '" + path + "' has been closed");
+    		console.log(`Missing topic handler on path '${path}' has been closed`);
     	},
     	// Called if there is an error on the handler
     	onError: function(path, error) {
-    		console.log("Error on missing topic handler");
+    		console.log('Error on missing topic handler');
     	},
     	// Called when we've received a missing topic notification on our registered handler path
     	onMissingTopic: function(notification) {
-    		console.log("Received missing topic notification with selector: " + notification.selector);
-    		// Once we've received the missing topic notification initiated from subscribing to "?example/topic/.*",
-    		// we add a topic that will match the selector
+    		console.log(`Received missing topic notification with selector: ${notification.selector}`);
 
-    		const path = "example/topic/foo";
+    		// Once we've received the missing topic notification initiated from subscribing to '?example/topic/.*',
+    		// we add a topic that will match the selector
+    		const path = 'example/topic/foo';
 
     		session.topics.add(path, new TopicSpecification(TopicType.STRING)).then(function(result) {
-    			console.log("Topic add success: " + path);
-    			// If the topic addition is successful, we proceed() with the session's subscription.
-    			// The client will now be subscribed to the topic
-    			notification.proceed();
+    			console.log(`Topic add success: ${path}`);
     		}, function(reason) {
-    			console.log("Topic add failed: " + reason);
-    			// If the topic addition fails, we cancel() the session's subscription request.
-    			notification.cancel();
+    			console.log(`Topic add failed: ${reason}`);
     		});
     	}
     };
 
-    // Register a missing topic handler on the "example" root topic
+    // Register a missing topic handler on the 'example' root topic
     // Any subscriptions to missing topics along this path will invoke this handler
-    session.topics.addMissingTopicHandler("example", handler);
+    session.topics.addMissingTopicHandler('example', handler);
 }
