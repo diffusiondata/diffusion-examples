@@ -43,20 +43,22 @@ namespace PushTechnology.ClientInterface.Example.Features
 
             IRemoteServer server = null;
 
+            var builder = Diffusion.NewRemoteServerBuilder();
+            var remoteServer1 = builder
+                        .Principal("principal")
+                        .Credentials(Diffusion.Credentials.Password("password"))
+                        .ConnectionOptions(new Dictionary<RemoteServerConnectionOption, string>()
+                                            {
+                                            { RemoteServerConnectionOption.RECONNECTION_TIMEOUT, "50000" },
+                                            { RemoteServerConnectionOption.CONNECTION_TIMEOUT, "2500" },
+                                            { RemoteServerConnectionOption.WRITE_TIMEOUT, "2000" }
+                                            })
+                        .MissingTopicNotificationFilter("filter")
+                        .Create("Server1", "ws://host:8080");
+
             try
             {
-                server = await session.RemoteServers.CreateRemoteServerAsync(
-                    "Server1",
-                    "ws://host:8080",
-                    "principal",
-                    Diffusion.Credentials.Password("password"),
-                    new Dictionary<RemoteServerConnectionOption, string>()
-                    {
-                    { RemoteServerConnectionOption.RECONNECTION_TIMEOUT, "50000" },
-                    { RemoteServerConnectionOption.CONNECTION_TIMEOUT, "2500" },
-                    { RemoteServerConnectionOption.WRITE_TIMEOUT, "2000" }
-                    }
-                );
+                server = await session.RemoteServers.CreateRemoteServerAsync(remoteServer1);
 
                 WriteLine($"Remote server '{server.Name}' was created.");
             }
@@ -75,7 +77,12 @@ namespace PushTechnology.ClientInterface.Example.Features
 
                 foreach (var remoteServer in listServers)
                 {
-                    WriteLine($"'{remoteServer.Name}'");
+                    WriteLine($"Name: '{remoteServer.Name}', Url: '{remoteServer.ServerUrl}', Principal: '{remoteServer.Principal}', Missing Topic Notification Filter: '{remoteServer.MissingTopicNotificationFilter}'");
+
+                    foreach(var connectionOption in remoteServer.ConnectionOptions)
+                    {
+                        WriteLine($"Connection Option: '{connectionOption.Key}', Value: '{connectionOption.Value}'");
+                    }
                 }
             }
             catch (Exception ex)

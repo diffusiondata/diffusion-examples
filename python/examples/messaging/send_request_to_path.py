@@ -39,7 +39,7 @@ async def main():
 
         print("Registering request handler...")
         try:
-            await session.messaging.register_request_handler(path, handler=handler)
+            await session.messaging.add_request_handler(path, handler=handler)
         except diffusion.DiffusionError as ex:
             print(f"ERROR: {ex}")
         else:

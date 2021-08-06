@@ -9,8 +9,9 @@
     <Import_RootNamespace>PushTechnology.ClientInterface.Example.Features</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AuthenticationControl.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AutomaticRemoval.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Authentication.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ChangePrincipal.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ClientControlChangeRoles.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ClientControlChangeRolesFilter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ClientControlCloseSession.cs" />
@@ -22,8 +23,14 @@
     <Compile Include="$(MSBuildThisFileDirectory)ClientControlSetSessionPropertiesFilter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ClientControlSetSessionPropertiesListener.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ClientUsingFetch.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ControlAuthenticationClient.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SystemAuthenticationControl.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PingServer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SessionLocks.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TopicMetricCollector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SessionReconnection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SessionMetricCollector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SessionTrees.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SecurityControl.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RemoteServers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SubscriptionControlRoutingHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SubscriptionControlSubscribe.cs" />

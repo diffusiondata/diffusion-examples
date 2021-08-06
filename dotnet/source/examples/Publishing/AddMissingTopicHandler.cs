@@ -179,8 +179,6 @@ namespace PushTechnology.ClientInterface.Example.Publishing
             /// <param name="topicPath"></param>
             public void OnTopicAdded(string topicPath)
             {
-                notification.Proceed();
-
                 WriteLine($"Topic '{topicPath}' added.");
             }
 

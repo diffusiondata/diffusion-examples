@@ -27,6 +27,7 @@ import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.MissingTopicNotification;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.MissingTopicNotificationStream;
 import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.client.topics.TopicSelector.Type;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 
 /**
@@ -56,7 +57,7 @@ public final class ControlClientHandlingMissingTopicNotification {
 
         // Registers a missing topic notification on a topic path
         topicControl.addMissingTopicHandler(
-            "A",
+            "Accounts",
             new NotificationStream()).get(5, TimeUnit.SECONDS);
 
     }
@@ -73,17 +74,27 @@ public final class ControlClientHandlingMissingTopicNotification {
 
         @Override
         public void onMissingTopic(MissingTopicNotification notification) {
-            final String topicPath = notification.getTopicPath();
-            topicControl.addTopic(
-                topicPath,
-                TopicType.STRING).whenComplete((result, ex) -> {
-                    if (ex == null) {
-                        LOG.info("Missing topic " + topicPath + " " + result);
-                    }
-                    else {
-                        LOG.warn("Failed to create missing topic", ex);
-                    }
-                });
+            // This handler will create a missing topic if a path selector
+            // requesting a topic starting with "Accounts/" is selected and
+            // the requesting session has the principal 'control'.
+            if (notification.getTopicSelector().getType() == Type.PATH) {
+                final String path = notification.getTopicPath();
+                if (path.startsWith("Accounts/") &&
+                    "control".equals(
+                        notification.getSessionProperties().get(Session.PRINCIPAL))) {
+
+                    topicControl.addTopic(
+                        path,
+                        TopicType.STRING).whenComplete((result, ex) -> {
+                            if (ex == null) {
+                                LOG.info("Missing topic " + path + " " + result);
+                            }
+                            else {
+                                LOG.warn("Failed to create missing topic " + path, ex);
+                            }
+                        });
+                }
+            }
         }
     }
 

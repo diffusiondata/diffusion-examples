@@ -59,30 +59,26 @@ namespace PushTechnology.ClientInterface.Examples.Runner {
                 //runner.Start( new PublishingRecordV2Topics(), secureUrl );
                 //runner.Start( new ConsumingRecordV2Topics(), url );
 
-                /// Start messaging examples
-                //runner.Start( new ReceivingMessages(), secureUrl );
-                //runner.Start( new SendingMessages(), secureUrl );
-
                 /// Start Request/Response to path examples
                 //runner.Start( new ReceivingPathRequestMessages(), secureUrl );
                 //runner.Start( new SendingPathRequestMessages(), secureUrl );
 
                 /// Start Request/Response to session filter examples
-                //runner.Start( new ReceivingFilterRequestMessages(), secureUrl );
+                //runner.Start( new ReceivingFilterRequestMessages(), url );
                 //runner.Start( new SendingFilterRequestMessages(), secureUrl );
 
                 /// Start Request/Response to specified session examples
-                //runner.Start( new ReceivingSessionRequestMessages(), secureUrl );
+                //runner.Start( new ReceivingSessionRequestMessages(), url );
                 //runner.Start( new SendingSessionRequestMessages(), secureUrl );
 
                 /// Start ping example
-                //runner.Start( new Example.Features.PingServer(), secureUrl );
+                //runner.Start( new PingServer(), url);
 
                 /// Start automatic topic removal
                 //runner.Start( new Removal(), secureUrl );
 
                 /// Start authentication example
-                //runner.Start( new Authentication(), secureUrl );
+                //runner.Start( new AuthenticationControl(), secureUrl );
 
                 /// Start AddAndSet example
                 //runner.Start( new AddAndSetTopic(), secureUrl );
@@ -134,8 +130,8 @@ namespace PushTechnology.ClientInterface.Examples.Runner {
                 /// Start apply JSON patch example
                 //runner.Start(new ApplyJSONPatch(), secureUrl);
 
-                /// Start Control Authentication Client example
-                //runner.Start(new ControlClientChangingSystemAuthentication(), secureUrl);
+                /// Start System Authentication Control example
+                //runner.Start(new SystemAuthenticationControl(), secureUrl);
 
                 /// Start add fallback stream example
                 //runner.Start(new AddFallbackStream(), secureUrl);
@@ -187,6 +183,27 @@ namespace PushTechnology.ClientInterface.Examples.Runner {
 
                 /// Start Remote Servers example
                 //runner.Start(new RemoteServers(), secureUrl);
+
+                /// Start Security Control example
+                //runner.Start(new SecurityControl(), secureUrl);
+
+                /// Start Session Trees example
+                //runner.Start(new SessionTrees(), secureUrl);
+
+                /// Start Change Principal example
+                //runner.Start(new ChangePrincipal(), secureUrl);
+
+                /// Start Session Locks example
+                //runner.Start(new SessionLocks(), secureUrl);
+
+                /// Start Session Reconnection example
+                //runner.Start(new SessionReconnection(), secureUrl);
+
+                /// Start Session Metric Collector example
+                //runner.Start(new SessionMetricCollector(), secureUrl);
+
+                /// Start Topic Metric Collector example
+                //runner.Start(new TopicMetricCollector(), secureUrl);
             }
         }
 
