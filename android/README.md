@@ -14,7 +14,7 @@ range query API does not use the `java.time` classes.
 
 You can download the Android client library from the following location:
 
-*   [http://download.pushtechnology.com/cloud/latest/sdks.html](http://download.pushtechnology.com/cloud/latest/sdks.html#android)
+*   [https://www.pushtechnology.com/developers/cloud/latest/#android-sdk](https://www.pushtechnology.com/developers/cloud/latest/#android-sdk)
 
 The client library is also available in the `clients` directory of the Diffusion installation.
 
