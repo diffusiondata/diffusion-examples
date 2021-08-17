@@ -18,6 +18,6 @@ The Java client library is available from the [Push Technology Maven repository]
 
 You can also download the Java client library from the following locations:
 
-*   Download from [our website](http://download.pushtechnology.com/cloud/latest/sdks.html#java)
+*   Download from [https://www.pushtechnology.com/developers/cloud/latest/#java-sdk](https://www.pushtechnology.com/developers/cloud/latest/#java-sdk)
 
 *   The client library is also available in the `clients` directory of the Diffusion installation.
