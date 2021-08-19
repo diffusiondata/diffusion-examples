@@ -14,7 +14,7 @@ The C API is available for the following operating systems:
 
 You can download the C client libraries from the following locations:
 
-*   Download from [https://www.pushtechnology.com/developers/cloud/latest/#c-sdk](https://www.pushtechnology.com/developers/cloud/latest/#c-sdk)
+*   Download from [our website](http://download.pushtechnology.com/cloud/latest/sdks.html#c)
 
 *   The client libraries are also available in the `clients` directory of the Diffusion server installation.
 

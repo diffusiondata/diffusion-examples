@@ -13,6 +13,6 @@ In order for all examples to work you have to pull in
 
 You can also download the client library from the following locations:
 
-*   Download from [https://www.pushtechnology.com/developers/cloud/latest/#dotnet-sdk](https://www.pushtechnology.com/developers/cloud/latest/#dotnet-sdk)
+*   Download from [our website](http://download.pushtechnology.com/cloud/latest/sdks.html#dotnet)
 
 *   The client library is also available in the `clients` directory of the Diffusion server installation.
