@@ -1,6 +1,17 @@
+#  Copyright (c) 2021 Push Technology Ltd., All Rights Reserved.
+#
+#  Use is subject to license terms.
+#
+#  NOTICE: All information contained herein is, and remains the
+#  property of Push Technology. The intellectual and technical
+#  concepts contained herein are proprietary to Push Technology and
+#  may be covered by U.S. and Foreign Patents, patents in process, and
+#  are protected by trade secret or copyright law.
 """ Example of sending a request to a session filter. """
+
 import asyncio
 import diffusion
+import diffusion.features.topics as topics
 
 # Diffusion server connection information; same for both sessions
 # adjust as needed for the server used in practice
@@ -35,7 +46,7 @@ topic_type = diffusion.datatypes.STRING
 session_duration = 15
 
 # fallback stream object
-fallback_stream = diffusion.topics.ValueStreamHandler(
+fallback_stream = topics.ValueStreamHandler(
     data_type=topic_type,
     update=on_update,
     subscribe=on_subscribe,

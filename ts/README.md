@@ -10,6 +10,6 @@ You can install the Node version of the JavaScript client library including the 
 
 You can download the TypeScript definitions separately from the following locations:
 
-*   Download from [https://www.pushtechnology.com/developers/cloud/latest/#js-sdk](https://www.pushtechnology.com/developers/cloud/latest/#js-sdk)
+*   Download from [our website](http://download.pushtechnology.com/cloud/latest/sdks.html#ts)
 
 *   The typescript definitions are also available in the `typescript` directory of the Diffusion installation.

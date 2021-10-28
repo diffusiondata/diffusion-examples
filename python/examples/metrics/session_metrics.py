@@ -29,10 +29,13 @@ async def main():
     ) as session:
         metrics = session.metrics
         session_filter = "x is 'y'"
-        
+
         try:
-            print(f"Adding the session metric collector 'Test' with session filter '{session_filter}'.")
-        
+            print(
+                f"""\
+Adding the session metric collector 'Test' with session filter '{session_filter}'."""
+            )
+
             collector = (
                 SessionMetricCollectorBuilder()
                 .group_by_properties("$Location")
@@ -54,10 +57,12 @@ async def main():
 
             for session_metric_collector in listSessionMetricCollectors:
                 print(
-                    f"Name: '{session_metric_collector.Name}', "
-                    f"Session filter: '{session_metric_collector.session_filter}', "
-                    f"Exports to Prometheus: '{session_metric_collector.exports_to_prometheus}', "
-                    f"Removes metrics with no matches: '{session_metric_collector.removes_metrics_with_no_matches}'"
+                    f"""
+Name: '{session_metric_collector.name}',
+Session filter: '{session_metric_collector.session_filter}',
+Exports to Prometheus: '{session_metric_collector.exports_to_prometheus}',
+Removes metrics with no matches: '{session_metric_collector.removes_metrics_with_no_matches}'
+                    """
                 )
 
             for property in session_metric_collector.group_by_properties:

@@ -32,7 +32,9 @@ async def main():
 
         try:
             print(
-                f"Adding the topic metric collector 'Test' with topic selector '{topic_selector}'."
+                f"""\
+Adding the topic metric collector 'Test' with topic selector '{topic_selector}'.
+                """
             )
 
             collector = (
