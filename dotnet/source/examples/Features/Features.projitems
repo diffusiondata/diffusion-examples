@@ -10,7 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AutomaticRemoval.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Authentication.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AuthenticationControl.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ClientControlChangeRoles.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ClientControlChangeRolesFilter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ClientControlCloseSession.cs" />

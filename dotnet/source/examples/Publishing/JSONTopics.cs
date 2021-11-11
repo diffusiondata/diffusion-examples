@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2016, 2019 Push Technology Ltd.
+ * Copyright © 2016, 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,9 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using PushTechnology.ClientInterface.Client.Callbacks;
 using PushTechnology.ClientInterface.Client.Factories;
-using PushTechnology.ClientInterface.Client.Features.Control.Topics;
+using PushTechnology.ClientInterface.Client.Session;
 using PushTechnology.ClientInterface.Client.Topics;
-using PushTechnology.ClientInterface.Data.JSON;
 
 using static System.Console;
 using static PushTechnology.ClientInterface.Examples.Runner.Program;
@@ -37,21 +35,28 @@ namespace PushTechnology.ClientInterface.Example.Publishing
         /// <param name="cancellationToken">A token used to end the client example.</param>
         /// <param name="args">A single string should be used for the server url.</param>
         public async Task Run( CancellationToken cancellationToken, string[] args ) {
-            var serverUrl = args[ 0 ];
-            var session = Diffusion.Sessions.Principal( "control" ).Password( "password" ).Open( serverUrl );
+            string serverUrl = args[ 0 ];
+            var session = Diffusion.Sessions.Principal( "control" ).Password( "password" )
+                .CertificateValidation((cert, chain, errors) => CertificateValidationResult.ACCEPT)
+                .Open( serverUrl );
+
             var topicControl = session.TopicControl;
             var topicUpdate = session.TopicUpdate;
 
             // Create a JSON topic 'random/JSON'
-            var topic = "random/JSON";
+            string topic = "random/JSON";
 
             try {
                 await topicControl.AddTopicAsync( topic, TopicType.JSON, cancellationToken );
-            } catch ( Exception ex ) {
+                WriteLine($"Topic '{topic}' added successfully.");
+            }
+            catch ( Exception ex ) {
                 WriteLine( $"Failed to add topic '{topic}' : {ex}." );
                 session.Close();
                 return;
             }
+
+            WriteLine($"Updating topic '{topic}' with new values:");
 
             // Update topic every 300 ms until user requests cancellation of example
             while ( !cancellationToken.IsCancellationRequested ) {
@@ -61,11 +66,10 @@ namespace PushTechnology.ClientInterface.Example.Publishing
 
                 try {
                     await topicUpdate.SetAsync( topic, newValue, cancellationToken );
-                    Console.WriteLine( $"Topic {topic} updated successfully." );
 
                     await Task.Delay( TimeSpan.FromMilliseconds( 300 ) );
                 } catch ( Exception ex ) {
-                    Console.WriteLine( $"Topic {topic} could not be updated : {ex}." );
+                    WriteLine( $"Topic {topic} could not be updated : {ex}." );
                 }
             }
 

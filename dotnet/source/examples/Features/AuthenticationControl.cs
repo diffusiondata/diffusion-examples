@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2019 Push Technology Ltd.
+ * Copyright © 2019, 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,33 +23,65 @@ using PushTechnology.ClientInterface.Client.Security.Authentication;
 using PushTechnology.DiffusionCore.Client.Types;
 using static PushTechnology.ClientInterface.Examples.Runner.Program;
 using static System.Console;
+using PushTechnology.ClientInterface.Client.Session;
+using System;
 
 namespace PushTechnology.ClientInterface.Example.Features {
     /// <summary>
     /// Implementation of a client which authenticates other sessions.
     /// </summary>
-    public sealed class Authentication : IExample {
+    public sealed class AuthenticationControl : IExample {
         /// <summary>
         /// Runs the authenticator client example.
         /// </summary>
         /// <param name="cancellationToken">A token used to end the client example.</param>
         /// <param name="args">A single string should be used for the server url.</param>
         public async Task Run( CancellationToken cancellationToken, string[] args ) {
-            var serverUrl = args[ 0 ];
+            string serverUrl = args[ 0 ];
 
             // Connect as a control session
-            var session = Diffusion.Sessions.Principal( "control" ).Password( "password" ).Open( serverUrl );
+            var session = Diffusion.Sessions.Principal( "control" ).Password( "password" )
+                .CertificateValidation((cert, chain, errors) => CertificateValidationResult.ACCEPT)
+                .Open(serverUrl);
 
-            try {
-                await session.AuthenticationControl.SetAuthenticationHandlerAsync(
+            WriteLine("Opening control session.");
+
+            IRegistration registration = null;
+
+            try
+            {
+                registration = await session.AuthenticationControl.SetAuthenticationHandlerAsync(
                     "before-system-handler", new Authenticator(), cancellationToken );
 
-                // Run until user requests ending of example
-                await Task.Delay( Timeout.Infinite, cancellationToken );
+                WriteLine("Authentication handler registered. Authenticator created.");
+
+                Diffusion.Sessions.Principal("client")
+                    .Credentials(Diffusion.Credentials.Password("password"))
+                    .CertificateValidation((cert, chain, errors) => CertificateValidationResult.ACCEPT)
+                    .Open(serverUrl, new SessionOpenCallback());
+
+                await Task.Delay(TimeSpan.FromMilliseconds(2000), cancellationToken );
             } catch ( TaskCanceledException ) {
-                //Task was canceled; 
+                //Task was cancelled; 
             } finally {
+                WriteLine("Closing control session.");
+
+                await registration.CloseAsync();
                 session.Close();
+            }
+        }
+
+        private sealed class SessionOpenCallback : ISessionOpenCallback
+        {
+            public void OnError(ErrorReason errorReason) => WriteLine($"An error occurred: {errorReason}");
+
+            public void OnOpened(ISession session)
+            {
+                WriteLine("Other session opened.");
+
+                session.Close();
+
+                WriteLine("Other session closed.");
             }
         }
 
@@ -105,7 +137,7 @@ namespace PushTechnology.ClientInterface.Example.Features {
             /// Notification of error.
             /// </summary>
             /// <param name="errorReason">Error reason.</param>
-            public void OnError( ErrorReason errorReason ) => WriteLine( $"Received and error: {errorReason}" );
+            public void OnError( ErrorReason errorReason ) => WriteLine( $"Authenticator received an error: {errorReason}" );
         }
     }
 }
