@@ -10,7 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AutomaticRemoval.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Authentication.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AuthenticationControl.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ClientUsingFetch.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PingServer.cs" />
   </ItemGroup>

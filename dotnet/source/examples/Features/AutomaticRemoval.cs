@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2018 Push Technology Ltd.
+ * Copyright © 2018, 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  */
 
 using PushTechnology.ClientInterface.Client.Factories;
+using PushTechnology.ClientInterface.Client.Session;
 using PushTechnology.ClientInterface.Client.Topics;
 using PushTechnology.ClientInterface.Client.Topics.Details;
 using System;
@@ -31,7 +32,10 @@ namespace PushTechnology.ClientInterface.Example.Features {
         public async Task Run( CancellationToken cancellationToken, string[] args ) {
             var serverUrl = args[ 0 ];
             // Connect with control principal.
-            var session = Diffusion.Sessions.Principal( "control" ).Password( "password" ).Open( serverUrl );
+            var session = Diffusion.Sessions.Principal( "control" ).Password( "password" )
+                .CertificateValidation( ( cert, chain, errors ) => CertificateValidationResult.ACCEPT )
+                .Open( serverUrl );
+
             var topicControl = session.TopicControl;
             ITopicSpecification topicSpecification;
 

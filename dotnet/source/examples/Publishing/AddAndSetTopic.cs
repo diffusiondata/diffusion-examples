@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2020 Push Technology Ltd.
+ * Copyright © 2020, 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using PushTechnology.ClientInterface.Client.Factories;
+using PushTechnology.ClientInterface.Client.Session;
 using PushTechnology.ClientInterface.Client.Topics;
 using static System.Console;
 using static PushTechnology.ClientInterface.Examples.Runner.Program;
@@ -33,26 +34,38 @@ namespace PushTechnology.ClientInterface.Example.Publishing {
         /// <param name="cancellationToken">A token used to end the client example.</param>
         /// <param name="args">A single string should be used for the server url.</param>
         public async Task Run( CancellationToken cancel, string[] args ) {
-            var serverUrl = args[ 0 ];
-            var session = Diffusion.Sessions.Principal( "control" ).Password( "password" ).Open( serverUrl );
+            string serverUrl = args[0];
+            var session = Diffusion.Sessions.Principal( "control" ).Password( "password" )
+                .CertificateValidation( ( cert, chain, errors ) => CertificateValidationResult.ACCEPT )
+                .Open( serverUrl );
+
             var topicUpdate = session.TopicUpdate;
 
             try {
                 // Attempt to add a topic, set its value to 0, and await the response from the server.
-                // If there was no topic previously bound to "test/topic", the method will return and create the topic, set the value, and return false.
-                // If there is an existing INT64 topic with default topic properties bound to "test/topic" the method will set its value to 0.
+                // If there was no topic previously bound to "test/topic", the method will return and create the topic and set its value to 0.
+                // If there is an existing INT64 topic with default topic properties bound to "test/topic" the method will set its value to 1.
                 // If an incompatible topic is bound to "test/topic", the method will throw ExistingTopicException.
-                var doesExist = await topicUpdate.AddAndSetAsync( "test/topic", session.TopicControl.NewSpecification( TopicType.INT64 ), 0 );
+                var state = await topicUpdate.AddAndSetAsync<long?>( "test/topic", session.TopicControl.NewSpecification( TopicType.INT64 ), 0L );
 
-                WriteLine( "Topic test/topic exists:" + doesExist + "with value: " + 0 );
+                WriteLine( $"Topic 'test/topic' {state} with value: 0." );
 
-                doesExist = await topicUpdate.AddAndSetAsync( "test/topic", session.TopicControl.NewSpecification( TopicType.INT64 ), 1 );
+                state = await topicUpdate.AddAndSetAsync<long?>( "test/topic", session.TopicControl.NewSpecification( TopicType.INT64 ), 1L );
 
-                WriteLine( "Topic test/topic exists:" + doesExist + "with value: " + 1 );
-
+                WriteLine( $"Topic 'test/topic' {state} with value: 1." );
             } catch ( Exception ex ) {
-                WriteLine( $"Failed to add topic : {ex}." );
+                WriteLine( $"Failed to add and set topic 'test/topic': {ex}." );
+                session.Close();
+
                 return;
+            }
+
+            try {
+                await session.TopicControl.RemoveTopicsAsync( "test/topic" );
+
+                WriteLine( $"Removed topic 'test/topic'." );
+            } catch ( Exception ex ) {
+                WriteLine( $"Failed to remove topic 'test/topic': {ex}." );
             } finally {
                 session.Close();
             }

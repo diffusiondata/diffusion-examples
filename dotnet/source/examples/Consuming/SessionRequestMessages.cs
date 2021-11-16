@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2018 Push Technology Ltd.
+ * Copyright © 2018, 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,10 +33,10 @@ namespace PushTechnology.ClientInterface.Example.Consuming {
         /// <param name="cancellationToken">A token used to end the client example.</param>
         /// <param name="args">A single string should be used for the server url.</param>
         public async Task Run( CancellationToken cancellationToken, string[] args ) {
-            var serverUrl = args[ 0 ];
+            string serverUrl = args[0];
             var session = Diffusion.Sessions.Principal( "client" ).Password( "password" ).Open( serverUrl );
             var messaging = session.Messaging;
-            var messagingPath = ">random/requestResponse";
+            string messagingPath = ">random/requestResponse";
 
             var requestStream = new SimpleRequestStream();
             messaging.SetRequestStream( messagingPath, requestStream );

@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2018 Push Technology Ltd.
+ * Copyright © 2018, 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,14 +35,14 @@ namespace PushTechnology.ClientInterface.Example.Consuming {
         /// <param name="cancellationToken">A token used to end the client example.</param>
         /// <param name="args">A single string should be used for the server URL.</param>
         public async Task Run( CancellationToken cancellationToken, string[] args ) {
-            var serverUrl = args[ 0 ];
+            string serverUrl = args[0];
 
             // Connect anonymously
             var session = Diffusion.Sessions.Open( serverUrl );
 
             // Get the Topics feature to subscribe to topics
             var topics = session.Topics;
-            var topic = "random/RecordV2";
+            string topic = "random/RecordV2";
 
             // Add a topic stream for 'random/RecordV2'
             var recordV2Stream = new RecordV2Stream();
@@ -92,7 +92,7 @@ namespace PushTechnology.ClientInterface.Example.Consuming {
             /// <param name="topicPath">Topic path.</param>
             /// <param name="specification">Topic specification.</param>
             public void OnSubscription( string topicPath, ITopicSpecification specification )
-                => WriteLine( $"Client subscribed to {topicPath}." );
+                => WriteLine( $"Client subscribed to topic '{topicPath}'." );
 
             /// <summary>
             /// Notification of a successful unsubscription.
@@ -101,7 +101,7 @@ namespace PushTechnology.ClientInterface.Example.Consuming {
             /// <param name="specification">Topic specification.</param>
             /// <param name="reason">Error reason.</param>
             public void OnUnsubscription( string topicPath, ITopicSpecification specification, TopicUnsubscribeReason reason )
-                => WriteLine( $"Client unsubscribed from {topicPath} : {reason}." );
+                => WriteLine( $"Client unsubscribed from topic '{topicPath}' with reason '{reason}'." );
 
             /// <summary>
             /// Topic update received.
@@ -111,7 +111,7 @@ namespace PushTechnology.ClientInterface.Example.Consuming {
             /// <param name="oldValue">Value prior to update.</param>
             /// <param name="newValue">Value after update.</param>
             public void OnValue( string topicPath, ITopicSpecification specification, IRecordV2 oldValue, IRecordV2 newValue )
-                => WriteLine( $"New value of {topicPath} is [{string.Join( ", ", newValue.AsFields() )}]." );
+                => WriteLine( $"New value of topic '{topicPath}' is [{string.Join( ", ", newValue.AsFields() )}]." );
         }
     }
 }

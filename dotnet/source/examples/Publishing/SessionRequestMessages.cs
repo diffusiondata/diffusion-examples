@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2018 Push Technology Ltd.
+ * Copyright © 2018, 2021 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,28 +37,29 @@ namespace PushTechnology.ClientInterface.Example.Publishing {
         /// <param name="cancellationToken">A token used to end the client example.</param>
         /// <param name="args">A single string should be used for the server url.</param>
         public async Task Run( CancellationToken cancellationToken, string[] args ) {
-            var serverUrl = args[ 0 ];
-            var session = Diffusion.Sessions.Principal( "control" ).Password( "password" ).Open( serverUrl );
+            string serverUrl = args[0];
+            var session = Diffusion.Sessions.Principal( "control" ).Password( "password" )
+                .CertificateValidation( ( cert, chain, errors ) => CertificateValidationResult.ACCEPT )
+                .Open( serverUrl );
+
             var messaging = session.Messaging;
             var requestCallback = new RequestCallback();
 
+            // Filter messaging is used to get the session ID for this example
+            int requestsSent = await messaging.SendRequestToFilterAsync( 
+                "$Principal EQ 'client'",
+                messagingPath,
+                "Hello?",
+                requestCallback,
+                cancellationToken );
+
+            await Task.Delay( TimeSpan.FromMilliseconds( 1000 ) );
+
             while ( !cancellationToken.IsCancellationRequested ) {
-                // To obtain session IDs we will use in this example request to filter messaging
-                int requestsSent = await messaging.SendRequestToFilterAsync(
-                    "$Principal EQ 'client'",
-                    messagingPath,
-                    "Hello?",
-                    requestCallback,
-                    cancellationToken );
-
-                if ( requestsSent > 0 ) {
-                    requestCallback.ResponseEvent.WaitOne();
-
-                    // Send message to a session using obtained session ID
-                    var response = await messaging.SendRequestAsync<string, string>(
-                        requestCallback.SessionId, messagingPath, "Time", cancellationToken );
-                    WriteLine( $"Received response: '{response}'." );
-                }
+                // Send message to a session using obtained session ID
+                string response = await messaging.SendRequestAsync<string, string>( 
+                    requestCallback.SessionId, messagingPath, "Time", cancellationToken );
+                WriteLine( $"Received response: '{response}'." );
 
                 await Task.Delay( TimeSpan.FromMilliseconds( 1000 ) );
             }
@@ -71,9 +72,7 @@ namespace PushTechnology.ClientInterface.Example.Publishing {
         /// A simple IFilteredRequestCallback implementation that prints confirmation of the actions completed.
         /// </summary>
         private class RequestCallback : IFilteredRequestCallback<string> {
-            public string Response { get; private set; }
             public ISessionId SessionId { get; private set; }
-            public AutoResetEvent ResponseEvent { get; private set; } = new AutoResetEvent( false );
 
             /// <summary>
             /// Indicates that the stream was closed.
@@ -90,11 +89,7 @@ namespace PushTechnology.ClientInterface.Example.Publishing {
             /// <summary>
             /// Indicates that a response message was received.
             /// </summary>
-            public void OnResponse( ISessionId sessionId, string response ) {
-                Response = response;
-                SessionId = sessionId;
-                ResponseEvent.Set();
-            }
+            public void OnResponse( ISessionId sessionId, string response ) => SessionId = sessionId;
 
             /// <summary>
             /// Indicates that a error response message was received.
