@@ -1,2 +1,2 @@
-diffusion==6.7.4
+diffusion==6.7.5
 jupyter
