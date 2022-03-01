@@ -49,8 +49,9 @@
 
         // create a session metric collector using its builder
         PTDiffusionSessionMetricCollector *const collector =
-            [[[[[PTDiffusionSessionMetricCollectorBuilder new]
-                exportToPrometheus:YES]
+            [[[[[[PTDiffusionSessionMetricCollectorBuilder new]
+                 exportToPrometheus:YES]
+                maximumGroups:10]
                removeMetricsWithNoMatches:NO]
               groupByProperty:@"$Location"]
              createCollectorWithName:@"collector 1" andSessionFilter:@"$Principal is 'control'"];
@@ -81,6 +82,7 @@
                     NSLog(@"%@", c.name);
                     NSLog(@"\tSession Filter: %@", c.sessionFilter);
                     NSLog(@"\tExports to Prometheus: %@", c.exportsToPrometheus ? @"YES" : @"NO");
+                    NSLog(@"\tMaximum groups: %d", (int) c.maximumGroups);
                     NSLog(@"\tRemoves metrics with no matches: %@", c.removesMetricsWithNoMatches ? @"YES" : @"NO");
                     NSLog(@"\tGroup by properties:");
                     for (NSString *property in c.groupByProperties) {

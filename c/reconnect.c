@@ -31,7 +31,7 @@
 #define sleep(x) Sleep(1000 * x)
 #endif
 
-#include <apr_time.h>
+#include "apr_time.h"
 
 #include "diffusion.h"
 #include "args.h"

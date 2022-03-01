@@ -48,9 +48,12 @@ namespace PushTechnology.ClientInterface.Example.Features
             {
                 WriteLine($"Adding the topic metric collector 'Test' with topic selector '{topicSelector}'.");
 
-                collector = Diffusion.NewTopicMetricCollectorBuilder()
-                    .GroupByTopicType( true )
-                    .Create("Test", topicSelector);
+                var builder = Diffusion.NewTopicMetricCollectorBuilder();
+                builder = (ITopicMetricCollectorBuilder)builder.ExportsToPrometheus(true);
+                builder = (ITopicMetricCollectorBuilder)builder.GroupByTopicType(true);
+                builder = (ITopicMetricCollectorBuilder)builder.MaximumGroups(10);
+                builder = (ITopicMetricCollectorBuilder)builder.GroupByPathPrefixParts(1);
+                collector = builder.Create("Test", topicSelector);
 
                 await metrics.PutTopicMetricCollectorAsync(collector);
 
@@ -71,7 +74,11 @@ namespace PushTechnology.ClientInterface.Example.Features
 
                 foreach (var topicMetricCollector in listTopicMetricCollectors)
                 {
-                    WriteLine($"Name: '{topicMetricCollector.Name}', Topic selector: '{topicMetricCollector.TopicSelector}', Exports to Prometheus: '{GetAnswer(topicMetricCollector.ExportsToPrometheus)}', Groups by topic type: '{GetAnswer(topicMetricCollector.GroupsByTopicType)}'");
+                    WriteLine($"Name: '{topicMetricCollector.Name}', Topic selector: '{topicMetricCollector.TopicSelector}', " +
+                              $"Maximum Groups: {topicMetricCollector.MaximumGroups}, " +
+                              $"Exports to Prometheus: '{GetAnswer(topicMetricCollector.ExportsToPrometheus)}', " +
+                              $"Group By Path Prefix Parts: {topicMetricCollector.GroupByPathPrefixParts}, " +
+                              $"Groups by topic type: '{GetAnswer(topicMetricCollector.GroupsByTopicType)}'");
                 }
             }
             catch (Exception ex)

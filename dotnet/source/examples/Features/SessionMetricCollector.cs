@@ -49,10 +49,12 @@ namespace PushTechnology.ClientInterface.Example.Features
             {
                 WriteLine($"Adding the session metric collector 'Test' with session filter '{sessionFilter}'.");
 
-                collector = Diffusion.NewSessionMetricCollectorBuilder()
-                    .GroupByProperties(new List<string> { "$Location" })
-                    .RemoveMetricsWithNoMatches(true)
-                    .Create("Test", sessionFilter);
+                var builder = Diffusion.NewSessionMetricCollectorBuilder();
+                builder = (ISessionMetricCollectorBuilder)builder.ExportsToPrometheus(true);
+                builder = (ISessionMetricCollectorBuilder)builder.GroupByProperties(new List<string> { "$Location" });
+                builder = (ISessionMetricCollectorBuilder)builder.RemoveMetricsWithNoMatches(true);
+                builder = (ISessionMetricCollectorBuilder)builder.MaximumGroups(10);
+                collector = builder.Create("Test", sessionFilter);
 
                 await metrics.PutSessionMetricCollectorAsync(collector);
 
@@ -73,7 +75,10 @@ namespace PushTechnology.ClientInterface.Example.Features
 
                 foreach (var sessionMetricCollector in listSessionMetricCollectors)
                 {
-                    WriteLine($"Name: '{sessionMetricCollector.Name}', Session filter: '{sessionMetricCollector.SessionFilter}', Exports to Prometheus: '{GetAnswer(sessionMetricCollector.ExportsToPrometheus)}', Removes metrics with no matches: '{GetAnswer(sessionMetricCollector.RemovesMetricsWithNoMatches)}'");
+                    WriteLine($"Name: '{sessionMetricCollector.Name}', Session filter: '{sessionMetricCollector.SessionFilter}', " +
+                        $"Exports to Prometheus: '{GetAnswer(sessionMetricCollector.ExportsToPrometheus)}', " +
+                        $"Maximum Groups: {sessionMetricCollector.MaximumGroups}, " +
+                        $"Removes metrics with no matches: '{GetAnswer(sessionMetricCollector.RemovesMetricsWithNoMatches)}'");
 
                     foreach (string property in sessionMetricCollector.GroupByProperties)
                     {

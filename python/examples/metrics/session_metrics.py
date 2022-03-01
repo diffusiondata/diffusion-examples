@@ -40,6 +40,7 @@ Adding the session metric collector 'Test' with session filter '{session_filter}
                 SessionMetricCollectorBuilder()
                 .group_by_properties("$Location")
                 .remove_metrics_with_no_matches(True)
+                .maximum_groups(10)
                 .create("Test", session_filter)
             )
 
@@ -60,6 +61,7 @@ Adding the session metric collector 'Test' with session filter '{session_filter}
                     f"""
 Name: '{session_metric_collector.name}',
 Session filter: '{session_metric_collector.session_filter}',
+Maximum Groups: {session_metric_collector.maximum_groups},
 Exports to Prometheus: '{session_metric_collector.exports_to_prometheus}',
 Removes metrics with no matches: '{session_metric_collector.removes_metrics_with_no_matches}'
                     """

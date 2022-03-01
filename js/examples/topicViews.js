@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2020 Push Technology Ltd.
+ * Copyright (C) 2020 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -30,10 +30,19 @@ async function listTopicViews() {
     const views = await session.topicViews.listTopicViews();
 
     // show the name and specification of each topic view
-    console.log('All Topic Views:')
+    console.log('All Topic Views:');
     views.forEach((topicView) => {
         console.log(`${topicView.name}: ${topicView.specification}`);
     });
+}
+
+async function getTopicView() {
+    // get a topic view
+    const topicView = await session.topicViews.getTopicView('example-view');
+
+    // show the name and specification of the topic view
+    console.log('Topic View:');
+    console.log(`${topicView.name}: ${topicView.specification}`);
 }
 
 async function removeTopicViews() {
@@ -57,4 +66,5 @@ diffusion.connect({
 })
 .then(createTopicView)
 .then(listTopicViews)
+.then(getTopicView)
 .then(removeTopicViews);

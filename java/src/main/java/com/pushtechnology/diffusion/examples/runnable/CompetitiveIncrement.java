@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018, 2020 Push Technology Ltd.
+ * Copyright (C) 2018, 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,9 +37,9 @@ import com.pushtechnology.diffusion.client.features.Topics.ValueStream.Default;
 import com.pushtechnology.diffusion.client.features.UnsatisfiedConstraintException;
 import com.pushtechnology.diffusion.client.features.UpdateConstraint;
 import com.pushtechnology.diffusion.client.features.control.topics.TopicControl.TopicLicenseLimitException;
+import com.pushtechnology.diffusion.client.session.PermissionsException;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionClosedException;
-import com.pushtechnology.diffusion.client.session.SessionSecurityException;
 import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 
 /**
@@ -201,15 +201,11 @@ public final class CompetitiveIncrement extends AbstractClient {
 
     private void handleIncrementFailure(Topics topics, Throwable ex) {
         final Throwable cause = ex.getCause();
-        if (cause instanceof ClusterRoutingException) {
-            // A transient cluster failure ooccured during the increment.
+        if ((cause instanceof ClusterRoutingException) || (cause instanceof UnsatisfiedConstraintException)) {
+            // A transient cluster failure occured during the increment
+            // or the constraint was not satisfied, another session must
+            // have updated the topic.
             // Retry incrementing the topic until successful.
-            performIncrement(topics);
-        }
-        else if (cause instanceof UnsatisfiedConstraintException) {
-            // The constraint was not satisfied, another session must have
-            // updated the topic. Retry incrementing the topic with the latest
-            // known value until successful.
             performIncrement(topics);
         }
         else if (cause instanceof NoSuchTopicException) {
@@ -234,7 +230,7 @@ public final class CompetitiveIncrement extends AbstractClient {
             LOG.warn("The topic is managed by a different component");
             stop();
         }
-        else if (cause instanceof SessionSecurityException) {
+        else if (cause instanceof PermissionsException) {
             // The session does't have permission update update the path.
             // This is not recoverable.
             LOG.warn("The session does't have permission to update the path");

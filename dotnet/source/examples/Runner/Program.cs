@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2016, 2021 Push Technology Ltd.
+ * Copyright © 2016, 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ using System.Threading.Tasks;
 using PushTechnology.ClientInterface.Example.Consuming;
 using PushTechnology.ClientInterface.Example.Features;
 using PushTechnology.ClientInterface.Example.Publishing;
+
 
 namespace PushTechnology.ClientInterface.Examples.Runner {
     /// <summary>
@@ -109,7 +110,10 @@ namespace PushTechnology.ClientInterface.Examples.Runner {
                 /// Start list topic view example
                 //runner.Start( new TopicViewsList(), secureUrl);
 
-                /// Start list topic view example
+                /// Start get topic view example
+                //runner.Start( new TopicViewsGet(), secureUrl);
+
+                /// Start remove topic view example
                 //runner.Start( new TopicViewsRemove(), secureUrl);
 
                 /// Start create update stream example

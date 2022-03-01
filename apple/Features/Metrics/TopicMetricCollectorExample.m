@@ -49,9 +49,10 @@
 
         // create a topic metric collector using its builder
         PTDiffusionTopicMetricCollector *const collector =
-            [[[[PTDiffusionTopicMetricCollectorBuilder new]
-                                    exportToPrometheus:NO]
-                            groupByTopicType:YES]
+            [[[[[PTDiffusionTopicMetricCollectorBuilder new]
+                exportToPrometheus:NO]
+               maximumGroups:10]
+              groupByTopicType:YES]
              createCollectorWithName:@"collector 1" andTopicSelector:@"*A/B/C//"];
 
         PTDiffusionMetricsFeature *const metrics = session.metrics;
@@ -81,6 +82,7 @@
                     NSLog(@"\tTopic Selector: %@", c.topicSelector);
                     NSLog(@"\tExports to Prometheus: %@", c.exportsToPrometheus ? @"YES" : @"NO");
                     NSLog(@"\tGroups by Topic type: %@", c.groupsByTopicType ? @"YES" : @"NO");
+                    NSLog(@"\tMaximum groups: %d", (int) c.maximumGroups);
                 }
 
                 NSLog(@"Removing topic metric collector");

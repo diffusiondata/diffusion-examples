@@ -1,6 +1,6 @@
 {
   "name": "diffusion-examples",
-  "version": "6.7.5",
+  "version": "6.8.0",
   "description": "Examples for using the Diffusion JavaScript client",
   "main": "index.js",
   "directories": {
@@ -8,6 +8,18 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "diffusion": "6.7.5"
+    "@types/long": "4.0.1",
+    "@types/node": "16.7.10",
+    "@typescript-eslint/eslint-plugin": "4.31.1",
+    "@typescript-eslint/parser": "4.31.1",
+    "eslint": "7.32.0",
+    "eslint-plugin-deprecation": "1.2.1",
+    "long": "4.0.0",
+    "typescript": "4.4.3"
+  },
+  "scripts": {
+    "start": "npm run check && npm run compile",
+    "check": "eslint manual/**/*.ts",
+    "compile": "tsc"
   }
 }

@@ -31,9 +31,9 @@
 #define sleep(x) Sleep(1000 * x)
 #endif
 
-#include <apr.h>
-#include <apr_thread_mutex.h>
-#include <apr_thread_cond.h>
+#include "apr.h"
+#include "apr_thread_mutex.h"
+#include "apr_thread_cond.h"
 
 #include "diffusion.h"
 #include "args.h"
@@ -82,7 +82,7 @@ static int on_branch_mapping_table_received(
         LIST_T *branch_mappings =
                 diffusion_branch_mapping_table_get_branch_mappings(
                         (DIFFUSION_BRANCH_MAPPING_TABLE_T *) table);
-        
+
         printf("Branch mapping table for '%s'\n", session_tree_branch);
         for (int i = 0; i < list_get_size(branch_mappings); i++) {
                 DIFFUSION_BRANCH_MAPPING_T *mapping = list_get_data_indexed(branch_mappings, i);
@@ -90,7 +90,7 @@ static int on_branch_mapping_table_received(
                 char *topic_tree_branch =  diffusion_branch_mapping_get_topic_tree_branch(mapping);
 
                 printf("\t%30s --> %s\n", session_filter, topic_tree_branch);
-                
+
                 free(session_filter);
                 free(topic_tree_branch);
         }
@@ -149,7 +149,7 @@ int main(int argc, char** argv)
                 fprintf(stderr, "ERR : %s\n", error.message);
                 return EXIT_FAILURE;
         }
-        
+
         /*
          * Create a branch mapping table.
          */
@@ -164,10 +164,10 @@ int main(int argc, char** argv)
                 builder,
                 "all",
                 "target/content/other");
-        
+
         DIFFUSION_BRANCH_MAPPING_TABLE_T *table =
                 diffusion_branch_mapping_table_builder_create_table(builder, "public/content");
-        
+
         /*
          * Put the branch mapping table in the Diffusion server.
          */

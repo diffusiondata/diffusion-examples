@@ -40,6 +40,8 @@ Adding the topic metric collector 'Test' with topic selector '{topic_selector}'.
             collector = (
                 TopicMetricCollectorBuilder()
                 .group_by_topic_type(True)
+                .maximum_groups(10)
+                .group_by_path_prefix_parts(55)
                 .create("Test", topic_selector)
             )
 
@@ -58,7 +60,9 @@ Adding the topic metric collector 'Test' with topic selector '{topic_selector}'.
             for topic_metric_collector in list_topic_metric_collectors:
                 print(
                     f"Name: '{topic_metric_collector.name}', "
+                    f"Maximum Groups: {topic_metric_collector.maximum_groups}, "
                     f"Topic selector: '{topic_metric_collector.topic_selector}', "
+                    f"Group By Path Prefix Parts: {topic_metric_collector.group_by_path_prefix_parts}, "
                     f"Exports to Prometheus: '{topic_metric_collector.exports_to_prometheus}', "
                     f"Groups by topic type: '{topic_metric_collector.groups_by_topic_type}'"
                 )

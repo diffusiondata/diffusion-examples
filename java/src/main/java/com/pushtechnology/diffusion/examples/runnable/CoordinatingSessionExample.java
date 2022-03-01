@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018, 2020 Push Technology Ltd.
+ * Copyright (C) 2018, 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,9 +35,9 @@ import com.pushtechnology.diffusion.client.features.TopicUpdate;
 import com.pushtechnology.diffusion.client.features.UnsatisfiedConstraintException;
 import com.pushtechnology.diffusion.client.features.UpdateConstraint;
 import com.pushtechnology.diffusion.client.features.UpdateStream;
+import com.pushtechnology.diffusion.client.session.PermissionsException;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.session.SessionClosedException;
-import com.pushtechnology.diffusion.client.session.SessionSecurityException;
 import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 
@@ -202,7 +202,7 @@ public final class CoordinatingSessionExample extends AbstractClient {
                 // The lock will be released with the session
                 stop();
             }
-            else if (cause instanceof SessionSecurityException) {
+            else if (cause instanceof PermissionsException) {
                 // The session does't have permission update update the path.
                 // This is not recoverable.
                 LOG.warn("The session doesn't have permission to update the path");

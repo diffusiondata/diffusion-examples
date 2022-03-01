@@ -35,6 +35,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)SubscriptionControlRoutingHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SubscriptionControlSubscribe.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SubscriptionControlSubscribeFilter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TopicViewsGet.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TopicViewsList.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TopicViewsCreate.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TopicViewsRemove.cs" />
