@@ -1,5 +1,5 @@
 /**
- * Copyright © 2020, 2021 Push Technology Ltd.
+ * Copyright © 2020, 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,9 @@
 #define sleep(x) Sleep(1000 * x)
 #endif
 
-#include <apr.h>
-#include <apr_thread_mutex.h>
-#include <apr_thread_cond.h>
+#include "apr.h"
+#include "apr_thread_mutex.h"
+#include "apr_thread_cond.h"
 
 #include "diffusion.h"
 #include "args.h"
@@ -108,7 +108,7 @@ on_topic_view_created(const DIFFUSION_TOPIC_VIEW_T *topic_view, void *context)
 
         free(view_name);
         free(spec);
-        
+
         apr_thread_mutex_lock(mutex);
         apr_thread_cond_broadcast(cond);
         apr_thread_mutex_unlock(mutex);
@@ -129,15 +129,15 @@ static int
 on_topic_views_list(const LIST_T *topic_views, void *context)
 {
         int size = list_get_size(topic_views);
-        
+
         printf("Total topic views: %d\n", size);
         for (int i = 0; i < size; i++) {
                 DIFFUSION_TOPIC_VIEW_T *topic_view = list_get_data_indexed(topic_views, i);
-                
+
                 char *view_name = diffusion_topic_view_get_name(topic_view);
                 char *view_specification = diffusion_topic_view_get_specification(topic_view);
                 SET_T *view_roles = diffusion_topic_view_get_roles(topic_view);
-                
+
                 printf("%s: [%s] [", view_name, view_specification);
                 char **values = (char **) set_values(view_roles);
                 for(char **value = values; *value != NULL; value++) {
@@ -193,15 +193,15 @@ on_error_remove(SESSION_T *session, const DIFFUSION_ERROR_T *error)
 /*
  * Helper functions to create topics and topic views and list topic views
  */
-static void 
+static void
 create_topic_and_topic_view(SESSION_T *session, char *root_topic_path, char *topic_name, char *view_name) {
-        
+
         char *topic_path = calloc(strlen(root_topic_path) + strlen(topic_name) + 1, sizeof(char));
         sprintf(topic_path, "%s/%s", root_topic_path, topic_name);
-        
+
         char *topic_view_path = calloc(strlen(view_name) + 6, sizeof(char));
         sprintf(topic_view_path, "views/%s", view_name);
-        
+
         ADD_TOPIC_CALLBACK_T callback = create_topic_callback(topic_path);
         TOPIC_SPECIFICATION_T *spec = topic_specification_init(TOPIC_TYPE_STRING);
 
@@ -232,7 +232,7 @@ create_topic_and_topic_view(SESSION_T *session, char *root_topic_path, char *top
         diffusion_topic_views_create_topic_view(session, topic_view_params, NULL);
         apr_thread_cond_wait(cond, mutex);
         apr_thread_mutex_unlock(mutex);
-        
+
         /*
          * Free resources.
          */
@@ -243,7 +243,7 @@ create_topic_and_topic_view(SESSION_T *session, char *root_topic_path, char *top
         free(topic_path);
 }
 
-static void 
+static void
 list_topic_views(SESSION_T *session)
 {
        DIFFUSION_TOPIC_VIEWS_LIST_PARAMS_T params_list = {

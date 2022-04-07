@@ -1,5 +1,5 @@
 /**
- * Copyright © 2019, 2021 Push Technology Ltd.
+ * Copyright © 2019, 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,9 @@
 #define sleep(x) Sleep(1000 * x)
 #endif
 
-#include <apr.h>
-#include <apr_thread_mutex.h>
-#include <apr_thread_cond.h>
+#include "apr.h"
+#include "apr_thread_mutex.h"
+#include "apr_thread_cond.h"
 
 #include "diffusion.h"
 #include "args.h"
@@ -179,7 +179,7 @@ main(int argc, char** argv)
 
                 /*
                  * Create a BUF_T and write the string datatype value
-                 * into it. 
+                 * into it.
                  */
                 BUF_T *update_buf = buf_create();
                 write_diffusion_string_value(time_str, update_buf);

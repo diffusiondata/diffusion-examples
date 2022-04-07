@@ -1,5 +1,5 @@
 /**
- * Copyright © 2020, 2021 Push Technology Ltd.
+ * Copyright © 2020, 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,9 @@
 #define sleep(x) Sleep(1000 * x)
 #endif
 
-#include <apr.h>
-#include <apr_thread_mutex.h>
-#include <apr_thread_cond.h>
+#include "apr.h"
+#include "apr_thread_mutex.h"
+#include "apr_thread_cond.h"
 
 #include "diffusion.h"
 #include "args.h"
@@ -123,7 +123,7 @@ on_error(SESSION_T *session, const DIFFUSION_ERROR_T *error)
 /*
  * Handlers for range query of a time series topic
  */
- static int 
+ static int
  on_query_result(const DIFFUSION_TIME_SERIES_QUERY_RESULT_T *query_result, void *context)
  {
          LIST_T *events = diffusion_time_series_query_result_get_events(query_result);
@@ -138,9 +138,9 @@ on_error(SESSION_T *session, const DIFFUSION_ERROR_T *error)
                  char *val;
                  DIFFUSION_VALUE_T *value = diffusion_time_series_event_get_value(event);
                  read_diffusion_string_value(value, &val, NULL);
-                 
+
                  printf("Range query: [%d] --> [%s] appended the value [%s]\n", i, author, val);
-                 
+
                  free(author);
                  diffusion_value_free(value);
                  free(val);
@@ -272,7 +272,7 @@ main(int argc, char** argv)
          diffusion_time_series_select_from(session, params_range_query, NULL);
          apr_thread_cond_wait(cond, mutex);
          apr_thread_mutex_unlock(mutex);
-         
+
          diffusion_time_series_range_query_free(range_query);
 
         /*

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2014, 2021 Push Technology Ltd.
+ * Copyright © 2014, 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,9 @@
 #include <unistd.h>
 #endif
 
-#include <apr.h>
-#include <apr_thread_mutex.h>
-#include <apr_thread_cond.h>
+#include "apr.h"
+#include "apr_thread_mutex.h"
+#include "apr_thread_cond.h"
 
 #include "diffusion.h"
 #include "args.h"

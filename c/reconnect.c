@@ -1,5 +1,5 @@
 /**
- * Copyright © 2014, 2021 Push Technology Ltd.
+ * Copyright © 2014, 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@
 #define sleep(x) Sleep(1000 * x)
 #endif
 
-#include <apr_time.h>
+#include "apr_time.h"
 
 #include "diffusion.h"
 #include "args.h"

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2020, 2021 Push Technology Ltd.
+ * Copyright © 2020, 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,9 @@
 #define sleep(x) Sleep(1000 * x)
 #endif
 
-#include <apr.h>
-#include <apr_thread_mutex.h>
-#include <apr_thread_cond.h>
+#include "apr.h"
+#include "apr_thread_mutex.h"
+#include "apr_thread_cond.h"
 
 #include "diffusion.h"
 #include "args.h"
@@ -109,7 +109,7 @@ on_topic_view_created(const DIFFUSION_TOPIC_VIEW_T *topic_view, void *context)
 
         free(view_name);
         free(spec);
-        
+
         apr_thread_mutex_lock(mutex);
         apr_thread_cond_broadcast(cond);
         apr_thread_mutex_unlock(mutex);
@@ -126,20 +126,20 @@ on_error(SESSION_T *session, const DIFFUSION_ERROR_T *error)
 /*
  * Handlers for listing Topic views
  */
- 
+
 static int
 on_topic_views_list(const LIST_T *topic_views, void *context)
 {
         int size = list_get_size(topic_views);
-        
+
         printf("Total topic views: %d\n", size);
         for (int i = 0; i < size; i++) {
                 DIFFUSION_TOPIC_VIEW_T *topic_view = list_get_data_indexed(topic_views, i);
-                
+
                 char *view_name = diffusion_topic_view_get_name(topic_view);
                 char *view_specification = diffusion_topic_view_get_specification(topic_view);
                 SET_T *view_roles = diffusion_topic_view_get_roles(topic_view);
-                
+
                 printf("%s: [%s] [", view_name, view_specification);
                 char **values = (char **) set_values(view_roles);
                 for(char **value = values; *value != NULL; value++) {
