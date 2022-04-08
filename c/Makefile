@@ -19,57 +19,89 @@ CC		= gcc
 # Extra definitions from parent directory, if they exist.
 -include ../makefile.defs
 
-CFLAGS		+= -g -Wall -Werror -Wno-error=deprecated-declarations -std=c99 -D_POSIX_C_SOURCE=200112L -D_XOPEN_SOURCE=700 -I$(DIFFUSION_C_CLIENT_INCDIR)
+CFLAGS		+= -g -std=c99 -D_POSIX_C_SOURCE=200112L -D_XOPEN_SOURCE=700 \
+			   -Wall -Werror -Wno-error=deprecated-declarations \
+			   -I$(DIFFUSION_C_CLIENT_INCDIR)
 LDFLAGS		+= $(DIFFUSION_C_CLIENT_LIBDIR)/libdiffusion.a -lpthread -lpcre -lz $(LIBS)
-# If you have openssl installed then you can uncomment these.
-ifdef HAVE_OPEN_SSL
-LDFLAGS     += -lssl -lcrypto
-endif
 
 ARFLAGS		+=
-SOURCES = subscribe.c fetch-request.c 	\
-		  auth-service.c					\
-		  change-principal.c add-topics.c 			\
-		  subscribe-multiple.c update-record.c connect.c	\
-		  connect-async.c system-auth-control.c			\
-		  session-properties-listener.c				\
-		  get-session-properties.c				\
-	 	  missing-topic-notification.c				\
-		  subscription-control.c reconnect.c			\
-		  json/json-publishing-example.c			\
-		  json/json-subscribing-example.c			\
-		  recordv2-topics.c binary-topics.c			\
-		  int64-topics.c double-topics.c string-topics.c	\
-		  send-request-to-session.c send-request-to-path.c	\
-		  send-request-to-filter.c topic-update.c		\
-		  topic-update-with-constraint.c topic-update-stream.c	\
-		  topic-update-add-and-set.c time-series-append.c	\
-		  topic-views.c time-series-edit.c			\
-		  time-series-range-query.c topic-views-list.c		\
-		  topic-views-remove.c time-series-timestamp-append.c	\
+SOURCES 	=	subscribe.c \
+				fetch-request.c \
+				auth-service.c \
+				change-principal.c \
+				add-topics.c \
+				subscribe-multiple.c \
+				update-record.c \
+				connect.c \
+				connect-async.c \
+				system-auth-control.c \
+				session-properties-listener.c \
+				get-session-properties.c \
+				missing-topic-notification.c \
+				subscription-control.c \
+				reconnect.c \
+				json/json-publishing-example.c \
+				json/json-subscribing-example.c \
+				recordv2-topics.c \
+				binary-topics.c \
+				int64-topics.c \
+				double-topics.c \
+				string-topics.c \
+				send-request-to-session.c \
+				send-request-to-path.c \
+				send-request-to-filter.c \
+				topic-update.c \
+				topic-update-with-constraint.c \
+				topic-update-stream.c \
+				topic-update-add-and-set.c \
+				time-series-append.c	\
+				topic-views.c \
+				time-series-edit.c \
+				time-series-range-query.c \
+				topic-views-list.c \
+				topic-views-remove.c \
+				time-series-timestamp-append.c
 
-TARGETDIR	= target
-OBJDIR		= $(TARGETDIR)/objs
-BINDIR		= $(TARGETDIR)/bin
-OBJECTS		= $(SOURCES:.c=.o)
-TARGETS = subscribe fetch-request \
-		  auth-service change-principal add-topics		\
-		  subscribe-multiple update-record			\
-		  connect connect-async system-auth-control		\
-		  session-properties-listener				\
-		  get-session-properties				\
-                  missing-topic-notification				\
-		  subscription-control reconnect			\
-		  json-publishing-example json-subscribing-example	\
-		  recordv2-topics binary-topics				\
-		  int64-topics double-topics string-topics		\
-		  send-request-to-session send-request-to-path		\
-		  send-request-to-filter topic-update			\
-		  topic-update-with-constraint topic-update-stream	\
-		  topic-update-add-and-set time-series-append		\
-		  topic-views time-series-edit				\
-		  time-series-range-query topic-views-list		\
-		  topic-views-remove time-series-timestamp-append	\
+TARGETDIR	= 	target
+OBJDIR		= 	$(TARGETDIR)/objs
+BINDIR		= 	$(TARGETDIR)/bin
+OBJECTS		= 	$(SOURCES:.c=.o)
+TARGETS 	=	subscribe \
+				fetch-request \
+				auth-service \
+				change-principal \
+				add-topics \
+				subscribe-multiple \
+				update-record \
+				connect \
+				connect-async \
+				system-auth-control \
+				session-properties-listener \
+				get-session-properties \
+				missing-topic-notification \
+				subscription-control \
+				reconnect \
+				json-publishing-example \
+				json-subscribing-example \
+				recordv2-topics \
+				binary-topics \
+				int64-topics \
+				double-topics \
+				string-topics \
+				send-request-to-session \
+				send-request-to-path \
+				send-request-to-filter \
+				topic-update \
+				topic-update-with-constraint \
+				topic-update-stream \
+				topic-update-add-and-set \
+				time-series-append \
+				topic-views \
+				time-series-edit \
+				time-series-range-query \
+				topic-views-list \
+				topic-views-remove \
+				time-series-timestamp-append
 
 all:		prepare $(TARGETS)
 .PHONY:		all
@@ -144,7 +176,7 @@ recordv2-topics:	$(OBJDIR)/recordv2-topics.o
 		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
 
 binary-topics:	$(OBJDIR)/binary-topics.o
-	
+
 		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
 
 int64-topics:	$(OBJDIR)/int64-topics.o
@@ -170,7 +202,7 @@ topic-update-add-and-set:	$(OBJDIR)/topic-update-add-and-set.o
 
 time-series-append:	$(OBJDIR)/time-series-append.o
 		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
-		
+
 time-series-timestamp-append:	$(OBJDIR)/time-series-timestamp-append.o
 		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
 
