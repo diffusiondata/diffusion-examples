@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2016, 2021 Push Technology Ltd.
+ * Copyright © 2016, 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,6 +82,10 @@ namespace PushTechnology.ClientInterface.Examples.Runner {
 
                 /// Start AddAndSet example
                 //runner.Start( new AddAndSetTopic(), secureUrl );
+
+                /// Start AddMissingTopicHandler example
+                //runner.Start( new AddMissingTopicHandler(), secureUrl );
+
             }
         }
 
