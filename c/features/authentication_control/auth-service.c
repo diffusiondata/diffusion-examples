@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014, 2021 Push Technology Ltd.
+ * Copyright © 2014 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,58 +52,56 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
 #ifndef WIN32
-#include <unistd.h>
+        #include <unistd.h>
 #else
-#define sleep(x) Sleep(1000 * x)
+        #define sleep(x) Sleep(1000 * x)
 #endif
 
 #include "diffusion.h"
 #include "args.h"
 #include "conversation.h"
 
+
 struct user_credentials_s {
         const char *username;
         const char *password;
 };
 
-/*
- * Username/password pairs that this handler accepts.
- */
+// Username/password pairs that this handler accepts.
 static const struct user_credentials_s USERS[] = {
         { "fish", "chips" },
         { "ham", "eggs" },
         { NULL, NULL }
 };
 
+
 DIFFUSION_REGISTRATION_T *g_registration = NULL;
+
 
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
         {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "ws://localhost:8080"},
         {'n', "name", "Name under which to register the authorisation handler", ARG_OPTIONAL, ARG_HAS_VALUE, "before-system-handler"},
-        {'p', "principal", "Principal (username) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
-        {'c', "credentials", "Credentials (password) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
+        {'p', "principal", "Principal (username) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, "control"},
+        {'c', "credentials", "Credentials (password) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, "password"},
         END_OF_ARG_OPTS
 };
 
-/*
- * When the authenticator handler is active, this function will be
- * called.
- */
-static int
-on_authenticator_active(SESSION_T *session, const DIFFUSION_REGISTRATION_T *registration)
+// When the authenticator handler is active, this function will be called.
+static int on_authenticator_active(
+        SESSION_T *session,
+        const DIFFUSION_REGISTRATION_T *registration)
 {
         g_registration = diffusion_registration_dup(registration);
-        
+
         printf("Registered authentication handler\n");
         return HANDLER_SUCCESS;
 }
 
-/*
- * When the authenticator handler is closed, this function will be
- * called.
- */
+
+// When the authenticator handler is closed, this function will be called.
 static void on_authenticator_close()
 {
         printf("Closed authentication handler\n");
@@ -126,13 +124,13 @@ static void on_authenticator_close()
  * error occurs during the authentication process (in which case,
  * HANDLER_FAILURE is appropriate).
  */
- static int 
- on_authenticator_authenticate(SESSION_T *session,
-                               const char *principal,
-                               const CREDENTIALS_T *credentials,
-                               const HASH_T *session_properties,
-                               const HASH_T *proposed_session_properties,
-                               const DIFFUSION_AUTHENTICATOR_T *authenticator)
+static int on_authenticator_authenticate(
+        SESSION_T *session,
+        const char *principal,
+        const CREDENTIALS_T *credentials,
+        const HASH_T *session_properties,
+        const HASH_T *proposed_session_properties,
+        const DIFFUSION_AUTHENTICATOR_T *authenticator)
 {
         // No credentials, or not password type. We're not an authority for
         // this type of authentication so abstain in case some other registered
@@ -180,7 +178,6 @@ static void on_authenticator_close()
                         break;
                 }
                 i++;
-
         }
 
         free(password);
@@ -189,12 +186,11 @@ static void on_authenticator_close()
                 puts("Abstained");
                 diffusion_authenticator_abstain(session, authenticator, NULL);
         }
-
         return HANDLER_SUCCESS;
 }
 
-int
-main(int argc, char** argv)
+
+int main(int argc, char** argv)
 {
         HASH_T *options = parse_cmdline(argc, argv, arg_opts);
         if (options == NULL || hash_get(options, "help") != NULL) {
@@ -202,59 +198,54 @@ main(int argc, char** argv)
                 return EXIT_FAILURE;
         }
 
-        char *url = hash_get(options, "url");
-        char *name = hash_get(options, "name");
-        char *principal = hash_get(options, "principal");
-        char *credentials = hash_get(options, "credentials");
+        const char *url = hash_get(options, "url");
+        const char *name = hash_get(options, "name");
+        const char *principal = hash_get(options, "principal");
+        const char *password = hash_get(options, "credentials");
+
+        CREDENTIALS_T *credentials = NULL;
+        if (password != NULL) {
+            credentials = credentials_create_password(password);
+        }
 
         /*
          * Create a session with Diffusion.
          */
         puts("Creating session");
         DIFFUSION_ERROR_T error = { 0 };
-        SESSION_T *session = session_create(url,
-                                            principal,
-                                            credentials != NULL ? credentials_create_password(credentials) : NULL,
-                                            NULL, NULL,
-                                            &error);
+        SESSION_T *session = session_create(url, principal, credentials, NULL, NULL, &error);
         if (session == NULL) {
                 fprintf(stderr, "TEST: Failed to create session\n");
                 fprintf(stderr, "ERR : %s\n", error.message);
                 return EXIT_FAILURE;
         }
 
-        /*
-         * Register the authentication handler.
-         */
-         DIFFUSION_AUTHENTICATION_HANDLER_T handler = {
-                 .handler_name = name,
-                 .on_active = on_authenticator_active,
-                 .on_authenticate = on_authenticator_authenticate,
-                 .on_close = on_authenticator_close
+        // Register the authentication handler.
+        DIFFUSION_AUTHENTICATION_HANDLER_T handler = {
+                .handler_name = (char *) name,
+                .on_active = on_authenticator_active,
+                .on_authenticate = on_authenticator_authenticate,
+                .on_close = on_authenticator_close
          };
-         
-         DIFFUSION_AUTHENTICATION_HANDLER_PARAMS_T params = {
-                 .handler = &handler
+
+        DIFFUSION_AUTHENTICATION_HANDLER_PARAMS_T params = {
+                .handler = &handler
          };
 
         puts("Setting authentication handler");
         diffusion_set_authentication_handler(session, params);
 
-        /*
-         *  Wait a while before moving on to deregistration.
-         */
+        // Wait a while before moving on to deregistration.
         sleep(30);
 
-        /*
-         * Deregister the authentication handler.
-         */
+        // Deregister the authentication handler.
         printf("Closing authentication handler\n");
         diffusion_registration_close(session, g_registration);
 
         session_close(session, NULL);
         session_free(session);
         hash_free(options, NULL, free);
-        
+        credentials_free(credentials);
         diffusion_registration_free(g_registration);
         g_registration = NULL;
 

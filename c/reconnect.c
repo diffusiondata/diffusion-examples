@@ -1,5 +1,5 @@
 /**
- * Copyright © 2014, 2021 Push Technology Ltd.
+ * Copyright © 2014 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+
 #ifndef WIN32
-#include <unistd.h>
+        #include <unistd.h>
 #else
-#define sleep(x) Sleep(1000 * x)
+        #define sleep(x) Sleep(1000 * x)
 #endif
 
-#include "apr_time.h"
 
 #include "diffusion.h"
 #include "args.h"
@@ -41,7 +41,7 @@ ARG_OPTS_T arg_opts[] = {
         {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "ws://localhost:8080"},
         {'p', "principal", "Principal (username) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
         {'c', "credentials", "Credentials (password) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, NULL},
-        {'s', "sleep", "Time to sleep before disconnecting (in seconds).", ARG_OPTIONAL, ARG_HAS_VALUE, "5" },
+        {'s', "sleep", "Time to sleep before disconnecting (in seconds).", ARG_OPTIONAL, ARG_HAS_VALUE, "20" },
         END_OF_ARG_OPTS
 };
 
@@ -50,8 +50,8 @@ ARG_OPTS_T arg_opts[] = {
  * moves from a "connecting" to a "connected" state, or from "connected" to
  * "closed".
  */
-static void
-on_session_state_changed(SESSION_T *session,
+static void on_session_state_changed(
+        SESSION_T *session,
         const SESSION_STATE_T old_state,
         const SESSION_STATE_T new_state)
 {
@@ -60,19 +60,22 @@ on_session_state_changed(SESSION_T *session,
                session_state_as_string(new_state), new_state);
 }
 
+
 typedef struct {
-        long current_wait;
-        long max_wait;
+        double current_wait;
+        double max_wait;
 } BACKOFF_STRATEGY_ARGS_T;
 
-static RECONNECTION_ATTEMPT_ACTION_T
-backoff_reconnection_strategy(SESSION_T *session, void *args)
+
+static RECONNECTION_ATTEMPT_ACTION_T backoff_reconnection_strategy(
+        SESSION_T *session,
+        void *args)
 {
         BACKOFF_STRATEGY_ARGS_T *backoff_args = args;
 
-        printf("Waiting for %ld ms\n", backoff_args->current_wait);
+        printf("Waiting for %f ms\n", backoff_args->current_wait);
 
-        apr_sleep(backoff_args->current_wait * 1000); // µs -> ms
+        sleep(backoff_args->current_wait);
 
         // But only up to some maximum time.
         if(backoff_args->current_wait > backoff_args->max_wait) {
@@ -82,8 +85,8 @@ backoff_reconnection_strategy(SESSION_T *session, void *args)
         return RECONNECTION_ATTEMPT_ACTION_START;
 }
 
-static void
-backoff_success(SESSION_T *session, void *args)
+
+static void backoff_success(SESSION_T *session, void *args)
 {
         printf("Reconnection successful\n");
 
@@ -91,8 +94,8 @@ backoff_success(SESSION_T *session, void *args)
         backoff_args->current_wait = 0; // Reset wait.
 }
 
-static void
-backoff_failure(SESSION_T *session, void *args)
+
+static void backoff_failure(SESSION_T *session, void *args)
 {
         printf("Reconnection failed (%s)\n", session_state_as_string(session->state));
 
@@ -100,18 +103,18 @@ backoff_failure(SESSION_T *session, void *args)
 
         // Exponential backoff.
         if(backoff_args->current_wait == 0) {
-                backoff_args->current_wait = 1;
+                backoff_args->current_wait = 0.01;
         }
         else {
                 backoff_args->current_wait *= 2;
         }
 }
 
+
 /*
  * Entry point for the example.
  */
-int
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
         /*
          * Standard command-line parsing.
@@ -143,16 +146,17 @@ main(int argc, char **argv)
          */
         BACKOFF_STRATEGY_ARGS_T *backoff_args = calloc(1, sizeof(BACKOFF_STRATEGY_ARGS_T));
         backoff_args->current_wait = 0;
-        backoff_args->max_wait = 5000;
+        backoff_args->max_wait = 5;
 
         /*
          * Create the backoff strategy.
          */
         RECONNECTION_STRATEGY_T *reconnection_strategy =
-                make_reconnection_strategy_user_function(backoff_reconnection_strategy,
-                                                         backoff_args,
-                                                         backoff_success,
-                                                         backoff_failure);
+                make_reconnection_strategy_user_function(
+                        backoff_reconnection_strategy,
+                        backoff_args,
+                        backoff_success,
+                        backoff_failure);
 
         /*
          * Only ever retry for 30 seconds.

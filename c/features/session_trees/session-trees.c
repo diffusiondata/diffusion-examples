@@ -1,5 +1,5 @@
 /**
- * Copyright © 2021 Push Technology Ltd.
+ * Copyright © 2021 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,21 +26,14 @@
 #include <time.h>
 
 #ifndef WIN32
-#include <unistd.h>
+        #include <unistd.h>
 #else
-#define sleep(x) Sleep(1000 * x)
+        #define sleep(x) Sleep(1000 * x)
 #endif
-
-#include "apr.h"
-#include "apr_thread_mutex.h"
-#include "apr_thread_cond.h"
 
 #include "diffusion.h"
 #include "args.h"
 
-apr_pool_t *pool = NULL;
-apr_thread_mutex_t *mutex = NULL;
-apr_thread_cond_t *cond = NULL;
 
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
@@ -131,14 +124,6 @@ int main(int argc, char** argv)
         }
 
         /*
-         * Setup for condition variable.
-         */
-        apr_initialize();
-        apr_pool_create(&pool, NULL);
-        apr_thread_mutex_create(&mutex, APR_THREAD_MUTEX_UNNESTED, pool);
-        apr_thread_cond_create(&cond, pool);
-
-        /*
          * Create a session with the Diffusion server.
          */
         SESSION_T *session;
@@ -210,11 +195,6 @@ int main(int argc, char** argv)
         hash_free(options, NULL, free);
         diffusion_branch_mapping_table_free(table);
         diffusion_branch_mapping_table_builder_free(builder);
-
-        apr_thread_mutex_destroy(mutex);
-        apr_thread_cond_destroy(cond);
-        apr_pool_destroy(pool);
-        apr_terminate();
 
         return EXIT_SUCCESS;
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2014, 2021 Push Technology Ltd.
+ * Copyright © 2020 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * This example is written in C99. Please use an appropriate C99 capable compiler
  *
  * @author Push Technology Limited
- * @since 5.7
+ * @since 6.6
  */
 
 /*
@@ -25,19 +25,17 @@
  */
 
 #include <stdio.h>
-#ifndef WIN32
-#include <unistd.h>
-#else
-#define sleep(x) Sleep(1000 * x)
-#endif
 
-#include "apr.h"
-#include "apr_thread_mutex.h"
-#include "apr_thread_cond.h"
+#ifndef WIN32
+        #include <unistd.h>
+#else
+        #define sleep(x) Sleep(1000 * x)
+#endif
 
 #include "diffusion.h"
 #include "args.h"
 #include "set.h"
+
 
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
@@ -47,11 +45,11 @@ ARG_OPTS_T arg_opts[] = {
         END_OF_ARG_OPTS
 };
 
+
 /*
  * Helper function to print the properties hash key/value pairs.
  */
-static void
-print_properties(HASH_T *properties)
+static void print_properties(HASH_T *properties)
 {
         char **keys = hash_keys(properties);
         for(char **k = keys; *k != NULL; k++) {
@@ -61,32 +59,39 @@ print_properties(HASH_T *properties)
         free(keys);
 }
 
+
 /*
  * Callback invoked when our listener registers successfully.
  */
-static int
-on_registered(SESSION_T *session, void *context)
+static int on_registered(
+        SESSION_T *session,
+        void *context)
 {
         printf("on_registered\n");
         return HANDLER_SUCCESS;
 }
 
+
 /*
  * Callback invoked if our listener fails to register.
  */
-static int
-on_registration_error(SESSION_T *session, const DIFFUSION_ERROR_T *error)
+static int on_registration_error(
+        SESSION_T *session,
+        const DIFFUSION_ERROR_T *error)
 {
         printf("on_registration_error: %s\n", error->message);
         return HANDLER_SUCCESS;
 }
 
+
 /*
  * Callback invoked when we receive notification of a new client
  * session.
  */
-static int
-on_session_open(SESSION_T *session, const SESSION_PROPERTIES_EVENT_T *request, void *context)
+static int on_session_open(
+        SESSION_T *session,
+        const SESSION_PROPERTIES_EVENT_T *request,
+        void *context)
 {
         char *sid_str = session_id_to_string(&request->session_id);
         printf("on_session_open: %s\n", sid_str);
@@ -95,12 +100,15 @@ on_session_open(SESSION_T *session, const SESSION_PROPERTIES_EVENT_T *request, v
         return HANDLER_SUCCESS;
 }
 
+
 /*
  * Callback invoked when an existing client session undergoes a change
  * of properties.
  */
-static int
-on_session_update(SESSION_T *session, const SESSION_PROPERTIES_EVENT_T *request, void *context)
+static int on_session_update(
+        SESSION_T *session,
+        const SESSION_PROPERTIES_EVENT_T *request,
+        void *context)
 {
         printf("on_session_update\n");
         char *sid_str = session_id_to_string(&request->session_id);
@@ -110,11 +118,14 @@ on_session_update(SESSION_T *session, const SESSION_PROPERTIES_EVENT_T *request,
         return HANDLER_SUCCESS;
 }
 
+
 /*
  * Callback invoked when a client session closes.
  */
-static int
-on_session_close(SESSION_T *session, const SESSION_PROPERTIES_EVENT_T *request, void *context)
+static int on_session_close(
+        SESSION_T *session,
+        const SESSION_PROPERTIES_EVENT_T *request,
+        void *context)
 {
         char *sid_str = session_id_to_string(&request->session_id);
         printf("on_session_close: %s\n", sid_str);
@@ -124,12 +135,14 @@ on_session_close(SESSION_T *session, const SESSION_PROPERTIES_EVENT_T *request, 
         return HANDLER_SUCCESS;
 }
 
+
 /*
  * Callback invoked if an error occurs while procssing a session
  * property event from the server.
  */
-static int
-on_session_error(SESSION_T *session, const DIFFUSION_ERROR_T *error)
+static int on_session_error(
+        SESSION_T *session,
+        const DIFFUSION_ERROR_T *error)
 {
         printf("on_session_error: %s\n", error->message);
         return HANDLER_SUCCESS;
@@ -138,8 +151,7 @@ on_session_error(SESSION_T *session, const DIFFUSION_ERROR_T *error)
 /*
  * Program entry point.
  */
-int
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
         /*
          * Standard command-line parsing.

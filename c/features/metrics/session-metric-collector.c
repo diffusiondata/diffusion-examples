@@ -1,5 +1,5 @@
 /**
- * Copyright © 2021 Push Technology Ltd.
+ * Copyright © 2021 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +26,14 @@
 #include <time.h>
 
 #ifndef WIN32
-#include <unistd.h>
+        #include <unistd.h>
 #else
-#define sleep(x) Sleep(1000 * x)
+        #define sleep(x) Sleep(1000 * x)
 #endif
 
 #include "diffusion.h"
 #include "args.h"
+
 
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
@@ -44,14 +45,14 @@ ARG_OPTS_T arg_opts[] = {
 
 static int on_collector_set(void *context)
 {
-        printf("Session metric collector has been set.");
+        printf("Session metric collector has been set.\n");
         return HANDLER_SUCCESS;
 }
 
 
 static int on_collector_removed(void *context)
 {
-        printf("Session metric collector has been removed.");
+        printf("Session metric collector has been removed.\n");
         return HANDLER_SUCCESS;
 }
 

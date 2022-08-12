@@ -1,5 +1,5 @@
 /**
- * Copyright © 2014, 2021 Push Technology Ltd.
+ * Copyright © 2014 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,8 +49,9 @@ ARG_OPTS_T arg_opts[] = {
  * When a subscribed message is received by the first listener, this
  * callback is invoked.
  */
-static int
-on_topic_message_1(SESSION_T *session, const TOPIC_MESSAGE_T *msg)
+static int on_topic_message_1(
+        SESSION_T *session,
+        const TOPIC_MESSAGE_T *msg)
 {
         printf("First handler: Received message for topic %s\n", msg->name);
         printf("Payload: %.*s\n", (int)msg->payload->len, msg->payload->data);

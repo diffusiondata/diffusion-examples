@@ -1,5 +1,5 @@
 /**
- * Copyright © 2014, 2021 Push Technology Ltd.
+ * Copyright © 2020 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * This example is written in C99. Please use an appropriate C99 capable compiler
  *
  * @author Push Technology Limited
- * @since 5.7
+ * @since 6.6
  */
 
 /*
@@ -28,20 +28,16 @@
  */
 
 #include <stdio.h>
-#ifndef WIN32
-#include <unistd.h>
-#endif
 
-#include "apr.h"
-#include "apr_thread_mutex.h"
-#include "apr_thread_cond.h"
+#ifndef WIN32
+        #include <unistd.h>
+#else
+        #define sleep(x) Sleep(1000 * x)
+#endif
 
 #include "diffusion.h"
 #include "args.h"
 
-apr_pool_t *pool = NULL;
-apr_thread_mutex_t *mutex = NULL;
-apr_thread_cond_t *cond = NULL;
 
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
@@ -56,8 +52,10 @@ ARG_OPTS_T arg_opts[] = {
 /*
  * Callback invoked when session properties are received.
  */
-int
-on_session_properties(SESSION_T *session, const SVC_GET_SESSION_PROPERTIES_RESPONSE_T *response, void *context)
+int on_session_properties(
+        SESSION_T *session,
+        const SVC_GET_SESSION_PROPERTIES_RESPONSE_T *response,
+        void *context)
 {
         char **keys = hash_keys(response->properties);
         for(char **k = keys; *k != NULL; k++) {
@@ -65,16 +63,11 @@ on_session_properties(SESSION_T *session, const SVC_GET_SESSION_PROPERTIES_RESPO
                 printf("%s=%s\n", *k, v);
         }
         free(keys);
-
-        apr_thread_mutex_lock(mutex);
-        apr_thread_cond_broadcast(cond);
-        apr_thread_mutex_unlock(mutex);
-
         return HANDLER_SUCCESS;
 }
 
-int
-main(int argc, char **argv)
+
+int main(int argc, char **argv)
 {
         /*
          * Standard command-line parsing.
@@ -92,14 +85,6 @@ main(int argc, char **argv)
         if(password != NULL) {
                 credentials = credentials_create_password(password);
         }
-
-        /*
-         * Setup for condition variable.
-         */
-        apr_initialize();
-        apr_pool_create(&pool, NULL);
-        apr_thread_mutex_create(&mutex, APR_THREAD_MUTEX_UNNESTED, pool);
-        apr_thread_cond_create(&cond, pool);
 
         /*
          * Create a session with Diffusion.
@@ -139,23 +124,17 @@ main(int argc, char **argv)
         /*
          * Request the session properties, and wait for the response.
          */
-        apr_thread_mutex_lock(mutex);
         get_session_properties(session, params);
-        apr_thread_cond_wait(cond, mutex);
-        apr_thread_mutex_unlock(mutex);
+
+        // Sleep for a while
+        sleep(5);
 
         /*
          * Close the session and clean up.
          */
         session_close(session, NULL);
         session_free(session);
-
         set_free(properties);
-        apr_thread_mutex_destroy(mutex);
-        apr_thread_cond_destroy(cond);
-        apr_pool_destroy(pool);
-        apr_terminate();
-
         credentials_free(credentials);
         hash_free(options, NULL, free);
 

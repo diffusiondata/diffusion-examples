@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016, 2021 Push Technology Ltd.
+ * Copyright © 2016 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,18 +24,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#ifndef WIN32
-#include <unistd.h>
-#else
-#define sleep(x) Sleep(1000 * x)
-#endif
 
-#include "apr.h"
-#include "apr_thread_mutex.h"
-#include "apr_thread_cond.h"
+#ifndef WIN32
+        #include <unistd.h>
+#else
+        #define sleep(x) Sleep(1000 * x)
+#endif
 
 #include "diffusion.h"
 #include "args.h"
+
 
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
@@ -47,9 +45,7 @@ ARG_OPTS_T arg_opts[] = {
 };
 
 
-/*
- * Handlers for add_topic_from_specification() function.
- */
+// Handlers for add_topic_from_specification() function.
 static int on_topic_added_with_specification(
         SESSION_T *session,
         TOPIC_ADD_RESULT_CODE result_code,
@@ -114,14 +110,10 @@ static int on_missing_topic(
 }
 
 
-/*
- * Entry point for the example.
- */
+// Entry point for the example.
 int main(int argc, char **argv)
 {
-        /*
-         * Standard command-line parsing.
-         */
+        // Standard command-line parsing.
         HASH_T *options = parse_cmdline(argc, argv, arg_opts);
         if(options == NULL || hash_get(options, "help") != NULL) {
                 show_usage(argc, argv, arg_opts);
@@ -131,9 +123,9 @@ int main(int argc, char **argv)
         const char *url = hash_get(options, "url");
         const char *principal = hash_get(options, "principal");
         const char *topic_root = hash_get(options, "topic_root");
+        const char *password = hash_get(options, "credentials");
 
         CREDENTIALS_T *credentials = NULL;
-        const char *password = hash_get(options, "credentials");
         if(password != NULL) {
                 credentials = credentials_create_password(password);
         }
@@ -154,9 +146,7 @@ int main(int argc, char **argv)
                 return EXIT_FAILURE;
         }
 
-        /*
-         * Register the missing topic handler
-         */
+        // Register the missing topic handler
         MISSING_TOPIC_PARAMS_T handler = {
                 .on_missing_topic = on_missing_topic,
                 .topic_path = topic_root,
@@ -165,14 +155,10 @@ int main(int argc, char **argv)
 
         missing_topic_register_handler(session, handler);
 
-        /*
-         * Run for 5 minutes.
-         */
+        // Run for 5 minutes.
         sleep(5 * 60);
 
-        /*
-         * Close session and clean up.
-         */
+        // Close session and free resources.
         session_close(session, NULL);
         session_free(session);
 

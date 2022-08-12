@@ -1,5 +1,5 @@
 /**
- * Copyright © 2021 Push Technology Ltd.
+ * Copyright © 2021 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,16 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
 #ifndef WIN32
-#include <unistd.h>
+        #include <unistd.h>
 #else
-#define sleep(x) Sleep(1000 * x)
+        #define sleep(x) Sleep(1000 * x)
 #endif
 
 #include "diffusion.h"
 #include "args.h"
+
 
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
@@ -41,32 +43,30 @@ ARG_OPTS_T arg_opts[] = {
         END_OF_ARG_OPTS
 };
 
-/*
- * Callback to display that the roles has been successfully
- * changed.
- */
-static int on_roles_changed_with_filter(int number_of_matching_sessions, void *context)
+
+// Callback to display that the roles has been successfully changed.
+static int on_roles_changed_with_filter(
+        int number_of_matching_sessions,
+        void *context)
 {
         printf("Successfully changed roles, affecting %d session(s).\n", number_of_matching_sessions);
         return HANDLER_SUCCESS;
 }
 
-/*
- * Callback to display an error when attempting to change roles.
- */
-static int
-on_error(SESSION_T *session, const DIFFUSION_ERROR_T *error)
+
+// Callback to display an error when attempting to change roles.
+static int on_error(
+        SESSION_T *session,
+        const DIFFUSION_ERROR_T *error)
 {
         printf("Failed to change roles: [%d] %s\n", error->code, diffusion_error_str(error->code));
         return HANDLER_SUCCESS;
 }
 
-int
-main(int argc, char** argv)
+
+int main(int argc, char** argv)
 {
-        /*
-         * Standard command-line parsing.
-         */
+        // Standard command-line parsing.
         HASH_T *options = parse_cmdline(argc, argv, arg_opts);
         if(options == NULL || hash_get(options, "help") != NULL) {
                 show_usage(argc, argv, arg_opts);
@@ -74,45 +74,44 @@ main(int argc, char** argv)
         }
 
         const char *url = hash_get(options, "url");
-        const char *principal = hash_get(options, "control");
-        CREDENTIALS_T *control_credentials = NULL;
+        const char *principal = hash_get(options, "principal");
         const char *password = hash_get(options, "credentials");
-        if(password != NULL) {
-                control_credentials = credentials_create_password(password);
+
+        // Create a control session with Diffusion.
+        CREDENTIALS_T *control_credentials =
+                credentials_create_password("password");
+
+        DIFFUSION_SESSION_FACTORY_T *session_factory = diffusion_session_factory_init();
+        diffusion_session_factory_principal(session_factory, "control");
+        diffusion_session_factory_credentials(session_factory, control_credentials);
+
+        SESSION_T *control_session = session_create_with_session_factory(session_factory, url);
+        if (control_session == NULL) {
+                fprintf(stderr, "Failed to create control session\n");
+                return EXIT_FAILURE;
         }
 
-        /*
-         * Create a control session with Diffusion.
-         */
-        DIFFUSION_SESSION_FACTORY_T *session_factory = diffusion_session_factory_init();
-        diffusion_session_factory_principal(session_factory, principal);
-        diffusion_session_factory_credentials(session_factory, control_credentials);
-        
-        SESSION_T *control_session = session_create_with_session_factory(session_factory, url);
-        
-        /*
-         * Create multiple normal sessions with Diffusion, using `client` as Principal
-         */
-        CREDENTIALS_T *credentials = credentials_create_password("password");
-        
+        // Create multiple normal sessions with Diffusion, using `client` as Principal
+        CREDENTIALS_T *credentials = credentials_create_password(password);
+
         DIFFUSION_SESSION_FACTORY_T *client_session_factory = diffusion_session_factory_init();
-        diffusion_session_factory_principal(client_session_factory, "client");
+        diffusion_session_factory_principal(client_session_factory, principal);
         diffusion_session_factory_credentials(client_session_factory, credentials);
-        
-        int totalSessions = 5;
+
+        int totalSessions = 3;
         SESSION_T **sessions = calloc(totalSessions, sizeof(SESSION_T*));
-        
+
         for (int i = 0; i < totalSessions; i++) {
-            sessions[i] = session_create_with_session_factory(client_session_factory, url);
-            if (sessions[i] == NULL) {
-                fprintf(stderr, "Failed to create normal session\n");
-                return EXIT_FAILURE;
-            }
+                sessions[i] = session_create_with_session_factory(client_session_factory, url);
+                if (sessions[i] == NULL) {
+                        fprintf(stderr, "Failed to create normal session %d\n", i);
+                        return EXIT_FAILURE;
+                }
         }
 
         SET_T *roles_to_add = set_new_string(1);
         set_add(roles_to_add, "NEW_CLIENT_ROLE");
-        
+
         DIFFUSION_CHANGE_ROLES_WITH_FILTER_PARAMS_T params = {
                 .filter = "$Principal EQ 'client'",
                 .roles_to_remove = NULL,
@@ -129,13 +128,13 @@ main(int argc, char** argv)
 
         puts("Closing sessions");
 
-        // Close the connection.
+        // Close the connections and free resources
         session_close(control_session, NULL);
         session_free(control_session);
-        
+
         for(int i = 0; i < totalSessions; i++) {
-            session_close(sessions[i], NULL);
-            session_free(sessions[i]);
+                session_close(sessions[i], NULL);
+                session_free(sessions[i]);
         }
         free(sessions);
 
@@ -143,6 +142,9 @@ main(int argc, char** argv)
         credentials_free(control_credentials);
         credentials_free(credentials);
         hash_free(options, NULL, free);
+
+        diffusion_session_factory_free(client_session_factory);
+        diffusion_session_factory_free(session_factory);
 
         return EXIT_SUCCESS;
 }

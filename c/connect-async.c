@@ -1,5 +1,5 @@
 /**
- * Copyright © 2014, 2021 Push Technology Ltd.
+ * Copyright © 2014 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,26 +24,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#ifndef WIN32
-#include <unistd.h>
-#else
-#define sleep(x) Sleep(1000 * x)
-#endif
 
-#include "apr.h"
-#include "apr_thread_mutex.h"
-#include "apr_thread_cond.h"
+#ifndef WIN32
+        #include <unistd.h>
+#else
+        #define sleep(x) Sleep(1000 * x)
+#endif
 
 #include "diffusion.h"
 #include "args.h"
-
-/*
- * Used to synchronise connection callbacks with the main flow of control,
- * so we can close the program in a timely fashion.
- */
-apr_pool_t *pool = NULL;
-apr_thread_mutex_t *mutex = NULL;
-apr_thread_cond_t *cond = NULL;
 
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
@@ -60,8 +49,8 @@ SESSION_T *g_session = NULL;
  * moves from a "connecting" to a "connected" state, or from "connected" to
  * "closed".
  */
-static void
-on_session_state_changed(SESSION_T *session,
+static void on_session_state_changed(
+        SESSION_T *session,
         const SESSION_STATE_T old_state,
         const SESSION_STATE_T new_state)
 {
@@ -74,8 +63,7 @@ on_session_state_changed(SESSION_T *session,
  * This is the callback that is invoked if the client can successfully
  * connect to Diffusion, and a session instance is ready for use.
  */
-static int
-on_connected(SESSION_T *session)
+static int on_connected(SESSION_T *session)
 {
         char *sid = session_id_to_string(session->id);
         printf("on_connected(), state=%d, session id=%s\n",
@@ -83,12 +71,7 @@ on_connected(SESSION_T *session)
                sid);
         free(sid);
 
-        apr_thread_mutex_lock(mutex);
-
         g_session = session;
-
-        apr_thread_cond_broadcast(cond);
-        apr_thread_mutex_unlock(mutex);
         return HANDLER_SUCCESS;
 }
 
@@ -96,8 +79,7 @@ on_connected(SESSION_T *session)
  * This is the callback that is invoked if there is an error connection
  * to the Diffusion instance.
  */
-static int
-on_error(SESSION_T *session, DIFFUSION_ERROR_T *error)
+static int on_error(SESSION_T *session, DIFFUSION_ERROR_T *error)
 {
         g_session = session;
 
@@ -106,17 +88,13 @@ on_error(SESSION_T *session, DIFFUSION_ERROR_T *error)
                sid,
                error->message);
         free(sid);
-        apr_thread_mutex_lock(mutex);
-        apr_thread_cond_broadcast(cond);
-        apr_thread_mutex_unlock(mutex);
         return HANDLER_SUCCESS;
 }
 
 /*
  * Entry point for the example.
  */
-int
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
         /*
          * Standard command-line parsing.
@@ -135,14 +113,7 @@ main(int argc, char **argv)
                 credentials = credentials_create_password(password);
         }
 
-        // Setup synchronisation variables.
-        apr_initialize();
-        apr_pool_create(&pool, NULL);
-        apr_thread_mutex_create(&mutex, APR_THREAD_MUTEX_UNNESTED, pool);
-        apr_thread_cond_create(&cond, pool);
-
         DIFFUSION_ERROR_T error = { 0 };
-
         SESSION_LISTENER_T session_listener = { 0 };
         session_listener.on_state_changed = &on_session_state_changed;
 
@@ -165,14 +136,10 @@ main(int argc, char **argv)
          * session_create_async callback has been invoked, and we can
          * then close & free the session.
          */
-        apr_thread_mutex_lock(mutex);
         session_create_async(url, principal, credentials, &session_listener, &reconnection_strategy, callbacks, &error);
 
-        apr_thread_cond_wait(cond, mutex);
-        apr_thread_mutex_unlock(mutex);
-
-        // keep it open for 5 seconds
-        sleep( 5 );
+        // sleep for 10 seconds
+        sleep(10);
 
         /*
          * Close/free session (if we have one) and release resources
@@ -182,12 +149,6 @@ main(int argc, char **argv)
                 session_close(g_session, NULL);
                 session_free(g_session);
         }
-
-        apr_thread_mutex_destroy(mutex);
-        apr_thread_cond_destroy(cond);
-        apr_pool_destroy(pool);
-        apr_terminate();
-
         credentials_free(credentials);
         hash_free(options, NULL, free);
         free(callbacks);

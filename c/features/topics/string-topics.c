@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018, 2021 Push Technology Ltd.
+ * Copyright © 2018 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,24 +25,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "apr.h"
-#include "apr_thread_mutex.h"
-#include "apr_thread_cond.h"
+#ifndef WIN32
+        #include <unistd.h>
+#else
+        #define sleep(x) Sleep(1000 * x)
+#endif
 
 #include "diffusion.h"
 #include "args.h"
 #include "utils.h"
 
-static const long timeout = 5000;
-static const long sleep_timeout = 1000 * 1000;
 
-apr_pool_t *pool = NULL;
-
-apr_thread_mutex_t *mutex_add_topic = NULL;
-apr_thread_cond_t *cond_add_topic = NULL;
-
-apr_thread_mutex_t *mutex_value_stream = NULL;
-apr_thread_cond_t *cond_value_stream = NULL;
+static const long sleep_timeout = 1;
 
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
@@ -52,64 +46,65 @@ ARG_OPTS_T arg_opts[] = {
         END_OF_ARG_OPTS
 };
 
-/*
- * Handlers for add_topic_from_specification() function.
- */
-static int
-on_topic_added_with_specification(SESSION_T *session, TOPIC_ADD_RESULT_CODE result_code, void *context)
+
+// Handlers for add_topic_from_specification() function.
+static int on_topic_added_with_specification(
+        SESSION_T *session,
+        TOPIC_ADD_RESULT_CODE result_code,
+        void *context)
 {
-        apr_thread_mutex_lock(mutex_add_topic);
-        apr_thread_cond_broadcast(cond_add_topic);
-        apr_thread_mutex_unlock(mutex_add_topic);
         return HANDLER_SUCCESS;
 }
 
-static int
-on_topic_add_failed_with_specification(SESSION_T *session, TOPIC_ADD_FAIL_RESULT_CODE result_code, const DIFFUSION_ERROR_T *error, void *context)
+
+static int on_topic_add_failed_with_specification(
+        SESSION_T *session,
+        TOPIC_ADD_FAIL_RESULT_CODE result_code,
+        const DIFFUSION_ERROR_T *error,
+        void *context)
 {
         fprintf(stderr, "Failed to add topic: %s\n", error->message);
         return HANDLER_SUCCESS;
 }
 
-static int
-on_topic_add_discard(SESSION_T *session, void *context)
+
+static int on_topic_add_discard(
+        SESSION_T *session,
+        void *context)
 {
         fprintf(stderr, "Topic add discarded.");
         return HANDLER_SUCCESS;
 }
 
-static int
-on_subscription(const char *const topic_path,
-                    const TOPIC_SPECIFICATION_T *const specification,
-                    void *context)
+
+static int on_subscription(
+        const char *const topic_path,
+        const TOPIC_SPECIFICATION_T *const specification,
+        void *context)
 {
         printf("Subscribed to topic: %s\n", topic_path);
-        apr_thread_mutex_lock(mutex_value_stream);
-        apr_thread_cond_broadcast(cond_value_stream);
-        apr_thread_mutex_unlock(mutex_value_stream);
         return HANDLER_SUCCESS;
 }
 
-static int
-on_unsubscription(const char *const topic_path,
-                      const TOPIC_SPECIFICATION_T *const specification,
-                      NOTIFY_UNSUBSCRIPTION_REASON_T reason,
-                      void *context)
+
+static int on_unsubscription(
+        const char *const topic_path,
+        const TOPIC_SPECIFICATION_T *const specification,
+        NOTIFY_UNSUBSCRIPTION_REASON_T reason,
+        void *context)
 {
         printf("Unsubscribed from topic: %s\n", topic_path);
-        apr_thread_mutex_lock(mutex_value_stream);
-        apr_thread_cond_broadcast(cond_value_stream);
-        apr_thread_mutex_unlock(mutex_value_stream);
         return HANDLER_SUCCESS;
 }
 
-static int
-on_value(const char *const topic_path,
-             const TOPIC_SPECIFICATION_T *const specification,
-             DIFFUSION_DATATYPE datatype,
-             const DIFFUSION_VALUE_T *const old_value,
-             const DIFFUSION_VALUE_T *const new_value,
-             void *context)
+
+static int on_value(
+        const char *const topic_path,
+        const TOPIC_SPECIFICATION_T *const specification,
+        DIFFUSION_DATATYPE datatype,
+        const DIFFUSION_VALUE_T *const old_value,
+        const DIFFUSION_VALUE_T *const new_value,
+        void *context)
 {
         if(old_value) {
                 DIFFUSION_API_ERROR old_value_error;
@@ -134,15 +129,11 @@ on_value(const char *const topic_path,
 
         printf("New string value: %s\n\n", new_value_string);
         free(new_value_string);
-
-        apr_thread_mutex_lock(mutex_value_stream);
-        apr_thread_cond_broadcast(cond_value_stream);
-        apr_thread_mutex_unlock(mutex_value_stream);
         return HANDLER_SUCCESS;
 }
 
-static ADD_TOPIC_CALLBACK_T
-create_topic_callback()
+
+static ADD_TOPIC_CALLBACK_T create_topic_callback()
 {
         ADD_TOPIC_CALLBACK_T callback = {
                 .on_topic_added_with_specification = on_topic_added_with_specification,
@@ -153,22 +144,27 @@ create_topic_callback()
         return callback;
 }
 
-static int
-on_topic_update(void *context)
+
+static int on_topic_update(void *context)
 {
         printf("topic update success\n");
         return HANDLER_SUCCESS;
 }
 
-static int
-on_error(SESSION_T *session, const DIFFUSION_ERROR_T *error)
+
+static int on_error(
+        SESSION_T *session,
+        const DIFFUSION_ERROR_T *error)
 {
         printf("topic update error: %s\n", error->message);
         return HANDLER_SUCCESS;
 }
 
-static void
-dispatch_string_update(SESSION_T *session, const char *topic_path, int update_number)
+
+static void dispatch_string_update(
+        SESSION_T *session,
+        const char *topic_path,
+        int update_number)
 {
         // convert the update number into a string
         char update_number_string[20];
@@ -191,39 +187,30 @@ dispatch_string_update(SESSION_T *session, const char *topic_path, int update_nu
                 .on_error = on_error
         };
 
-        apr_thread_mutex_lock(mutex_value_stream);
         diffusion_topic_update_set(session, topic_update_params);
-        if(apr_thread_cond_timedwait(cond_value_stream, mutex_value_stream, timeout * 1000) != APR_SUCCESS) {
-                fprintf(stderr, "Timed out while waiting for value stream on_value callback\n");
-        }
-        apr_thread_mutex_unlock(mutex_value_stream);
+
+        // Sleep for a while
+        sleep(1);
 
         buf_free(buf);
         free(topic_path_dup);
 }
 
-static void tear_down(SESSION_T *session, TOPIC_SPECIFICATION_T *specification)
+
+static void tear_down(
+        SESSION_T *session,
+        TOPIC_SPECIFICATION_T *specification)
 {
         session_close(session, NULL);
         session_free(session);
 
         topic_specification_free(specification);
-
-        apr_thread_mutex_destroy(mutex_add_topic);
-        apr_thread_cond_destroy(cond_add_topic);
-
-        apr_thread_mutex_destroy(mutex_value_stream);
-        apr_thread_cond_destroy(cond_value_stream);
-
-        apr_pool_destroy(pool);
-        apr_terminate();
 }
+
 
 int main(int argc, char** argv)
 {
-        /*
-         * Standard command-line parsing.
-         */
+        // Standard command-line parsing.
         HASH_T *options = parse_cmdline(argc, argv, arg_opts);
         if(options == NULL || hash_get(options, "help") != NULL) {
                 show_usage(argc, argv, arg_opts);
@@ -231,11 +218,11 @@ int main(int argc, char** argv)
         }
 
         const char *topic_path = "string-example";
-
         const char *url = hash_get(options, "url");
         const char *principal = hash_get(options, "principal");
-        CREDENTIALS_T *credentials = NULL;
         const char *password = hash_get(options, "credentials");
+
+        CREDENTIALS_T *credentials = NULL;
         if(password != NULL) {
                 credentials = credentials_create_password(password);
         }
@@ -249,27 +236,14 @@ int main(int argc, char** argv)
                 return EXIT_FAILURE;
         }
 
-        apr_initialize();
-        apr_pool_create(&pool, NULL);
-
-        apr_thread_mutex_create(&mutex_add_topic, APR_THREAD_MUTEX_DEFAULT, pool);
-        apr_thread_cond_create(&cond_add_topic, pool);
-
-        apr_thread_mutex_create(&mutex_value_stream, APR_THREAD_MUTEX_DEFAULT, pool);
-        apr_thread_cond_create(&cond_value_stream, pool);
-
         // Add the string topic
         TOPIC_SPECIFICATION_T *specification = topic_specification_init(TOPIC_TYPE_STRING);
         ADD_TOPIC_CALLBACK_T add_topic_callback = create_topic_callback();
 
-        apr_thread_mutex_lock(mutex_add_topic);
         add_topic_from_specification(session, topic_path, specification, add_topic_callback);
-        if(apr_thread_cond_timedwait(cond_add_topic, mutex_add_topic, timeout * 1000) != APR_SUCCESS) {
-                fprintf(stderr, "Failed to add topic\n");
-                tear_down(session, specification);
-                return EXIT_FAILURE;
-        }
-        apr_thread_mutex_unlock(mutex_add_topic);
+
+        // Sleep for a while
+        sleep(5);
 
         // Set up and add the value stream to receive string topic updates
         VALUE_STREAM_T value_stream = {
@@ -287,19 +261,15 @@ int main(int argc, char** argv)
                 .on_topic_message = NULL
         };
 
-        apr_thread_mutex_lock(mutex_value_stream);
         subscribe(session, params);
-        if(apr_thread_cond_timedwait(cond_value_stream, mutex_value_stream, timeout * 1000) != APR_SUCCESS) {
-                fprintf(stderr, "Failed to receive value stream on_subscription callback\n");
-                tear_down(session, specification);
-                return EXIT_FAILURE;
-        }
-        apr_thread_mutex_unlock(mutex_value_stream);
+
+        // Sleep for a while
+        sleep(5);
 
         // Dispatch 120 string topic updates at 1 second intervals.
         for(int i = 1; i <= 120; i++) {
                 dispatch_string_update(session, topic_path, i);
-                apr_sleep(sleep_timeout);
+                sleep(sleep_timeout);
         }
 
         // Close our session, and release resources and memory.

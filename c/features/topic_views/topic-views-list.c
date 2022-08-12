@@ -1,5 +1,5 @@
 /**
- * Copyright © 2020, 2021 Push Technology Ltd.
+ * Copyright © 2020 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,23 +26,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#ifndef WIN32
-#include <unistd.h>
-#else
-#define sleep(x) Sleep(1000 * x)
-#endif
 
-#include "apr.h"
-#include "apr_thread_mutex.h"
-#include "apr_thread_cond.h"
+#ifndef WIN32
+        #include <unistd.h>
+#else
+        #define sleep(x) Sleep(1000 * x)
+#endif
 
 #include "diffusion.h"
 #include "args.h"
 #include "conversation.h"
 
-apr_pool_t *pool = NULL;
-apr_thread_mutex_t *mutex = NULL;
-apr_thread_cond_t *cond = NULL;
 
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
@@ -53,41 +47,37 @@ ARG_OPTS_T arg_opts[] = {
         END_OF_ARG_OPTS
 };
 
-/*
- * Handlers for add topic feature.
- */
-static int
-on_topic_added_with_specification(SESSION_T *session, TOPIC_ADD_RESULT_CODE result_code, void *context)
+
+// Handlers for add topic feature.
+static int on_topic_added_with_specification(
+        SESSION_T *session,
+        TOPIC_ADD_RESULT_CODE result_code,
+        void *context)
 {
         printf("Added topic \"%s\"\n", (const char *)context);
-        apr_thread_mutex_lock(mutex);
-        apr_thread_cond_broadcast(cond);
-        apr_thread_mutex_unlock(mutex);
         return HANDLER_SUCCESS;
 }
 
-static int
-on_topic_add_failed_with_specification(SESSION_T *session, TOPIC_ADD_FAIL_RESULT_CODE result_code, const DIFFUSION_ERROR_T *error, void *context)
+
+static int on_topic_add_failed_with_specification(
+        SESSION_T *session,
+        TOPIC_ADD_FAIL_RESULT_CODE result_code,
+        const DIFFUSION_ERROR_T *error,
+        void *context)
 {
         printf("Failed to add topic \"%s\" (%d)\n", (const char *)context, result_code);
-        apr_thread_mutex_lock(mutex);
-        apr_thread_cond_broadcast(cond);
-        apr_thread_mutex_unlock(mutex);
         return HANDLER_SUCCESS;
 }
 
-static int
-on_topic_add_discard(SESSION_T *session, void *context)
+
+static int on_topic_add_discard(SESSION_T *session, void *context)
 {
         printf("Topic add discarded\n");
-        apr_thread_mutex_lock(mutex);
-        apr_thread_cond_broadcast(cond);
-        apr_thread_mutex_unlock(mutex);
         return HANDLER_SUCCESS;
 }
 
-static ADD_TOPIC_CALLBACK_T
-create_topic_callback(const char *topic_name)
+
+static ADD_TOPIC_CALLBACK_T create_topic_callback(const char *topic_name)
 {
         ADD_TOPIC_CALLBACK_T callback = {
                 .on_topic_added_with_specification = on_topic_added_with_specification,
@@ -99,8 +89,8 @@ create_topic_callback(const char *topic_name)
         return callback;
 }
 
-static int
-on_topic_view_created(const DIFFUSION_TOPIC_VIEW_T *topic_view, void *context)
+
+static int on_topic_view_created(const DIFFUSION_TOPIC_VIEW_T *topic_view, void *context)
 {
         char *view_name = diffusion_topic_view_get_name(topic_view);
         char *spec = diffusion_topic_view_get_specification(topic_view);
@@ -110,25 +100,23 @@ on_topic_view_created(const DIFFUSION_TOPIC_VIEW_T *topic_view, void *context)
         free(view_name);
         free(spec);
 
-        apr_thread_mutex_lock(mutex);
-        apr_thread_cond_broadcast(cond);
-        apr_thread_mutex_unlock(mutex);
         return HANDLER_SUCCESS;
 }
 
-static int
-on_error(SESSION_T *session, const DIFFUSION_ERROR_T *error)
+
+static int on_error(
+        SESSION_T *session,
+        const DIFFUSION_ERROR_T *error)
 {
         printf("Error: %s\n", error->message);
         return HANDLER_SUCCESS;
 }
 
-/*
- * Handlers for listing Topic views
- */
 
-static int
-on_topic_views_list(const LIST_T *topic_views, void *context)
+// Handlers for listing Topic views
+static int on_topic_views_list(
+        const LIST_T *topic_views,
+        void *context)
 {
         int size = list_get_size(topic_views);
 
@@ -152,49 +140,43 @@ on_topic_views_list(const LIST_T *topic_views, void *context)
                 free(view_specification);
                 free(view_name);
         }
-        apr_thread_mutex_lock(mutex);
-        apr_thread_cond_broadcast(cond);
-        apr_thread_mutex_unlock(mutex);
         return HANDLER_SUCCESS;
 }
 
-static int
-on_error_list(SESSION_T *session, const DIFFUSION_ERROR_T *error)
+
+static int on_error_list(
+        SESSION_T *session,
+        const DIFFUSION_ERROR_T *error)
 {
         printf("An error has occured while listing Topic Views: (%d) %s\n", error->code, error->message);
-        apr_thread_mutex_lock(mutex);
-        apr_thread_cond_broadcast(cond);
-        apr_thread_mutex_unlock(mutex);
         return HANDLER_SUCCESS;
 }
 
 
-/*
- * Helper functions to create topics and topic views
- */
-static void create_topic_and_topic_view(SESSION_T *session, char *root_topic_path, char *topic_name, char *view_name) {
+// Helper functions to create topics and topic views
+static void create_topic_and_topic_view(
+        SESSION_T *session,
+        char *root_topic_path,
+        char *topic_name,
+        char *view_name) {
 
-        char *topic_path = calloc(strlen(root_topic_path) + strlen(topic_name) + 1, sizeof(char));
+        char *topic_path = calloc(strlen(root_topic_path) + strlen(topic_name) + 2, sizeof(char));
         sprintf(topic_path, "%s/%s", root_topic_path, topic_name);
 
-        char *topic_view_path = calloc(strlen(view_name) + 6, sizeof(char));
+        char *topic_view_path = calloc(strlen(view_name) + 7, sizeof(char));
         sprintf(topic_view_path, "views/%s", view_name);
 
         ADD_TOPIC_CALLBACK_T callback = create_topic_callback(topic_path);
         TOPIC_SPECIFICATION_T *spec = topic_specification_init(TOPIC_TYPE_STRING);
 
-        /*
-         * Create the source topic.
-         */
-        apr_thread_mutex_lock(mutex);
+        // Create the source topic.
         add_topic_from_specification(session, topic_path, spec, callback);
-        apr_thread_cond_wait(cond, mutex);
-        apr_thread_mutex_unlock(mutex);
 
-        /*
-         * Create the topic view specification string.
-         * Maps topic to reference topic.
-         */
+        // Sleep for a while
+        sleep(5);
+
+        // Create the topic view specification string.
+        // Maps topic to reference topic.
         BUF_T *buf = buf_create();
         buf_sprintf(buf, "map %s to %s", topic_path, topic_view_path);
 
@@ -207,17 +189,13 @@ static void create_topic_and_topic_view(SESSION_T *session, char *root_topic_pat
                 .on_error = on_error
         };
 
-        /*
-         * Send the request to create the topic view.
-         */
-        apr_thread_mutex_lock(mutex);
+        // Send the request to create the topic view.
         diffusion_topic_views_create_topic_view(session, topic_view_params, NULL);
-        apr_thread_cond_wait(cond, mutex);
-        apr_thread_mutex_unlock(mutex);
 
-        /*
-         * Free resources.
-         */
+        // Sleep for a while
+        sleep(5);
+
+        // Free resources.
         free(topic_view_spec);
         buf_free(buf);
         topic_specification_free(spec);
@@ -225,15 +203,11 @@ static void create_topic_and_topic_view(SESSION_T *session, char *root_topic_pat
         free(topic_path);
 }
 
-/*
- * Program entry point.
- */
-int
-main(int argc, char** argv)
+
+// Program entry point.
+int main(int argc, char** argv)
 {
-        /*
-         * Standard command-line parsing.
-         */
+        // Standard command-line parsing.
         HASH_T *options = parse_cmdline(argc, argv, arg_opts);
         if(options == NULL || hash_get(options, "help") != NULL) {
                 show_usage(argc, argv, arg_opts);
@@ -249,17 +223,7 @@ main(int argc, char** argv)
         }
         const char *topic_name = hash_get(options, "topic");
 
-        /*
-         * Setup for condition variable.
-         */
-        apr_initialize();
-        apr_pool_create(&pool, NULL);
-        apr_thread_mutex_create(&mutex, APR_THREAD_MUTEX_UNNESTED, pool);
-        apr_thread_cond_create(&cond, pool);
-
-        /*
-         * Create a session with the Diffusion server.
-         */
+        // Create a session with the Diffusion server.
         SESSION_T *session;
         DIFFUSION_ERROR_T error = { 0 };
         session = session_create(url, principal, credentials, NULL, NULL, &error);
@@ -269,39 +233,28 @@ main(int argc, char** argv)
                 return EXIT_FAILURE;
         }
 
-        /*
-         * Create multiple topics and corresponding topic views
-         */
-         create_topic_and_topic_view(session, (char *) topic_name, "topic_path_example_1", "view_1");
-         create_topic_and_topic_view(session, (char *) topic_name, "topic_path_example_2", "view_2");
-         create_topic_and_topic_view(session, (char *) topic_name, "topic_path_example_3", "view_3");
-         create_topic_and_topic_view(session, (char *) topic_name, "topic_path_example_4", "view_4");
+        // Create multiple topics and corresponding topic views
+        create_topic_and_topic_view(session, (char *) topic_name, "topic_path_example_1", "view_1");
+        create_topic_and_topic_view(session, (char *) topic_name, "topic_path_example_2", "view_2");
+        create_topic_and_topic_view(session, (char *) topic_name, "topic_path_example_3", "view_3");
+        create_topic_and_topic_view(session, (char *) topic_name, "topic_path_example_4", "view_4");
 
-         /*
-          * List the topic views
-          */
+        // List the topic views
         DIFFUSION_TOPIC_VIEWS_LIST_PARAMS_T params_list = {
                 .on_topic_views_list = on_topic_views_list,
                 .on_error = on_error_list
         };
-        apr_thread_mutex_lock(mutex);
         diffusion_topic_views_list_topic_views(session, params_list, NULL);
-        apr_thread_cond_wait(cond, mutex);
-        apr_thread_mutex_unlock(mutex);
 
-        /*
-         * Close session and free resources.
-         */
+        // Sleep for a while
+        sleep(5);
+
+        // Close session and free resources.
         session_close(session, NULL);
         session_free(session);
 
         credentials_free(credentials);
         hash_free(options, NULL, free);
-
-        apr_thread_mutex_destroy(mutex);
-        apr_thread_cond_destroy(cond);
-        apr_pool_destroy(pool);
-        apr_terminate();
 
         return EXIT_SUCCESS;
 }

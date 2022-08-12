@@ -1,5 +1,5 @@
 /**
- * Copyright © 2014 - 2022 Push Technology Ltd.
+ * Copyright © 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  * This example is written in C99. Please use an appropriate C99 capable compiler
  *
  * @author Push Technology Limited
- * @since 5.0
+ * @since 6.9
  */
 
 /*
- * This example shows how to make a synchronous connection to Diffusion.
+ * This example shows how to make a synchronous connection to Diffusion, passing a user_context to it.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -59,6 +59,8 @@ static void on_session_state_changed(
         printf("Session state changed from %s (%d) to %s (%d)\n",
                session_state_as_string(old_state), old_state,
                session_state_as_string(new_state), new_state);
+
+        printf("The user context for the session is: %s\n", session->user_context);
 }
 
 /*
@@ -114,14 +116,21 @@ int main(int argc, char **argv)
         }
 
         /*
+         * Set the user context for the session.
+         * This can be of any type.
+         */
+        char *user_context = "This is the user context for the session to be created.";
+
+        /*
          * Create a session, synchronously.
          */
-        session = session_create(
+        session = session_create_with_user_context(
                 url,
                 principal,
                 credentials,
                 &session_listener,
                 reconnection_strategy,
+                user_context,
                 &error);
         if(session != NULL) {
                 char *sid_str = session_id_to_string(session->id);

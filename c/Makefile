@@ -21,7 +21,6 @@ endif
 # Extra definitions from parent directory, if they exist.
 -include makefile.defs
 
-CC			= 	cc
 CFLAGS		+=	$(INCLUDES) \
 				-g -std=c99 -D_POSIX_C_SOURCE=200112L -D_XOPEN_SOURCE=700 \
 				-Wall -Werror -Wno-error=deprecated-declarations \
@@ -34,9 +33,12 @@ LDFLAGS		+= 	-lpthread -lpcre -lcurl -lz \
 # Detect the platform the Diffusion Client will be running on
 PLATFORM	= 	$(shell uname -s | tr '[A-Z]' '[a-z]' | sed -e 's/darwin/osx/')
 
-# If not MacOS, add `-lrt` to the linker flags
-ifneq ($(PLATFORM),osx)
-		LDFLAGS += -lrt -ldl
+ifeq ($(PLATFORM),osx)
+	CC		= 	clang
+else
+	# If not MacOS, add '-lrt' to the linker flags
+	CC		= 	gcc
+	LDFLAGS	+=	-lrt
 endif
 
 ARFLAGS		+=
@@ -123,7 +125,7 @@ OBJECTS		= 	$(SOURCES:.c=.o)
 TARGETS 	= 	connect-async \
 				connect \
 				reconnect \
-				authentication_control \
+				authentication-control \
 				client-control-change-roles-with-filter \
 				client-control-change-roles-with-session \
 				client-control-close-with-filter \
@@ -215,7 +217,7 @@ connect: $(OBJDIR)/connect.o
 reconnect: $(OBJDIR)/reconnect.o
 		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
 
-authentication_control: features/authentication_control/auth-service.c
+authentication-control: features/authentication_control/auth-service.c
 		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
 
 client-control-change-roles-with-filter: features/client_control/change-roles-with-filter.c
