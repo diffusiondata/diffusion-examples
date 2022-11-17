@@ -1,10 +1,13 @@
 # The following two variables must be set.
 #
 # Directory containing the C client include files.
-# DIFFUSION_C_CLIENT_INCDIR	=
+# DIFFUSION_C_CLIENT_INCDIR =
 #
 # Directory containing libdiffusion.a
-# DIFFUSION_C_CLIENT_LIBDIR	=
+# DIFFUSION_C_CLIENT_LIBDIR =
+#
+# Directory that will contain the executables and generated objects
+# TARGETDIR =
 
 ifndef DIFFUSION_C_CLIENT_INCDIR
 $(error DIFFUSION_C_CLIENT_INCDIR is not set)
@@ -18,7 +21,7 @@ ifndef TARGETDIR
 $(error TARGETDIR is not set)
 endif
 
-# Extra definitions from parent directory, if they exist.
+# Extra definitions from current directory, if they exist.
 -include makefile.defs
 
 CFLAGS		+=	$(INCLUDES) \
@@ -97,6 +100,7 @@ SOURCES 	=	connect-async.c \
 				manual/fetch_topics.c \
 				manual/messaging.c \
 				manual/missing_topic_notification.c \
+				manual/quick_start_guide.c \
 				manual/reconnecting.c \
 				manual/reconnection_strategy.c \
 				manual/remove_topics.c \
@@ -164,39 +168,7 @@ TARGETS 	= 	connect-async \
 				topics-double \
 				topics-fetch \
 				topics-int64 \
-				topics-binary \
-				website-publish-subscribe \
-				website-request-response \
-				website-rest \
-				website-time-series \
-				manual-authentication-control \
-				manual-client-control \
-				manual-connecting-basics \
-				manual-connecting-credentials \
-				manual-connecting-securely \
-				manual-fetch-topics \
-				manual-messaging \
-				manual-missing-topic-notification \
-				manual-reconnecting \
-				manual-reconnection-strategy \
-				manual-remove-topics \
-				manual-security-control \
-				manual-session-locks \
-				manual-session-properties \
-				manual-subscribe-to-json \
-				manual-subscription \
-				manual-subscription-control \
-				manual-subscription-control-filter \
-				manual-system-authentication-control \
-				manual-timeseries-publish \
-				manual-timeseries-subscribe \
-				manual-topic-control \
-				manual-topic-control-create-and-subscribe-json \
-				manual-topic-notifications \
-				manual-topic-update-exclusive \
-				manual-topic-update-json \
-				manual-topic-update-non-exclusive \
-				manual-value-streams
+				topics-binary
 
 .PHONY: all
 
@@ -336,103 +308,6 @@ topics-int64: features/topics/int64-topics.c
 
 topics-binary: features/topics/binary-topics.c
 		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-website-publish-subscribe: website/publish-subscribe.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-website-request-response: website/request-response.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-website-rest: website/rest.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-website-time-series: website/time-series.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-manual-authentication-control: manual/authentication_control.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-manual-client-control: manual/client_control.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-manual-connecting-basics: manual/connecting_basics.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-manual-connecting-credentials: manual/connecting_credentials.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-manual-connecting-securely: manual/connecting_securely.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-manual-fetch-topics: manual/fetch_topics.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-manual-messaging: manual/messaging.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-manual-missing-topic-notification: manual/missing_topic_notification.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-manual-reconnecting: manual/reconnecting.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-manual-reconnection-strategy: manual/reconnection_strategy.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-manual-remove-topics: manual/remove_topics.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-manual-security-control: manual/security_control.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-manual-session-locks: manual/session_locks.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-manual-session-properties: manual/session_properties.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-manual-subscribe-to-json: manual/subscribe_to_json.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-manual-subscription: manual/subscription.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-manual-subscription-control: manual/subscription_control.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-manual-subscription-control-filter: manual/subscription_control_filter.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-manual-system-authentication-control: manual/system_authentication_control.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-manual-timeseries-publish: manual/timeseries_publish.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-manual-timeseries-subscribe: manual/timeseries_subscribe.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-manual-topic-control: manual/topic_control.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-manual-topic-control-create-and-subscribe-json: manual/topic_control_create_and_subscribe_json.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-manual-topic-notifications: manual/topic_notifications.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-manual-topic-update-exclusive: manual/topic_update_exclusive.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-manual-topic-update-json: manual/topic_update_json.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-manual-topic-update-non-exclusive: manual/topic_update_non_exclusive.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
-manual-value-streams: manual/value_streams.c
-		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
-
 
 clean:
 		rm -rf $(TARGETS) $(OBJECTS) $(TARGETDIR) core a.out
