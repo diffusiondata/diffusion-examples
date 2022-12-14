@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Push Technology Ltd., All Rights Reserved.
+ * Copyright (c) 2018, 2022 Push Technology Ltd., All Rights Reserved.
  *
  * Use is subject to license terms.
  *
@@ -136,7 +136,7 @@ public final class TopicUpdateExample {
         session
             .feature(TopicUpdate.class)
             // Create an update stream
-            .createUpdateStream("a/path", Long.class)
+            .newUpdateStreamBuilder().build("a/path", Long.class)
             // Use the update stream to set the topic value. This will invalidate
             // any update stream that exists for the topic. This stream can be
             // invalidated once this completes.
@@ -155,7 +155,8 @@ public final class TopicUpdateExample {
             .lock("a/lock")
             .thenApply(lock -> constraints.value(5L).and(constraints.locked(lock)))
             // Create an update stream. The constraint will not be evaluated yet.
-            .thenApply(constraint -> update.createUpdateStream("a/path", Long.class, constraint))
+            .thenApply(constraint -> update.newUpdateStreamBuilder()
+                .constraint(constraint).build("a/path", Long.class))
             // Use the update stream to set the topic value. This will evaluate the constraint.
             .thenCompose(updateStream -> updateStream.set(6L))
             .whenComplete(TopicUpdateExample::updateHandler);
@@ -168,8 +169,9 @@ public final class TopicUpdateExample {
 
         final UpdateConstraint.Factory constraints = updateConstraints();
         final UpdateStream<String> updateStream = session
-            .feature(TopicUpdate.class)
-            .createUpdateStream("a/path", String.class, constraints.noValue());
+            .feature(TopicUpdate.class).newUpdateStreamBuilder()
+            .constraint(constraints.noValue()).build("a/path", String.class);
+
 
         // This sends the path with the value and validates the constraint
         updateStream.set("hello")
@@ -187,8 +189,8 @@ public final class TopicUpdateExample {
 
         final UpdateConstraint.Factory constraints = updateConstraints();
         final UpdateStream<String> updateStream = session
-            .feature(TopicUpdate.class)
-            .createUpdateStream("a/path", String.class, constraints.noValue());
+            .feature(TopicUpdate.class).newUpdateStreamBuilder()
+            .constraint(constraints.noValue()).build("a/path", String.class);
 
         // This sends the path with the value and validates the constraint
         updateStream.set("hello");
@@ -203,7 +205,7 @@ public final class TopicUpdateExample {
     public static void streamSetPeriodically(Session session) {
         final UpdateStream<Long> updateStream = session
             .feature(TopicUpdate.class)
-            .createUpdateStream("random/long", Long.class);
+            .newUpdateStreamBuilder().build("random/long", Long.class);
 
         final CompletableFuture<TopicCreationResult> validation = updateStream.validate();
 
@@ -232,7 +234,9 @@ public final class TopicUpdateExample {
         final UpdateStream<String> updateStream = session
             .feature(TopicUpdate.class)
             // Creates the update stream. This does not add the topic
-            .createUpdateStream("a/path", newTopicSpecification(TopicType.STRING), String.class);
+            .newUpdateStreamBuilder()
+            .specification(newTopicSpecification(TopicType.STRING))
+            .build("a/path", String.class);
 
         updateStream
             // This will add the topic without setting it to any value
@@ -255,7 +259,9 @@ public final class TopicUpdateExample {
 
         final UpdateStream<String> updateStream = session
             .feature(TopicUpdate.class)
-            .createUpdateStream("a/path", newTopicSpecification(TopicType.STRING), String.class);
+            .newUpdateStreamBuilder()
+            .specification(newTopicSpecification(TopicType.STRING))
+            .build("a/path", String.class);
 
         updateStream
             // This will add the topic if it is missing and set the value

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019 Push Technology Ltd.
+ * Copyright (C) 2019 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 import { connect, Session } from 'diffusion';
 
 // example showcasing how to create a custom reconnection strategy
-export async function reconnectExample() {
+export async function reconnectExample(): Promise<void> {
 
     // When establishing a session, it is possible to specify whether reconnection
     // should be attempted in the event of an unexpected disconnection. This allows
@@ -42,7 +42,7 @@ export async function reconnectExample() {
         if (attempts > maximumAttempts) {
             abort();
         } else {
-            var wait = Math.min(Math.pow(2, attempts++) * 100, maximumAttemptInterval);
+            const wait = Math.min(Math.pow(2, attempts++) * 100, maximumAttemptInterval);
 
             // Wait the specified time period, and then start the reconnection attempt
             setTimeout(start, wait);

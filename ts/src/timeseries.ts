@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019, 2021 Push Technology Ltd.
+ * Copyright (C) 2019 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,10 @@
  * limitations under the License.
  *******************************************************************************/
 
- import { connect, datatypes, topics, Session, TopicSpecification, QueryResult } from 'diffusion';
+import { connect, datatypes, topics, Session, TopicSpecification, QueryResult } from 'diffusion';
 
- // example showcasing how to manage time series topics
- export async function timeseriesExample() {
+// example showcasing how to manage time series topics
+export async function timeseriesExample(): Promise<void> {
 
     const TopicSpecification = topics.TopicSpecification;
     const TopicType = topics.TopicType;
@@ -45,7 +45,7 @@
 
     // 3. Register a value stream
     session.addStream('topic/timeseries', dataType).on('value', function(topic, specification, newValue, oldValue) {
-        var value = newValue.toString();
+        const value = newValue.toString();
 
         console.log(`New value ${newValue.isEditEvent?"edited on":"appended to"} topic: ${value}`);
     });
@@ -53,12 +53,12 @@
     // 4. Subscribe
     session.select('topic/timeseries');
 
-    for (var i = 0; i < 10; i++) {
+    for (let i = 0; i < 10; i++) {
         // 4. Append values 0 - 9 to the topic
         session.timeseries.append("topic/timeseries", i, dataType);
     }
 
-    for (var i = 10; i < 20; i++) {
+    for (let i = 10; i < 20; i++) {
         // 5. Append values 10 - 19 to the topic using a value constructor to specify the datatype
         session.timeseries.append("topic/timeseries", i, Number);
     }

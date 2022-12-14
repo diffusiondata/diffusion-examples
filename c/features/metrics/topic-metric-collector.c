@@ -83,6 +83,10 @@ static int on_collectors_received(const LIST_T *collectors, void *context)
             bool group_by_topic_type;
             diffusion_topic_metric_collector_groups_by_topic_type(collector, &group_by_topic_type);
             printf("\t\tGroup by topic type: %s\n", group_by_topic_type ? "YES" : "NO");
+
+            bool group_by_topic_view;
+            diffusion_topic_metric_collector_groups_by_topic_view(collector, &group_by_topic_view);
+            printf("\t\tGroup by topic view: %s\n", group_by_topic_view ? "YES" : "NO");
         }
         return HANDLER_SUCCESS;
 }
@@ -136,12 +140,9 @@ int main(int argc, char** argv)
         DIFFUSION_TOPIC_METRIC_COLLECTOR_BUILDER_T *builder =
                 diffusion_topic_metric_collector_builder_init();
 
-        builder = diffusion_topic_metric_collector_builder_export_to_prometheus(
-                builder,
-                true);
-        builder = diffusion_topic_metric_collector_builder_group_by_topic_type(
-                builder,
-                true);
+        builder = diffusion_topic_metric_collector_builder_export_to_prometheus(builder, true);
+        builder = diffusion_topic_metric_collector_builder_group_by_topic_type(builder, true);
+        builder = diffusion_topic_metric_collector_builder_group_by_topic_view(builder, true);
 
         DIFFUSION_TOPIC_METRIC_COLLECTOR_T *collector =
                 diffusion_topic_metric_collector_builder_create_collector(

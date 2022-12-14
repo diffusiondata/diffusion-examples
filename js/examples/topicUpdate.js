@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018, 2021 Push Technology Ltd.
+ * Copyright (C) 2018 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,8 @@ function addAndSetOperationWithNoTopicConstraint() {
 }
 
 function createUpdateStream() {
-    var stream = session.topicUpdate.createUpdateStream('foo_topic', stringDataType);
+    var stream = session.topicUpdate.newUpdateStreamBuilder()
+        .build('foo_topic', stringDataType);
     stream.validate();
     stream.set('hello');
     var cachedValue = stream.get();
@@ -72,7 +73,9 @@ function createUpdateStream() {
 
 function createUpdateStreamWithValueConstraint() {
     var constraint = diffusion.updateConstraints().value('world', stringDataType);
-    var stream = session.topicUpdate.createUpdateStream('foo_topic', stringDataType, {constraint});
+    var stream = session.topicUpdate.newUpdateStreamBuilder()
+        .constraint(constraint)
+        .build('foo_topic', stringDataType);
     stream.validate();
     stream.set('hello');
     var cachedValue = stream.get();
@@ -82,7 +85,9 @@ function createUpdateStreamWithValueConstraint() {
 
 function createUpdateStreamThatAddsTopic() {
     var topicSpec = new diffusion.topics.TopicSpecification(TopicType.STRING);
-    var stream = session.topicUpdate.createUpdateStream('quux_topic', stringDataType, {specification: topicSpec});
+    var stream = session.topicUpdate.newUpdateStreamBuilder()
+        .specification(topicSpec)
+        .build('quux_topic', stringDataType);
     // the first call to validate() or set() resolves in a TopicCreationResult
     stream.validate().then((result) => {
         if (result === diffusion.topicUpdate.TopicCreationResult.CREATED) {
@@ -99,7 +104,10 @@ function createUpdateStreamThatAddsTopic() {
 function createUpdateStreamThatAddsTopicWithNoTopicConstraint() {
     var topicSpec = new diffusion.topics.TopicSpecification(TopicType.STRING);
     var constraint = diffusion.updateConstraints().noTopic();
-    var stream = session.topicUpdate.createUpdateStream('quuz_topic', stringDataType, {specification: topicSpec, constraint});
+    var stream = session.topicUpdate.newUpdateStreamBuilder()
+        .specification(topicSpec)
+        .constraint(constraint)
+        .build('quuz_topic', stringDataType);
     // the first call to validate() or set() resolves in a TopicCreationResult
     stream.validate().then((result) => {
         if (result === diffusion.topicUpdate.TopicCreationResult.CREATED) {

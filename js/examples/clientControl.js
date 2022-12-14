@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Push Technology Ltd.
+ * Copyright (C) 2018 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ diffusion.connect({
 }).then(function(session) {
 
     // Get our own fixed properties
-    session.clients.getSessionProperties(session.sessionID, diffusion.clients.PropertyKeys.ALL_FIXED_PROPERTIES)
+    session.clients.getSessionProperties(session.sessionId, diffusion.clients.PropertyKeys.ALL_FIXED_PROPERTIES)
         .then(function(props) {
             console.log('getSessionProperties returns properties:', props);
         }, function(err) {
@@ -43,7 +43,7 @@ diffusion.connect({
             // Call deregister() to close this listener
         },
         onClose : function() {
-            console.log("Session properties listener closed"); 
+            console.log("Session properties listener closed");
         },
         onSessionOpen : function(session, properties) {
             // Notification that a session has been opened

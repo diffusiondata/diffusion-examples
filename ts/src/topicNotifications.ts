@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019, 2021 Push Technology Ltd.
+ * Copyright (C) 2019 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,17 @@
  * limitations under the License.
  *******************************************************************************/
 
-import { connect,
-         Session,
-         TopicNotificationListener,
-         TopicSpecification,
-         TopicNotificationType,
-         TopicNotificationRegistration } from 'diffusion';
+import {
+    connect,
+    Session,
+    TopicNotificationListener,
+    TopicSpecification,
+    TopicNotificationType,
+    TopicNotificationRegistration
+} from 'diffusion';
 
 // example showcasing how to fetch topics and their values using session.fetchRequest
-export async function fetchRequestExample() {
+export async function fetchRequestExample(): Promise<void> {
 
     // Connect to the server. Change these options to suit your own environment.
     // Node.js does not accept self-signed certificates by default. If you have
@@ -42,37 +44,37 @@ export async function fetchRequestExample() {
         // Called when the session receives a notification for a selected topic
         onTopicNotification: (path: string, specification: TopicSpecification, type: TopicNotificationType) => {
             switch (type) {
-                case TopicNotificationType.ADDED:
-                    console.log(`Topic ${path} has been added`);
-                    break;
-                case TopicNotificationType.REMOVED:
-                    console.log(`Topic ${path} has been removed`);
-                    break;
-                case TopicNotificationType.SELECTED:
-                    console.log(`Topic ${path} existed at the time of the selector registration.`);
-                    break;
-                case TopicNotificationType.DESELECTED:
-                    console.log(`Topic ${path} has been deselected`);
-                    break;
+            case TopicNotificationType.ADDED:
+                console.log(`Topic ${path} has been added`);
+                break;
+            case TopicNotificationType.REMOVED:
+                console.log(`Topic ${path} has been removed`);
+                break;
+            case TopicNotificationType.SELECTED:
+                console.log(`Topic ${path} existed at the time of the selector registration.`);
+                break;
+            case TopicNotificationType.DESELECTED:
+                console.log(`Topic ${path} has been deselected`);
+                break;
             }
         },
         // Called when the session receives a notification for an immediate
         // descendant of a selected topic
         onDescendantNotification: (path: string, type: TopicNotificationType) => {
             switch (type) {
-                case TopicNotificationType.ADDED:
-                    console.log(`Topic ${path} has been added as a descendant of a selected topic`);
-                    break;
-                case TopicNotificationType.REMOVED:
-                    console.log(`Topic ${path} has been removed as a descendant of a selected topic`);
-                    break;
-                case TopicNotificationType.SELECTED:
-                    console.log(`Topic ${path} existed as a descendant of a selected topic at the time of the selector registration.`);
-                    break;
-                case TopicNotificationType.DESELECTED:
-                    console.log(`Topic ${path} has been deselected as a descendant of a selected topic`);
-                    break;
-                }
+            case TopicNotificationType.ADDED:
+                console.log(`Topic ${path} has been added as a descendant of a selected topic`);
+                break;
+            case TopicNotificationType.REMOVED:
+                console.log(`Topic ${path} has been removed as a descendant of a selected topic`);
+                break;
+            case TopicNotificationType.SELECTED:
+                console.log(`Topic ${path} existed as a descendant of a selected topic at the time of the selector registration.`);
+                break;
+            case TopicNotificationType.DESELECTED:
+                console.log(`Topic ${path} has been deselected as a descendant of a selected topic`);
+                break;
+            }
         },
         // Called when the listener is closed
         onClose: () => {

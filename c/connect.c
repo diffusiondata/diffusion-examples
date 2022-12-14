@@ -34,6 +34,7 @@
 #include "diffusion.h"
 #include "args.h"
 
+
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
         {'u', "url", "Diffusion server URL", ARG_OPTIONAL, ARG_HAS_VALUE, "ws://localhost:8080"},
@@ -45,6 +46,7 @@ ARG_OPTS_T arg_opts[] = {
         {'s', "sleep", "Time to sleep before disconnecting (in seconds).", ARG_OPTIONAL, ARG_HAS_VALUE, "5" },
         END_OF_ARG_OPTS
 };
+
 
 /*
  * This callback is used when the session state changes, e.g. when a session
@@ -60,6 +62,7 @@ static void on_session_state_changed(
                session_state_as_string(old_state), old_state,
                session_state_as_string(new_state), new_state);
 }
+
 
 /*
  * Entry point for the example.

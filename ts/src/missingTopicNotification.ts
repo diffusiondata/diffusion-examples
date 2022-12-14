@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019, 2021 Push Technology Ltd.
+ * Copyright (C) 2019 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ import { connect, datatypes, topics, Session, MissingTopicHandler } from 'diffus
 
 // example showcasing how to receive notifications when a session subscribes to a topic that
 // doesn't exist
-export async function missingTopicNotificationExample() {
+export async function missingTopicNotificationExample(): Promise<void> {
 
     const stringDataType = datatypes.string();
     const TopicType = topics.TopicType;
@@ -34,40 +34,40 @@ export async function missingTopicNotificationExample() {
     });
 
     const handler: MissingTopicHandler = {
-    	// Called when a handler is successfully registered
-    	onRegister: function(path, close) {
-    		console.log(`Registered missing topic handler on path: ${path}`);
+        // Called when a handler is successfully registered
+        onRegister: function(path, close) {
+            console.log(`Registered missing topic handler on path: ${path}`);
 
-    		// Once we've registered the handler, we subscribe with the selector '?example/topic/.*'
-    		session.select('?example/topic/.*');
+            // Once we've registered the handler, we subscribe with the selector '?example/topic/.*'
+            session.select('?example/topic/.*');
 
-    		// Register a stream to listen for a subscription event
-    		session.addStream('?example/topic/.*', stringDataType).on('subscribe', function(topic, specification) {
-    			console.log(`Subscribed to topic: ${topic}`);
-    		});
-    	},
-    	// Called when the handler is closed
-    	onClose: function(path) {
-    		console.log(`Missing topic handler on path '${path}' has been closed`);
-    	},
-    	// Called if there is an error on the handler
-    	onError: function(path, error) {
-    		console.log('Error on missing topic handler');
-    	},
-    	// Called when we've received a missing topic notification on our registered handler path
-    	onMissingTopic: function(notification) {
-    		console.log(`Received missing topic notification with selector: ${notification.selector}`);
+            // Register a stream to listen for a subscription event
+            session.addStream('?example/topic/.*', stringDataType).on('subscribe', function(topic, specification) {
+                console.log(`Subscribed to topic: ${topic}`);
+            });
+        },
+        // Called when the handler is closed
+        onClose: function(path) {
+            console.log(`Missing topic handler on path '${path}' has been closed`);
+        },
+        // Called if there is an error on the handler
+        onError: function(path, error) {
+            console.log('Error on missing topic handler');
+        },
+        // Called when we've received a missing topic notification on our registered handler path
+        onMissingTopic: function(notification) {
+            console.log(`Received missing topic notification with selector: ${notification.selector}`);
 
-    		// Once we've received the missing topic notification initiated from subscribing to '?example/topic/.*',
-    		// we add a topic that will match the selector
-    		const path = 'example/topic/foo';
+            // Once we've received the missing topic notification initiated from subscribing to '?example/topic/.*',
+            // we add a topic that will match the selector
+            const path = 'example/topic/foo';
 
-    		session.topics.add(path, new TopicSpecification(TopicType.STRING)).then(function(result) {
-    			console.log(`Topic add success: ${path}`);
-    		}, function(reason) {
-    			console.log(`Topic add failed: ${reason}`);
-    		});
-    	}
+            session.topics.add(path, new TopicSpecification(TopicType.STRING)).then(function(result) {
+                console.log(`Topic add success: ${path}`);
+            }, function(reason) {
+                console.log(`Topic add failed: ${reason}`);
+            });
+        }
     };
 
     // Register a missing topic handler on the 'example' root topic

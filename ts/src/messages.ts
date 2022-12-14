@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019, 2021 Push Technology Ltd.
+ * Copyright (C) 2019 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 import { connect, datatypes, topics, Session, RequestHandler, Responder, RequestContext } from 'diffusion';
 
 // example showcasing how to send messages to a single session
-export async function messagesExample() {
+export async function messagesExample(): Promise<void> {
 
     // Connect to the server. Change these options to suit your own environment.
     // Node.js will not accept self-signed certificates by default. If you have
@@ -33,7 +33,7 @@ export async function messagesExample() {
     // 1. Messages can be sent & received between sessions.
     // Create a request handler that handles strings
     const handler: RequestHandler = {
-        onRequest: function(request: any, context: RequestContext, responder: Responder) {
+        onRequest: function(request, context: RequestContext, responder: Responder) {
             console.log('Received request: ' + request); // Log the request
             responder.respond('confirmation of request ' + request);
         },

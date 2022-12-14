@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Push Technology Ltd.
+ * Copyright (C) 2018 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,18 +46,18 @@ diffusion.connect({
     // Send a message to another session listening on 'foo' by way of
     // session properties.
     var responseHandler = {
-          onResponse : function(sessionID, response) {
-              console.log("Received response " + response);
-          },
-          onResponseError : function() {
-              console.log("There was an error when receiving the response");
-          },
-          onError : function() {
-              console.log("There was an with the response handler");
-          },
-          onClose : function() {
-              console.log("The response handler was closed");
-          }
+        onResponse : function(sessionID, response) {
+            console.log("Received response " + response);
+        },
+        onResponseError : function() {
+            console.log("There was an error when receiving the response");
+        },
+        onError : function() {
+            console.log("There was an with the response handler");
+        },
+        onClose : function() {
+            console.log("The response handler was closed");
+        }
     };
 
     session.messages.sendRequestToFilter('$Principal is "control"', 'foo/bar', 'Hello world', responseHandler);

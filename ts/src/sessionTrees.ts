@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2021 Push Technology Ltd.
+ * Copyright (C) 2021 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import {
 } from 'diffusion';
 
 // example showcasing how create and query session tree branch mappings
-export async function sessionTreesExample() {
+export async function sessionTreesExample(): Promise<void> {
 
     // Connect to the server. Change these options to suit your own environment.
     // Node.js does not accept self-signed certificates by default. If you have

@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2016, 2022 Push Technology Ltd.
+ * Copyright © 2016 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,23 +104,8 @@ namespace PushTechnology.ClientInterface.Examples.Runner {
                 //runner.Start(new PublishingTimeSeriesRangeQuery(), secureUrl);
                 //runner.Start(new ConsumingTimeSeriesTopics(), url);
 
-                /// Start create topic view example
-                //runner.Start( new TopicViewsCreate(), secureUrl );
-
-                /// Start list topic view example
-                //runner.Start( new TopicViewsList(), secureUrl);
-
-                /// Start get topic view example
-                //runner.Start( new TopicViewsGet(), secureUrl);
-
-                /// Start remove topic view example
-                //runner.Start( new TopicViewsRemove(), secureUrl);
-
-                /// Start create update stream example
-                //runner.Start(new UpdateStreamCreate(), secureUrl);
-
-                /// Start create update stream with constraint example
-                //runner.Start(new UpdateStreamCreateWithConstraint(), secureUrl);
+                /// Start topic view example
+                //runner.Start(new TopicViews(), secureUrl);
 
                 /// Start remove topics example
                 //runner.Start(new RemoveTopics(), secureUrl);
@@ -208,6 +193,15 @@ namespace PushTechnology.ClientInterface.Examples.Runner {
 
                 /// Start Topic Metric Collector example
                 //runner.Start(new TopicMetricCollector(), secureUrl);
+
+                /// Start Session Retry example
+                //runner.Start(new SessionRetry(), secureUrl);
+
+                /// Start Update Stream Builder example
+                //runner.Start(new UpdateStreamBuilder(), secureUrl);
+
+                /// Start Topic Fetch example
+                //runner.Start(new TopicFetch(), secureUrl);
             }
         }
 

@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2020 Push Technology Ltd.
+ * Copyright © 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,15 +24,16 @@ using static PushTechnology.ClientInterface.Examples.Runner.Program;
 
 namespace PushTechnology.ClientInterface.Example.Publishing {
     /// <summary>
-    /// Control client implementation that creates an update stream with constraint.
+    /// Control client implementation that creates an update stream with a builder.
     /// </summary>
-    public sealed class UpdateStreamCreateWithConstraint : IExample {
+    public sealed class UpdateStreamBuilder : IExample {
         /// <summary>
-        /// Runs the create update stream with constraint control client example.
+        /// Runs the create update stream with builder control client example.
         /// </summary>
         /// <param name="cancellationToken">A token used to end the client example.</param>
         /// <param name="args">A single string should be used for the server url.</param>
-        public async Task Run( CancellationToken cancellationToken, string[] args ) {
+        public async Task Run(CancellationToken cancellationToken, string[] args)
+        {
             string TOPIC_PREFIX = "test-topics";
 
             var serverUrl = args[0];
@@ -59,7 +60,10 @@ namespace PushTechnology.ClientInterface.Example.Publishing {
                 return;
             }
 
-            var stream = topicUpdate.CreateUpdateStream<String>(topicPath);
+            var specification = session.TopicControl.NewSpecification(TopicType.STRING);
+            var builder = session.TopicUpdate.NewUpdateStreamBuilder();
+            builder = builder.Specification(specification);
+            var stream = builder.Build<string>(topicPath);
 
             // Set the topic value
             try
@@ -75,7 +79,8 @@ namespace PushTechnology.ClientInterface.Example.Publishing {
             }
 
             var updateConstraint = Diffusion.UpdateConstraints.Value("Value1");
-            var stream2 = topicUpdate.CreateUpdateStream<String>(topicPath, updateConstraint);
+            builder = builder.Constraint(updateConstraint);
+            var stream2 = builder.Build<string>(topicPath);
 
             // Set the topic value with constraint and expect success
             try

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Push Technology Ltd.
+ * Copyright (C) 2018 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,10 +44,10 @@ diffusion.connect({
     });
 
     // Topics are updated using the standard update mechanisms
-    session.topics.updateValue('topic/json', jsonValue, jsonDataType);
+    session.topicUpdate.set('topic/json', jsonDataType, jsonValue),
 
     // For String, Double and Int64 topics, values can be passed directly
-    session.topics.updateValue('topic/string', "This is a new string value", stringDataType);
+    session.topicUpdate.set('topic/string', stringDataType, "This is a new string value")
 
 
     session.select('?topic//');
@@ -56,7 +56,7 @@ diffusion.connect({
     session.addStream('topic/json', jsonDataType).on('value', function(topic, spec, newValue, oldValue) {
         // When a JSON or Binary topic is updated, any value handlers on a subscription will be called with both the
         // new value, and the old value.
-   
+
         // The oldValue parameter will be undefined if this is the first value received for a topic.
 
         // For JSON topics, value#get returns a JavaScript object.
@@ -70,7 +70,7 @@ diffusion.connect({
         console.log("Update for string topic: " + newValue);
     });
 
-    // 5. Raw values of an appropriate type can also be used for JSON and Binary topics. 
+    // 5. Raw values of an appropriate type can also be used for JSON and Binary topics.
     // For example, plain JSON objects can be used to update JSON topics.
-    session.topics.updateValue('topic/json', {"foo" : "baz", "numbers" : [1, 2, 3] }, jsonDataType);
+    session.topicUpdate.set('topic/json', jsonDataType, {"foo" : "baz", "numbers" : [1, 2, 3] });
 });

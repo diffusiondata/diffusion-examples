@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019 Push Technology Ltd.
+ * Copyright (C) 2019 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 import { connect, datatypes, topics, Session } from 'diffusion';
 
 // example showcasing how to update a JSON topic
-export async function updateJsonExample() {
+export async function updateJsonExample(): Promise<void> {
 
     // Connect to the server. Change these options to suit your own environment.
     // Node.js will not accept self-signed certificates by default. If you have

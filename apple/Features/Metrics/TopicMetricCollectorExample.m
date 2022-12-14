@@ -1,6 +1,6 @@
 //  Diffusion Client Library for iOS, tvOS and OS X / macOS - Examples
 //
-//  Copyright (C) 2021 Push Technology Ltd.
+//  Copyright (C) 2021 - 2022 Push Technology Ltd.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -49,10 +49,11 @@
 
         // create a topic metric collector using its builder
         PTDiffusionTopicMetricCollector *const collector =
-            [[[[[PTDiffusionTopicMetricCollectorBuilder new]
-                exportToPrometheus:NO]
-               maximumGroups:10]
-              groupByTopicType:YES]
+            [[[[[[PTDiffusionTopicMetricCollectorBuilder new]
+                 exportToPrometheus:NO]
+                maximumGroups:10]
+               groupByTopicType:YES]
+              groupByTopicView:YES]
              createCollectorWithName:@"collector 1" andTopicSelector:@"*A/B/C//"];
 
         PTDiffusionMetricsFeature *const metrics = session.metrics;

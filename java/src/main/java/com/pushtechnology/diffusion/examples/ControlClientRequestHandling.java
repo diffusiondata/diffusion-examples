@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017, 2020 Push Technology Ltd.
+ * Copyright (C) 2017, 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,18 +143,6 @@ public class ControlClientRequestHandling {
      * Filter callback that logs responses to the request.
      */
     private final class JSONFilterRequestCallback implements Messaging.FilteredRequestCallback<JSON> {
-
-        @Override
-        public void onClose() {
-            // This method was deprecated in 6.5 and is no longer called. It
-            // will be removed in a future release.
-        }
-
-        @Override
-        public void onError(ErrorReason errorReason) {
-            // This method was deprecated in 6.5 and is no longer called. It
-            // will be removed in a future release.
-        }
 
         @Override
         public void onResponse(SessionId sessionId, JSON response) {

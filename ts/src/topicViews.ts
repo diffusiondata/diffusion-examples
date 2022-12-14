@@ -13,10 +13,10 @@
  * limitations under the License.
  *******************************************************************************/
 
-import { connect, topics, Session } from 'diffusion';
+import { connect, topics, Session, TopicView } from 'diffusion';
 let session: Session;
 
-async function createTopicView() {
+async function createTopicView(): Promise<void> {
     // First create a topic called 'some/topic'.
     await session.topics.add('some/topic', topics.TopicType.STRING);
 
@@ -38,7 +38,7 @@ async function listTopicViews() {
 
 async function getTopicView() {
     // get a topic view
-    const topicView = await session.topicViews.getTopicView('example-view');
+    const topicView: TopicView = await session.topicViews.getTopicView('example-view') as TopicView;
 
     // show the name and specification of the topic view
     console.log('Topic View:');
@@ -60,11 +60,9 @@ connect({
     secure : true,
     principal : 'control',
     credentials : 'password'
-})
-.then(function(sess) {
+}).then(function(sess) {
     session = sess;
-})
-.then(createTopicView)
-.then(listTopicViews)
-.then(getTopicView)
-.then(removeTopicViews);
+}).then(createTopicView)
+    .then(listTopicViews)
+    .then(getTopicView)
+    .then(removeTopicViews);

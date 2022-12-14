@@ -201,8 +201,8 @@ public final class CompetitiveIncrement extends AbstractClient {
 
     private void handleIncrementFailure(Topics topics, Throwable ex) {
         final Throwable cause = ex.getCause();
-        if ((cause instanceof ClusterRoutingException) || (cause instanceof UnsatisfiedConstraintException)) {
-            // A transient cluster failure occured during the increment
+        if (cause instanceof ClusterRoutingException || cause instanceof UnsatisfiedConstraintException) {
+            // A transient cluster failure occurred during the increment
             // or the constraint was not satisfied, another session must
             // have updated the topic.
             // Retry incrementing the topic until successful.

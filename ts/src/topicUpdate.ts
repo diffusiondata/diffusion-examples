@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019, 2021 Push Technology Ltd.
+ * Copyright (C) 2019 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,10 @@
  * limitations under the License.
  *******************************************************************************/
 
- import { connect, datatypes, topics, topicUpdate, updateConstraints, Session, SessionLock } from 'diffusion';
+import { connect, datatypes, topics, topicUpdate, updateConstraints, Session, SessionLock } from 'diffusion';
 
- // example showcasing how to update topics using session.topicUpdate.set or topic update streams
- export async function topicUpdateExample() {
+// example showcasing how to update topics using session.topicUpdate.set or topic update streams
+export async function topicUpdateExample(): Promise<void> {
 
     const stringDataType = datatypes.string();
     const jsonDataType = datatypes.json();
@@ -56,7 +56,7 @@
     async function setOperationWithPartialJSONConstraint() {
         const sessionLock: SessionLock = await session.lock("lock");
         const constraint = updateConstraints().jsonValue()
-            .with('/foo', stringDataType, 'foo')
+            .with('/foo', 'foo', stringDataType)
             .without('/bar');
         await session.topicUpdate.set('bar_topic', jsonDataType, {foo:'baz', bar:'bar'}, {constraint});
     }
@@ -73,7 +73,8 @@
     }
 
     async function createUpdateStream() {
-        const stream = session.topicUpdate.createUpdateStream('foo_topic', stringDataType);
+        const stream = session.topicUpdate.newUpdateStreamBuilder()
+            .build('foo_topic', stringDataType);
         await stream.validate();
         await stream.set('hello');
         const cachedValue = stream.get();
@@ -82,7 +83,9 @@
 
     async function createUpdateStreamWithValueConstraint() {
         const constraint = updateConstraints().value('world', stringDataType);
-        const stream = session.topicUpdate.createUpdateStream('foo_topic', stringDataType, {constraint});
+        const stream = session.topicUpdate.newUpdateStreamBuilder()
+            .constraint(constraint)
+            .build('foo_topic', stringDataType);
         await stream.validate();
         await stream.set('hello');
         const cachedValue = stream.get();
@@ -92,7 +95,9 @@
 
     async function createUpdateStreamThatAddsTopic() {
         const topicSpec = new topics.TopicSpecification(TopicType.STRING);
-        const stream = session.topicUpdate.createUpdateStream('quux_topic', stringDataType, {specification: topicSpec});
+        const stream = session.topicUpdate.newUpdateStreamBuilder()
+            .specification(topicSpec)
+            .build('quux_topic', stringDataType);
         // the first call to validate() or set() resolves in a TopicCreationResult
         const result = await stream.validate();
         if (result === topicUpdate.TopicCreationResult.CREATED) {
@@ -108,7 +113,10 @@
     async function createUpdateStreamThatAddsTopicWithNoTopicConstraint() {
         const topicSpec = new topics.TopicSpecification(TopicType.STRING);
         const constraint = updateConstraints().noTopic();
-        const stream = session.topicUpdate.createUpdateStream('quuz_topic', stringDataType, {specification: topicSpec, constraint});
+        const stream = session.topicUpdate.newUpdateStreamBuilder()
+            .specification(topicSpec)
+            .constraint(constraint)
+            .build('quuz_topic', stringDataType);
         // the first call to validate() or set() resolves in a TopicCreationResult
         const result = await stream.validate();
         if (result === topicUpdate.TopicCreationResult.CREATED) {

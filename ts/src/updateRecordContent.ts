@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019 Push Technology Ltd.
+ * Copyright (C) 2019 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 import { connect, datatypes, topics, Session } from 'diffusion';
 
 // example showcasing how to update a RecordV2 topic
-export async function updateRecordContentExample() {
+export async function updateRecordContentExample(): Promise<void> {
     // Connect to the server. Change these options to suit your own environment.
     // Node.js will not accept self-signed certificates by default. If you have
     // one of these, set the environment variable NODE_TLS_REJECT_UNAUTHORIZED=0
@@ -51,7 +51,7 @@ export async function updateRecordContentExample() {
     await session.topics.add('topic/record', specification);
 
     // 3. Produce RecordV2 values from the schema by creating a mutable model
-    var model = schema.createMutableModel();
+    const model = schema.createMutableModel();
 
     model.set("Row1.Field1", "123.456");
     model.set("Row1.Field2", "789");
@@ -71,11 +71,11 @@ export async function updateRecordContentExample() {
         .addStream('topic/record', RecordV2DataType)
         .on('value', (topic, specification, newValue, oldValue) => {
             // 5. The schema can be used to produce a model that allows key-based lookup of records and fields
-            var model = newValue.asModel(schema);
+            const model = newValue.asModel(schema);
 
-            var f1 = model.get("Row1.Field1");
-            var f2 = model.get("Row1.Field2");
-            var f3 = model.get("Row2.Field3");
+            const f1 = model.get("Row1.Field1");
+            const f2 = model.get("Row1.Field2");
+            const f3 = model.get("Row2.Field3");
 
             console.log(`Field1: ${f1} Field2: ${f2} Field3: ${f3}`);
 

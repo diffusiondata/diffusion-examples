@@ -24,9 +24,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)RemoveTopics.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AddAndSetTopicWithConstraint.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TopicNotificationListener.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UpdateStreamCreateWithConstraint.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UpdateStreamBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SetTopicWithConstraint.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UpdateStreamCreate.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimeSeriesRangeQuery.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimeSeriesEdit.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimeSeriesAppend.cs" />

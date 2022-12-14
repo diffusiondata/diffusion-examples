@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019 Push Technology Ltd.
+ * Copyright (C) 2019 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 import { connect, datatypes, topics, Session } from 'diffusion';
 
 // example showcasing the diffusion data types
-export async function datatypesExample() {
+export async function datatypesExample(): Promise<void> {
 
     // Connect to the server. Change these options to suit your own environment.
     // Node.js does not accept self-signed certificates by default. If you have
@@ -50,9 +50,9 @@ export async function datatypesExample() {
 
     await Promise.all([
         // Topics are updated using the standard update mechanisms
-        session.topics.updateValue('topic/json', jsonValue, jsonDataType),
+        session.topicUpdate.set('topic/json', jsonDataType, jsonValue),
         // For String, Double and Int64 topics, values can be passed directly
-        session.topics.updateValue('topic/string', "This is a new string value", stringDataType)
+        session.topicUpdate.set('topic/string', stringDataType, "This is a new string value")
     ]);
 
     // 4. Add a value streams for receiving JSON values.
@@ -77,5 +77,5 @@ export async function datatypesExample() {
 
     // 5. Raw values of an appropriate type can also be used for JSON and Binary topics.
     // For example, plain JSON objects can be used to update JSON topics.
-    session.topics.updateValue('topic/json', {"foo" : "baz", "numbers" : [1, 2, 3] }, jsonDataType);
+    session.topicUpdate.set('topic/json', jsonDataType, {"foo" : "baz", "numbers" : [1, 2, 3] });
 }

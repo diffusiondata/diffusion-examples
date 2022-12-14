@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019 Push Technology Ltd.
+ * Copyright (C) 2019 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,10 @@
  * limitations under the License.
  *******************************************************************************/
 
- import { connect, clients, Session, SessionProperties, SessionId, SessionEventType } from 'diffusion';
+import { connect, clients, Session, SessionProperties, SessionId, SessionEventType } from 'diffusion';
 
- // example showcasing how a control session can receive updates on another session's properties
- export async function clientControlExample() {
+// example showcasing how a control session can receive updates on another session's properties
+export async function clientControlExample(): Promise<void> {
 
     // Connect to the server. Change these options to suit your own environment.
     // Node.js does not accept self-signed certificates by default. If you have
@@ -32,7 +32,7 @@
 
     try {
         // Get our own fixed properties
-        const props: SessionProperties = await session.clients.getSessionProperties(session.sessionID, clients.PropertyKeys.ALL_FIXED_PROPERTIES);
+        const props: SessionProperties = await session.clients.getSessionProperties(session.sessionId, clients.PropertyKeys.ALL_FIXED_PROPERTIES);
         console.log('getSessionProperties returns properties:', props);
     } catch (error) {
         console.log('An error has occurred:', error);
@@ -57,20 +57,20 @@
             onSessionEvent: (sessionId: SessionId, event: SessionEventType, properties: SessionProperties) => {
                 // Notification that a session's properties have changed
                 switch (event) {
-                    case session.clients.SessionEventType.UPDATED:
-                        console.log("Session updated: " + sessionId, JSON.stringify(properties));
-                        break;
-                    case session.clients.SessionEventType.DISCONNECTED:
-                        console.log("Session disconnected: " + sessionId, JSON.stringify(properties));
-                        break;
-                    case session.clients.SessionEventType.RECONNECTED:
-                        console.log("Session reconnected: " + sessionId, JSON.stringify(properties));
-                        break;
-                    case session.clients.SessionEventType.FAILED_OVER:
-                        console.log("Session failed over: " + sessionId, JSON.stringify(properties));
+                case session.clients.SessionEventType.UPDATED:
+                    console.log("Session updated: " + sessionId, JSON.stringify(properties));
+                    break;
+                case session.clients.SessionEventType.DISCONNECTED:
+                    console.log("Session disconnected: " + sessionId, JSON.stringify(properties));
+                    break;
+                case session.clients.SessionEventType.RECONNECTED:
+                    console.log("Session reconnected: " + sessionId, JSON.stringify(properties));
+                    break;
+                case session.clients.SessionEventType.FAILED_OVER:
+                    console.log("Session failed over: " + sessionId, JSON.stringify(properties));
                 }
             },
-            onSessionClose: (sessionId: SessionId, properties: SessionProperties, reason: any) => {
+            onSessionClose: (sessionId: SessionId, properties: SessionProperties, reason) => {
                 console.log("Session closed: " + session + " reason: " + reason, JSON.stringify(properties));
             },
             onError: (error) => {

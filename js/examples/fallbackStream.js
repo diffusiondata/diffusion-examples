@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Push Technology Ltd.
+ * Copyright (C) 2018 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,26 +36,26 @@ diffusion.connect({
     // 1. Create a String topic type
     session.topics.add('topic/foo', new TopicSpecification(TopicType.STRING)).then(function() {
         // Once the topic is added successfully then update it with a new value
-        session.topics.updateValue('topic/foo', "foo-string", stringDataType);
+        session.topicUpdate.set('topic/foo', stringDataType, "foo-string");
     }, function(err) {
         console.log("Fail to update topic 'foo': ", err);
     });
 
     // Create another String topic type
     session.topics.add('topic/bar', new TopicSpecification(TopicType.STRING)).then(function() {
-        session.topics.updateValue('topic/bar', 'bar-string', stringDataType);
+        session.session.topicUpdate.set('topic/bar', stringDataType, 'bar-string');
     }, function(err) {
         console.log("Fail to update topic 'bar': ", err);
     });
 
     // And another String topic type
     session.topics.add('topic/baz', new TopicSpecification(TopicType.STRING)).then(function() {
-        session.topics.updateValue('topic/baz', "baz-string", stringDataType);
+        session.topicUpdate.set('topic/baz', stringDataType, "baz-string");
     }, function(err) {
         console.log("Fail to update topic 'baz': ", err);
     });
 
-    // 2. Register a value stream for receiving String value update 
+    // 2. Register a value stream for receiving String value update
     session.addStream('topic/foo', stringDataType)
         .on('value', function(topic, specification, newValue, oldValue) {
             console.log("Received update ", newValue);

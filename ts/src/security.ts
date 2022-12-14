@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019 Push Technology Ltd.
+ * Copyright (C) 2019 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ import { connect, topics, Session, SecurityConfiguration, SystemAuthenticationCo
 
 
 // example showcasing how to update the security and authentication stores
-export async function securityExample() {
+export async function securityExample(): Promise<void> {
 
     // Session security allows you to change the principal that a session is authenticated as. It also  allows users to
     // query and update server-side security and authentication stores, which control users, roles and permissions.
@@ -51,9 +51,10 @@ export async function securityExample() {
 
     // Set the permissions for a particular role - global and topic-scoped
     // Each method on a script builder returns a new builder
-    const setPermissionScript = securityScriptBuilder.setGlobalPermissions('SUPERUSER', ['REGISTER_HANDLER'])
-                                                     .setTopicPermissions('SUPERUSER', '/foo', ['UPDATE_TOPIC'])
-                                                     .build();
+    const setPermissionScript = securityScriptBuilder
+        .setGlobalPermissions('SUPERUSER', ['REGISTER_HANDLER'])
+        .setPathPermissions('SUPERUSER', '/foo', ['UPDATE_TOPIC'])
+        .build();
 
     try {
         // Update the server-side store with the generated script
@@ -76,9 +77,10 @@ export async function securityExample() {
     const authenticationScriptBuilder = session.security.authenticationScriptBuilder();
 
     // Add a new user and set password & roles.
-    const addUserScript = authenticationScriptBuilder.addPrincipal('Superman', 'correcthorsebatterystapler')
-                                                     .assignRoles('Superman', ['SUPERUSER'])
-                                                     .build();
+    const addUserScript = authenticationScriptBuilder
+        .addPrincipal('Superman', 'correcthorsebatterystapler')
+        .assignRoles('Superman', ['SUPERUSER'])
+        .build();
 
     try {
         // Update the system authentication store

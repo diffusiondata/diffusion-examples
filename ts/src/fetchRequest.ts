@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019, 2021 Push Technology Ltd.
+ * Copyright (C) 2019 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,10 @@
  * limitations under the License.
  *******************************************************************************/
 
-import { connect, datatypes, topics, Session, FetchResult, TopicResult } from 'diffusion';
+import { connect, datatypes, topics, Session, FetchResult, TopicResult, JSON } from 'diffusion';
 
 // example showcasing how to fetch topics and their values using session.fetchRequest
-export async function fetchRequestExample() {
+export async function fetchRequestExample(): Promise<void> {
 
     const jsonDataType = datatypes.json();
     const TopicType = topics.TopicType;
@@ -34,19 +34,20 @@ export async function fetchRequestExample() {
         credentials: 'password'
     });
 
-    const fetchResult: FetchResult<any>
-        = await session.fetchRequest()             // obtain a FetchRequest
-                       .from("SomeTopic/B")        // limit to topics after and including SomeTopic/B
-                       .to("SomeTopic/X")          // limit to topics before and including SomeTopic/X
-                       .first(10)                  // only fetch the first 10 topics
-                       .topicTypes([TopicType.STRING, TopicType.INT64]) // limit to string and integer topic types
-                       .withValues(jsonDataType)   // fetch values return them as JSON objects
-                       .withProperties()           // get the topic properties
-                       .fetch("*SomeTopic//");      // perform the fetch request using a topic selector
-    const results: TopicResult<any>[] = fetchResult.results();
+    const fetchResult: FetchResult<JSON>
+        = await session
+            .fetchRequest()             // obtain a FetchRequest
+            .from("SomeTopic/B")        // limit to topics after and including SomeTopic/B
+            .to("SomeTopic/X")          // limit to topics before and including SomeTopic/X
+            .first(10)                  // only fetch the first 10 topics
+            .topicTypes([TopicType.STRING, TopicType.INT64]) // limit to string and integer topic types
+            .withValues(jsonDataType)   // fetch values return them as JSON objects
+            .withProperties()           // get the topic properties
+            .fetch("*SomeTopic//");      // perform the fetch request using a topic selector
+    const results: TopicResult<JSON>[] = fetchResult.results();
     console.log("Fetch Request returned "+results.length+" topics");
 
-    results.forEach((topicResult: TopicResult) => {
+    results.forEach((topicResult: TopicResult<JSON>) => {
         console.log("Path: ", topicResult.path());
         console.log("Type: ", topicResult.type());
         console.log("Value: ", topicResult.value().get());
@@ -59,7 +60,7 @@ export async function fetchRequestExample() {
 }
 
 // example showcasing how to limit the branch depth when fetching topics
-export async function fetchRequestLimitBranchDepthExample() {
+export async function fetchRequestLimitBranchDepthExample(): Promise<void> {
 
     const jsonDataType = datatypes.json();
     const TopicType = topics.TopicType;
@@ -77,19 +78,21 @@ export async function fetchRequestLimitBranchDepthExample() {
         credentials: 'password'
     });
 
-    const fetchResult: FetchResult<any>
-        = await session.fetchRequest()             // obtain a FetchRequest
-                       .limitBranchDepth(3, 3)     // A deep branch has a root path that has a
-                                                   // number of parts equal to the deep_branch_depth parameter.
-                                                   // The deep_branch_limit specifies the maximum number of results for each deep branch.
-                       .withProperties()           // get the topic properties
-                       .topicTypes([TopicType.STRING, TopicType.INT64]) // limit to string and integer topic types
-                       .withValues(jsonDataType)   // fetch values return them as JSON objects
-                       .fetch("?.//")              // perform the fetch using a topic selector
-    const results: TopicResult<any>[] = fetchResult.results();
+    const fetchResult: FetchResult<JSON>
+        = await session
+            .fetchRequest()             // obtain a FetchRequest
+            .limitDeepBranches(3, 3)
+            // A deep branch has a root path that has a
+            // number of parts equal to the deep_branch_depth parameter.
+            // The deep_branch_limit specifies the maximum number of results for each deep branch.
+            .withProperties()           // get the topic properties
+            .topicTypes([TopicType.STRING, TopicType.INT64]) // limit to string and integer topic types
+            .withValues(jsonDataType)   // fetch values return them as JSON objects
+            .fetch("?.//")              // perform the fetch using a topic selector
+    const results: TopicResult<JSON>[] = fetchResult.results();
     console.log("Fetch Request returned "+results.length+" topics");
 
-    results.forEach((topicResult: TopicResult) => {
+    results.forEach((topicResult: TopicResult<JSON>) => {
         console.log("Path: ", topicResult.path());
         console.log("Type: ", topicResult.type());
         console.log("Value: ", topicResult.value().get());

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2019 Push Technology Ltd.
+ * Copyright (C) 2014, 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,10 +111,8 @@ public class ControlClientAsExclusiveUpdater {
         // update stream fails, stop the scheduled task and release the lock.
         final UpdateConstraint exclusiveAccessConstraint =
             updateConstraints().locked(lock);
-        final UpdateStream<String> updateStream = topicUpdate.createUpdateStream(
-            TOPIC_NAME,
-            String.class,
-            exclusiveAccessConstraint);
+        final UpdateStream<String> updateStream = topicUpdate.newUpdateStreamBuilder()
+            .constraint(exclusiveAccessConstraint).build(TOPIC_NAME, String.class);
         final CompletableFuture<Void> failureHandler = new CompletableFuture<>();
         final ScheduledFuture<?> theFeeder = scheduler.scheduleAtFixedRate(
             () -> updateStream

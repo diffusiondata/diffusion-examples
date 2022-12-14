@@ -22,7 +22,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)ClientControlSetSessionProperties.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ClientControlSetSessionPropertiesFilter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ClientControlSetSessionPropertiesListener.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ClientUsingFetch.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TopicFetch.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SessionRetry.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SystemAuthenticationControl.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PingServer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SessionLocks.cs" />
@@ -35,9 +36,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)SubscriptionControlRoutingHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SubscriptionControlSubscribe.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SubscriptionControlSubscribeFilter.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TopicViewsGet.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TopicViewsList.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TopicViewsCreate.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TopicViewsRemove.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TopicViews.cs" />
   </ItemGroup>
 </Project>

@@ -151,8 +151,11 @@ int main(int argc, char** argv)
         topic_specification_free(spec);
 
         // Create a new update stream for the topic.
+        DIFFUSION_UPDATE_STREAM_BUILDER_T *builder = diffusion_update_stream_builder_init();
+        DIFFUSION_API_ERROR api_error = { 0 };
+
         DIFFUSION_TOPIC_UPDATE_STREAM_T *update_stream =
-                diffusion_topic_update_create_update_stream(session, topic_name, DATATYPE_STRING);
+                diffusion_update_stream_builder_create_update_stream(builder, topic_name, DATATYPE_STRING, &api_error);
 
         time_t end_time = time(NULL) + seconds;
 
@@ -193,6 +196,7 @@ int main(int argc, char** argv)
 
         credentials_free(credentials);
         diffusion_topic_update_stream_free(update_stream);
+        diffusion_update_stream_builder_free(builder);
         hash_free(options, NULL, free);
 
         return EXIT_SUCCESS;

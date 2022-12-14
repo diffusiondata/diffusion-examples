@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019 Push Technology Ltd.
+ * Copyright (C) 2019 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ import { connect, datatypes, locks, Session, SessionLock } from 'diffusion';
 
 
 // example showcasing how to acquire and release session locks
-export async function sessionLockExample() {
+export async function sessionLockExample(): Promise<void> {
 
     const stringDataType = datatypes.string();
     const SessionLockScope = locks.SessionLockScope;

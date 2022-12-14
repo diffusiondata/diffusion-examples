@@ -101,7 +101,10 @@ public final class CoordinatingSessionExample extends AbstractClient {
         // Create a factory for update streams
         final TopicSpecification specification = newTopicSpecification(TopicType.INT64);
         final Supplier<UpdateStream<Long>> updateStreamFactory =
-            () -> topicUpdate.createUpdateStream(path, specification, Long.class, locked);
+            () -> topicUpdate.newUpdateStreamBuilder()
+            .specification(specification)
+            .constraint(locked)
+            .build(path, Long.class);
 
         final UpdateStream<Long> updateStream = updateStreamFactory.get();
         updateStream

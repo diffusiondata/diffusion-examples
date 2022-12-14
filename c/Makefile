@@ -48,6 +48,7 @@ ARFLAGS		+=
 SOURCES 	=	connect-async.c \
 				connect.c \
 				reconnect.c \
+				session-factory.c \
 				features/authentication_control/auth-service.c \
 				features/client-control-change-roles-with-filter.c \
 				features/client-control-change-roles-with-session.c \
@@ -87,40 +88,7 @@ SOURCES 	=	connect-async.c \
 				features/topics/double-topics.c \
 				features/topics/fetch-request.c \
 				features/topics/int64-topics.c \
-				features/topics/binary-topics.c \
-				website/publish-subscribe.c \
-				website/request-response.c \
-				website/rest.c \
-				website/time-series.c \
-				manual/authentication_control.c \
-				manual/client_control.c \
-				manual/connecting_basics.c \
-				manual/connecting_credentials.c \
-				manual/connecting_securely.c \
-				manual/fetch_topics.c \
-				manual/messaging.c \
-				manual/missing_topic_notification.c \
-				manual/quick_start_guide.c \
-				manual/reconnecting.c \
-				manual/reconnection_strategy.c \
-				manual/remove_topics.c \
-				manual/security_control.c \
-				manual/session_locks.c \
-				manual/session_properties.c \
-				manual/subscribe_to_json.c \
-				manual/subscription.c \
-				manual/subscription_control.c \
-				manual/subscription_control_filter.c \
-				manual/system_authentication_control.c \
-				manual/timeseries_publish.c \
-				manual/timeseries_subscribe.c \
-				manual/topic_control.c \
-				manual/topic_control_create_and_subscribe_json.c \
-				manual/topic_notifications.c \
-				manual/topic_update_exclusive.c \
-				manual/topic_update_json.c \
-				manual/topic_update_non_exclusive.c \
-				manual/value_streams.c
+				features/topics/binary-topics.c
 
 OBJDIR		= 	$(TARGETDIR)/objs
 BINDIR		= 	$(TARGETDIR)/bin
@@ -129,7 +97,8 @@ OBJECTS		= 	$(SOURCES:.c=.o)
 TARGETS 	= 	connect-async \
 				connect \
 				reconnect \
-				authentication-control \
+				session-factory \
+				authentication_control \
 				client-control-change-roles-with-filter \
 				client-control-change-roles-with-session \
 				client-control-close-with-filter \
@@ -189,7 +158,10 @@ connect: $(OBJDIR)/connect.o
 reconnect: $(OBJDIR)/reconnect.o
 		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
 
-authentication-control: features/authentication_control/auth-service.c
+session-factory: $(OBJDIR)/session-factory.o
+		$(CC) $< $(LDFLAGS) -o $(BINDIR)/$@
+
+authentication_control: features/authentication_control/auth-service.c
 		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
 
 client-control-change-roles-with-filter: features/client_control/change-roles-with-filter.c

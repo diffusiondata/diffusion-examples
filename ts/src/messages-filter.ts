@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019 Push Technology Ltd.
+ * Copyright (C) 2019 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 import { connect, datatypes, topics, Session, SessionId, RequestStream, Responder, FilteredResponseHandler } from 'diffusion';
 
 // example showcasing how to send messages to multiple sessions using a filter
-export async function messagesFilterExample() {
+export async function messagesFilterExample(): Promise<void> {
 
     // Connect to the server. Change these options to suit your own environment.
     // Node.js will not accept self-signed certificates by default. If you have
@@ -32,7 +32,7 @@ export async function messagesFilterExample() {
 
     // Create a request handler that handles strings
     const requestSream: RequestStream = {
-        onRequest: function(path: string, request: any, responder: Responder) {
+        onRequest: function(path: string, request, responder: Responder) {
             console.log('Received request: ' + request); // Log the request
             responder.respond('confirmation of request ' + request);
         },
@@ -50,18 +50,12 @@ export async function messagesFilterExample() {
     // Send a message to another session listening on 'foo' by way of
     // session properties.
     const responseHandler: FilteredResponseHandler = {
-          onResponse: function(sessionID: SessionId, response: any) {
-              console.log("Received response " + response);
-          },
-          onResponseError: function() {
-              console.log("There was an error when receiving the response");
-          },
-          onError: function() {
-              console.log("There was an error with the response handler");
-          },
-          onClose: function() {
-              console.log("The response handler was closed");
-          }
+        onResponse: function(sessionID: SessionId, response) {
+            console.log("Received response " + response);
+        },
+        onResponseError: function() {
+            console.log("There was an error when receiving the response");
+        },
     };
 
     session.messages.sendRequestToFilter('$Principal is "control"', 'foo/bar', 'Hello world', responseHandler);

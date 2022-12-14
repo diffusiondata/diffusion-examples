@@ -1,14 +1,20 @@
 {
     "compilerOptions" : {
-        "target" : "es6",
+        "target" : "es5",
         "module" : "commonjs",
-        "outDir" : "./js",
-        "sourceMap" : true,
-        "noImplicitAny" : true,
-        "declaration" : true,
+        "outDir" : "./target/build/js",
+        "baseUrl" : ".",
+        "sourceMap" : false,
+        "noImplicitAny" : false,
+        "allowJs" : false,
+        "declaration" : false,
         "strictNullChecks": true,
         "downlevelIteration": true,
-        "lib": ["es6"]
+        "lib": [
+            "es6",
+            "es2017.object"
+        ],
+        "traceResolution": false
     },
     "include": [
         "./src/**/*.ts",

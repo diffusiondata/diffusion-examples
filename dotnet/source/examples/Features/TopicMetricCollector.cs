@@ -1,5 +1,5 @@
 /**
- * Copyright © 2021 Push Technology Ltd.
+ * Copyright © 2021 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ namespace PushTechnology.ClientInterface.Example.Features
                 var builder = Diffusion.NewTopicMetricCollectorBuilder();
                 builder = (ITopicMetricCollectorBuilder)builder.ExportsToPrometheus(true);
                 builder = (ITopicMetricCollectorBuilder)builder.GroupByTopicType(true);
+                builder = (ITopicMetricCollectorBuilder)builder.GroupByTopicView(true);
                 builder = (ITopicMetricCollectorBuilder)builder.MaximumGroups(10);
                 builder = (ITopicMetricCollectorBuilder)builder.GroupByPathPrefixParts(1);
                 collector = builder.Create("Test", topicSelector);
@@ -78,7 +79,8 @@ namespace PushTechnology.ClientInterface.Example.Features
                               $"Maximum Groups: {topicMetricCollector.MaximumGroups}, " +
                               $"Exports to Prometheus: '{GetAnswer(topicMetricCollector.ExportsToPrometheus)}', " +
                               $"Group By Path Prefix Parts: {topicMetricCollector.GroupByPathPrefixParts}, " +
-                              $"Groups by topic type: '{GetAnswer(topicMetricCollector.GroupsByTopicType)}'");
+                              $"Groups by topic type: '{GetAnswer(topicMetricCollector.GroupsByTopicType)}', " +
+                              $"Groups by topic view: '{GetAnswer(topicMetricCollector.GroupsByTopicView)}'");
                 }
             }
             catch (Exception ex)

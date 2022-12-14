@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2018, 2021 Push Technology Ltd.
+ * Copyright © 2018 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,18 +73,6 @@ namespace PushTechnology.ClientInterface.Example.Publishing {
         /// </summary>
         private class RequestCallback : IFilteredRequestCallback<string> {
             public ISessionId SessionId { get; private set; }
-
-            /// <summary>
-            /// Indicates that the stream was closed.
-            /// </summary>
-            public void OnClose()
-                => WriteLine( "A request handler was closed." );
-
-            /// <summary>
-            /// Indicates error received by the callback.
-            /// </summary>
-            public void OnError( ErrorReason errorReason )
-                => WriteLine( $"A request handler has received error: '{errorReason}'." );
 
             /// <summary>
             /// Indicates that a response message was received.

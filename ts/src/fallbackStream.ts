@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019 Push Technology Ltd.
+ * Copyright (C) 2019 - 2022 Push Technology Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ import { connect, datatypes, topics, Session } from 'diffusion';
 
 // example showcasing how to add a fallback stream that receives updates for topics that
 // don't have a value stream
-export async function fallbackStreamExample() {
+export async function fallbackStreamExample(): Promise<void> {
 
     // Data Types are exposed from the top level Diffusion namespace. It is often easier
     // to assign these directly to a local variable.
@@ -41,7 +41,7 @@ export async function fallbackStreamExample() {
         // 1. Create a String topic type
         await session.topics.add('topic/foo', new TopicSpecification(TopicType.STRING));
         // Once the topic is added successfully then update it with a new value
-        await session.topics.updateValue('topic/foo', "foo-string", stringDataType);
+        await session.topicUpdate.set('topic/foo', stringDataType, "foo-string");
     } catch (error) {
         console.log("Fail to update topic 'foo': ", error);
     }
@@ -49,7 +49,7 @@ export async function fallbackStreamExample() {
     try {
         // Create another String topic type
         await session.topics.add('topic/bar', new TopicSpecification(TopicType.STRING));
-        await session.topics.updateValue('topic/bar', 'bar-string', stringDataType);
+        await session.topicUpdate.set('topic/bar', stringDataType, 'bar-string');
     } catch (error) {
         console.log("Fail to update topic 'bar': ", error);
     }
@@ -57,7 +57,7 @@ export async function fallbackStreamExample() {
     try {
         // And another String topic type
         await session.topics.add('topic/baz', new TopicSpecification(TopicType.STRING));
-        await session.topics.updateValue('topic/baz', "baz-string", stringDataType);
+        await session.topicUpdate.set('topic/baz', stringDataType, "baz-string");
     } catch (error) {
         console.log("Fail to update topic 'baz': ", error);
     }
