@@ -28,8 +28,4 @@
   <Import Project="..\Publishing\Publishing.projitems" Label="Shared" />
 
   <Import Project="..\Features\Features.projitems" Label="Shared" />
-
-  <Import Project="..\Manual\Manual.projitems" Label="Shared" />
-
-  <Import Project="..\Website\Website.projitems" Label="Shared" />
 </Project>

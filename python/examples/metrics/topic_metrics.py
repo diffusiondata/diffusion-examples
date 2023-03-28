@@ -1,4 +1,4 @@
-#  Copyright (c) 2021 - 2022 Push Technology Ltd., All Rights Reserved.
+#  Copyright (c) 2021-2023 Push Technology Ltd., All Rights Reserved.
 #
 #  Use is subject to license terms.
 #
@@ -65,7 +65,7 @@ Maximum Groups: {topic_metric_collector.maximum_groups}, \
 Topic selector: '{topic_metric_collector.topic_selector}', \
 Group By Path Prefix Parts: {topic_metric_collector.group_by_path_prefix_parts}, \
 Exports to Prometheus: '{topic_metric_collector.exports_to_prometheus}', \
-Groups by topic type: '{topic_metric_collector.groups_by_topic_type}'"""
+Groups by topic type: '{topic_metric_collector.groups_by_topic_type}''"""
                 )
         except Exception as ex:
             print(f"Failed to list topic metric collectors : {ex}.")
