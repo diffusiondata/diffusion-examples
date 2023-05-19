@@ -1,6 +1,6 @@
 {
   "name": "diffusion-examples",
-  "version": "6.8.8",
+  "version": "6.8.9",
   "description": "Examples for using the Diffusion JavaScript client",
   "main": "index.js",
   "directories": {

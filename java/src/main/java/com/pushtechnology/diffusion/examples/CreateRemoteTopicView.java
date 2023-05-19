@@ -33,7 +33,7 @@ import com.pushtechnology.diffusion.datatype.json.JSONDataType;
  * Two sessions are established and a remote topic view is created to map part
  * of the topic tree from the primary server to the secondary server
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.5
  */
 public final class CreateRemoteTopicView {

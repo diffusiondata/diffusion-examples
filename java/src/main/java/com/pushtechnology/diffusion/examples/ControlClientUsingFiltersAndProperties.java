@@ -30,7 +30,7 @@ import com.pushtechnology.diffusion.client.session.Session;
  * messages to clients using message filters. It also demonstrates the ability
  * to register a request handler with an interest in session property values.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.5
  */
 public final class ControlClientUsingFiltersAndProperties {

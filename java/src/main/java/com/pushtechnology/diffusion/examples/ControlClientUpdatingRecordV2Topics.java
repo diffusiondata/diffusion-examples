@@ -49,7 +49,7 @@ import com.pushtechnology.diffusion.datatype.recordv2.schema.Schema;
  * to demonstrate the different mechanisms and is not necessarily demonstrating
  * the most efficient way to update such a topic.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.0
  * @see ClientConsumingRecordV2Topics
  */

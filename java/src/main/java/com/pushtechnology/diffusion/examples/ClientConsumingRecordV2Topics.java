@@ -61,7 +61,7 @@ import com.pushtechnology.diffusion.datatype.recordv2.schema.SchemaParseExceptio
  * This example maintains a local map of the rates and also notifies a listener
  * of any rates changes.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.0
  * @see ControlClientUpdatingRecordV2Topics
  */

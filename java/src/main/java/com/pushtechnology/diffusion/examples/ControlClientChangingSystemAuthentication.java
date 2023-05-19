@@ -33,7 +33,7 @@ import com.pushtechnology.diffusion.client.session.Session;
  * <P>
  * This uses the {@link SystemAuthenticationControl} feature only.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.2
  */
 public class ControlClientChangingSystemAuthentication {

@@ -50,7 +50,7 @@ import com.pushtechnology.diffusion.client.topics.details.TopicType;
  * transferred when a session loses connection. The client handles transient
  * issues caused by cluster repartitioning.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.2
  */
 public final class CoordinatingSessionExample extends AbstractClient {

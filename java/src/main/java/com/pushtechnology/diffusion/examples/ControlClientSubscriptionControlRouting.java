@@ -32,7 +32,7 @@ import com.pushtechnology.diffusion.client.session.Session;
  * <P>
  * This uses the 'SubscriptionControl' feature.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.0
  */
 public class ControlClientSubscriptionControlRouting {

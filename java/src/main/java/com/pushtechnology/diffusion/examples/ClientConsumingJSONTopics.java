@@ -43,7 +43,7 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  * <P>
  * All updates will be notified to a listener.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.7
  * @see ControlClientUpdatingJSONTopics
  */

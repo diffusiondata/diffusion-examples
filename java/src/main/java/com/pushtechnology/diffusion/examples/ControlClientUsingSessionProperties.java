@@ -36,7 +36,7 @@ import com.pushtechnology.diffusion.client.session.SessionId;
  * It also has a method which makes use of filtered subscription to change the
  * topic that all matching clients are subscribed to.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.6
  */
 public final class ControlClientUsingSessionProperties {

@@ -38,7 +38,7 @@ import java.util.concurrent.TimeoutException;
  * To perform a partial update the topic must have a JSON value and the client
  * must have the 'update_topic' permission for the path.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.4
  * @see <a href="https://tools.ietf.org/html/rfc6902">JavaScript Object Notation (JSON) Patch</a>
  */

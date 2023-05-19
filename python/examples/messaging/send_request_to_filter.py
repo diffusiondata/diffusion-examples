@@ -31,8 +31,8 @@ filter_response_handler = diffusion.handlers.EventStreamHandler(
 
 
 # Messaging request callback function
-def callback(request: str, **kwargs) -> str:
-    return f"Hello there, {request}!"
+def callback(request: str, **kwargs) -> diffusion.datatypes.STRING:
+    return diffusion.datatypes.STRING(f"Hello there, {request}!")
 
 
 # request properties

@@ -13,8 +13,8 @@ credentials = diffusion.Credentials("password")
 
 
 # handler callback function
-def callback(request: str, context=None) -> str:
-    return f"Hello there, {request}!"
+def callback(request: str, context=None) -> diffusion.datatypes.STRING:
+    return diffusion.datatypes.STRING(f"Hello there, {request}!")
 
 
 path = "path"

@@ -40,7 +40,7 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  * <P>
  * This makes use of the 'Topics' feature only.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.2
  */
 public final class ClientUsingFetch {

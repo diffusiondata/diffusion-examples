@@ -26,7 +26,7 @@ import com.pushtechnology.diffusion.datatype.binary.Binary;
 /**
  * A client that consumes Binary topics.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.7
  */
 public final class ConsumingBinary extends AbstractClient {

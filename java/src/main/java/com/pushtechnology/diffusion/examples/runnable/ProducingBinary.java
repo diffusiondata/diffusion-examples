@@ -32,7 +32,7 @@ import com.pushtechnology.diffusion.datatype.binary.Binary;
 /**
  * A client that creates and updates Binary topics.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.7
  */
 public final class ProducingBinary extends AbstractClient {
