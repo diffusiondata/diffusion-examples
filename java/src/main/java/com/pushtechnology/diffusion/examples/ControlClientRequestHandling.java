@@ -39,7 +39,7 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  *
  * @see ClientRequestHandling
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.0
  */
 public class ControlClientRequestHandling {

@@ -28,7 +28,7 @@ import com.pushtechnology.diffusion.client.topics.details.TopicType;
 /**
  * A client that publishes an incrementing count to the topic 'foo/counter'.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.5
  */
 public final class PublishingClient {

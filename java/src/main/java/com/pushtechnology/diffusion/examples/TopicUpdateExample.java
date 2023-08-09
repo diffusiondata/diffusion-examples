@@ -36,7 +36,7 @@ import com.pushtechnology.diffusion.client.topics.details.TopicType;
 /**
  * Example showing the use of the {@link TopicUpdate} feature.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.2
  */
 public final class TopicUpdateExample {

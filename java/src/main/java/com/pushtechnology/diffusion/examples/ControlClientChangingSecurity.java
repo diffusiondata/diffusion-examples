@@ -37,7 +37,7 @@ import com.pushtechnology.diffusion.client.types.PathPermission;
  * <P>
  * This uses the {@link SecurityControl} feature only.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.3
  */
 public class ControlClientChangingSecurity {

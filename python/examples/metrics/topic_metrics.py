@@ -1,4 +1,4 @@
-#  Copyright (c) 2021 Push Technology Ltd., All Rights Reserved.
+#  Copyright (c) 2021-2023 Push Technology Ltd., All Rights Reserved.
 #
 #  Use is subject to license terms.
 #
@@ -57,10 +57,11 @@ Adding the topic metric collector 'Test' with topic selector '{topic_selector}'.
 
             for topic_metric_collector in list_topic_metric_collectors:
                 print(
-                    f"Name: '{topic_metric_collector.name}', "
-                    f"Topic selector: '{topic_metric_collector.topic_selector}', "
-                    f"Exports to Prometheus: '{topic_metric_collector.exports_to_prometheus}', "
-                    f"Groups by topic type: '{topic_metric_collector.groups_by_topic_type}'"
+                    f"""\
+Name: '{topic_metric_collector.name}', \
+Topic selector: '{topic_metric_collector.topic_selector}', \
+Exports to Prometheus: '{topic_metric_collector.exports_to_prometheus}', \
+Groups by topic type: '{topic_metric_collector.groups_by_topic_type}''"""
                 )
         except Exception as ex:
             print(f"Failed to list topic metric collectors : {ex}.")

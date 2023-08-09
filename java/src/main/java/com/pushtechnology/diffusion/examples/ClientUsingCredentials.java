@@ -27,7 +27,7 @@ import com.pushtechnology.diffusion.client.session.Session;
  * This is not a realistic use case on its own, but is shown separately here for
  * clarity.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.0
  */
 public class ClientUsingCredentials {

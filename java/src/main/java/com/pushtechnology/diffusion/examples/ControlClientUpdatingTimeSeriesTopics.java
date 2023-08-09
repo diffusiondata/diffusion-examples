@@ -41,7 +41,7 @@ import com.pushtechnology.diffusion.client.topics.details.TopicType;
  * Alternatively, the methods provided by the {@link TopicUpdate} feature can be
  * used. See {@link TopicUpdateExample} for example usages of this API.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.0
  * @see ClientConsumingTimeSeriesTopics
  * @see TimeSeriesQueryExample

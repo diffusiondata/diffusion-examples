@@ -30,7 +30,7 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
 /**
  * An example of creating a topic view.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.7
  */
  public final class CreateTopicView {

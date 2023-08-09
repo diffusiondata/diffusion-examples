@@ -54,7 +54,7 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  * subscribed, the ChatView will be asynchronously updated with new messages and
  * edits to existing messages.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.0
  */
 public final class TimeSeriesQueryExample {

@@ -31,7 +31,7 @@ import com.pushtechnology.diffusion.datatype.json.JSONDataType;
 /**
  * Example of basic publish / subscribe functionality.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.0
  */
 public class PubSubExample {

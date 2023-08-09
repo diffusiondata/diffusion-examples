@@ -34,7 +34,7 @@ import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
  * Examples for using the {@link TopicNotifications} feature to receive
  * notifications for the topic tree.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.0
  */
 public class ControlClientTopicNotifications {

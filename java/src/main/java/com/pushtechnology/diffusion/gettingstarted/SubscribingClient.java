@@ -26,7 +26,7 @@ import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 /**
  * A client that subscribes to the topic 'foo/counter.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.5
  */
 public class SubscribingClient {

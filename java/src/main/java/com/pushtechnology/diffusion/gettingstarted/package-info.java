@@ -16,7 +16,7 @@
 /**
  * This provides simple getting started examples using the Diffusion API.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.5
  */
 package com.pushtechnology.diffusion.gettingstarted;

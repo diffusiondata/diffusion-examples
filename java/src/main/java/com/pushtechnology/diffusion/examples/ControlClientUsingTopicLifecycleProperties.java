@@ -43,7 +43,7 @@ import com.pushtechnology.diffusion.client.topics.details.TopicType;
  * Also for simplicity all topic creations are blocking and there is no specific
  * error handling.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.1
  */
 public final class ControlClientUsingTopicLifecycleProperties {

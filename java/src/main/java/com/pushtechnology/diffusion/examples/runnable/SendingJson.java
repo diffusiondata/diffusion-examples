@@ -28,7 +28,7 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
 /**
  * A client that creates and sends JSON requests.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.7
  * @see ReceivingJson
  */

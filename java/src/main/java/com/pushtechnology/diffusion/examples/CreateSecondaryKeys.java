@@ -33,7 +33,7 @@ import com.pushtechnology.diffusion.datatype.json.JSONDataType;
  * It presents a simplified sportsbook and uses a topic view to create a
  * secondary key on the country sporting events take place in.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.3
  */
 public final class CreateSecondaryKeys implements AutoCloseable {

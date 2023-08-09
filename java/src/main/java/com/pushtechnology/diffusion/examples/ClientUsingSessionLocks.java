@@ -62,7 +62,7 @@ import com.pushtechnology.diffusion.client.types.PathPermission;
  * {@link PathPermission#ACQUIRE_LOCK ACQUIRE_LOCK} permission to
  * {@code lockA}.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.1
  */
 public class ClientUsingSessionLocks {

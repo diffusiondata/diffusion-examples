@@ -34,7 +34,7 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  * 'select_topic' and 'read_topic' permissions for that branch of the
  * topic tree.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.0
  */
 public final class ClientSimpleSubscriber {
