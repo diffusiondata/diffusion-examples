@@ -1,10 +1,10 @@
-#  Copyright (c) 2021-2023 Push Technology Ltd., All Rights Reserved.
+#  Copyright (c) 2021 - 2023 DiffusionData Ltd., All Rights Reserved.
 #
-#  Use is subject to license terms.
+#  Use is subject to licence terms.
 #
 #  NOTICE: All information contained herein is, and remains the
-#  property of Push Technology. The intellectual and technical
-#  concepts contained herein are proprietary to Push Technology and
+#  property of DiffusionData. The intellectual and technical
+#  concepts contained herein are proprietary to DiffusionData and
 #  may be covered by U.S. and Foreign Patents, patents in process, and
 #  are protected by trade secret or copyright law.
 
@@ -39,9 +39,10 @@ Adding the topic metric collector 'Test' with topic selector '{topic_selector}'.
 
             collector = (
                 TopicMetricCollectorBuilder()
-                .group_by_topic_type(True)
                 .maximum_groups(10)
                 .group_by_path_prefix_parts(55)
+                .group_by_topic_type(True)
+                .group_by_topic_view(True)
                 .create("Test", topic_selector)
             )
 
@@ -65,7 +66,8 @@ Maximum Groups: {topic_metric_collector.maximum_groups}, \
 Topic selector: '{topic_metric_collector.topic_selector}', \
 Group By Path Prefix Parts: {topic_metric_collector.group_by_path_prefix_parts}, \
 Exports to Prometheus: '{topic_metric_collector.exports_to_prometheus}', \
-Groups by topic type: '{topic_metric_collector.groups_by_topic_type}''"""
+Groups by topic type: '{topic_metric_collector.groups_by_topic_type}',
+Groups by topic view: '{topic_metric_collector.groups_by_topic_view}'"""
                 )
         except Exception as ex:
             print(f"Failed to list topic metric collectors : {ex}.")

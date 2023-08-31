@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2021 Push Technology Ltd.
+ * Copyright (C) 2014, 2023 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import com.pushtechnology.diffusion.client.topics.details.TopicType;
  * An example of registering a missing topic notification handler and processing
  * notifications using a control client.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  */
 public final class ControlClientHandlingMissingTopicNotification {
 

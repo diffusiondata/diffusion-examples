@@ -1,5 +1,5 @@
 /**
- * Copyright © 2021 Push Technology Ltd.
+ * Copyright © 2021 - 2023 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,25 @@
  *
  * This example is written in C99. Please use an appropriate C99 capable compiler
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.7
  */
 
-/*
- * This example creates, lists, checks and removes a remote server.
- */
+
+// This example creates, lists, checks and removes a remote server.
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
 #ifndef WIN32
-#include <unistd.h>
+        #include <unistd.h>
 #else
-#define sleep(x) Sleep(1000 * x)
+        #define sleep(x) Sleep(1000 * x)
 #endif
 
 #include "diffusion.h"
 #include "args.h"
+
 
 ARG_OPTS_T arg_opts[] = {
         ARG_OPTS_HELP,
@@ -41,6 +41,22 @@ ARG_OPTS_T arg_opts[] = {
         {'c', "credentials", "Credentials (password) for the connection", ARG_OPTIONAL, ARG_HAS_VALUE, "password"},
         END_OF_ARG_OPTS
 };
+
+
+static char *get_remote_server_type_string(
+        DIFFUSION_REMOTE_SERVER_TYPE_T type)
+{
+        switch (type) {
+                case DIFFUSION_REMOTE_SERVER_TYPE_PRIMARY_INITIATOR:
+                        return "primary initiator";
+                case DIFFUSION_REMOTE_SERVER_TYPE_SECONDARY_INITIATOR:
+                        return "secondary initiator";
+                case DIFFUSION_REMOTE_SERVER_TYPE_SECONDARY_ACCEPTOR:
+                        return "secondary acceptor";
+                default:
+                        return "unknown";
+        }
+}
 
 
 static char *get_connection_option_string(
@@ -85,24 +101,42 @@ static void print_remote_server(
         DIFFUSION_REMOTE_SERVER_T *remote_server)
 {
         char *name = diffusion_remote_server_get_name(remote_server);
-        char *principal = diffusion_remote_server_get_principal(remote_server);
-        char *url = diffusion_remote_server_get_url(remote_server);
-        char *missing_topic_notification_filter =
-                diffusion_remote_server_get_missing_topic_notification_filter(remote_server);
-        HASH_NUM_T *connection_options = diffusion_remote_server_get_connection_options(remote_server);
-
         printf("Name: %s\n", name);
-        printf("URL: %s\n", url);
-        printf("Principal: %s\n", principal);
-        printf("Missing Topic Notification Filter: %s\n", missing_topic_notification_filter);
-        printf("Connection Options:\n");
-        print_connection_options(connection_options);
-
         free(name);
-        free(principal);
-        free(url);
-        free(missing_topic_notification_filter);
-        hash_num_free(connection_options, free);
+
+        DIFFUSION_REMOTE_SERVER_TYPE_T type = diffusion_remote_server_get_type(remote_server);
+        printf("Type: %s\n", get_remote_server_type_string(type));
+
+        if (type == DIFFUSION_REMOTE_SERVER_TYPE_PRIMARY_INITIATOR) {
+                char *url = diffusion_remote_server_get_url(remote_server);
+                printf("URL: %s\n", url);
+                free(url);
+
+                printf("Retry delay: %d\n", diffusion_remote_server_get_retry_delay(remote_server));
+        }
+        else {
+                LIST_T *urls = diffusion_remote_server_get_urls(remote_server);
+                printf("URLS:\n");
+                for (int i = 0; i < list_get_size(urls); i++) {
+                        char *url = list_get_data_indexed(urls, i);
+                        printf("\t- %s\n", url);
+                }
+                list_free(urls, free);
+
+                char *principal = diffusion_remote_server_get_principal(remote_server);
+                printf("Principal: %s\n", principal);
+                free(principal);
+
+                char *missing_topic_notification_filter =
+                        diffusion_remote_server_get_missing_topic_notification_filter(remote_server);
+                printf("Missing Topic Notification Filter: %s\n", missing_topic_notification_filter);
+                free(missing_topic_notification_filter);
+
+                HASH_NUM_T *connection_options = diffusion_remote_server_get_connection_options(remote_server);
+                printf("Connection Options:\n");
+                print_connection_options(connection_options);
+                hash_num_free(connection_options, free);
+        }
 }
 
 
@@ -194,14 +228,11 @@ static int on_error(
         return HANDLER_SUCCESS;
 }
 
-/*
- * Program entry point.
- */
+
+// Program entry point.
 int main(int argc, char** argv)
 {
-        /*
-         * Standard command-line parsing.
-         */
+        // Standard command-line parsing.
         HASH_T *options = parse_cmdline(argc, argv, arg_opts);
         if(options == NULL || hash_get(options, "help") != NULL) {
                 show_usage(argc, argv, arg_opts);
@@ -216,9 +247,7 @@ int main(int argc, char** argv)
                 credentials = credentials_create_password(password);
         }
 
-        /*
-         * Create a session with the Diffusion server.
-         */
+        // Create a session with the Diffusion server.
         SESSION_T *session;
         DIFFUSION_ERROR_T error = { 0 };
         session = session_create(url, principal, credentials, NULL, NULL, &error);
@@ -228,67 +257,52 @@ int main(int argc, char** argv)
                 return EXIT_FAILURE;
         }
 
-        /*
-         * Create a remote server, using its builder
-         */
-        DIFFUSION_REMOTE_SERVER_BUILDER_T *builder =
-                diffusion_remote_server_builder_init();
+        // Create a secondary initiator remote server, using its builder
+        DIFFUSION_REMOTE_SERVER_BUILDER_T *builder = diffusion_remote_server_builder_init();
 
-        builder = diffusion_remote_server_builder_principal(
-                builder,
-                "admin");
-        builder = diffusion_remote_server_builder_missing_topic_notification_filter(
-                builder,
-                "*/A/B/C/D//");
-        builder = diffusion_remote_server_builder_connection_option(
-                builder,
-                DIFFUSION_REMOTE_SERVER_CONNECTION_OPTION_RECONNECTION_TIMEOUT,
-                "120000"); // milliseconds
-        builder = diffusion_remote_server_builder_connection_option(
-                builder,
-                DIFFUSION_REMOTE_SERVER_CONNECTION_OPTION_RETRY_DELAY,
-                "2000"); // milliseconds
-        builder = diffusion_remote_server_builder_connection_option(
-                builder,
-                DIFFUSION_REMOTE_SERVER_CONNECTION_OPTION_RECOVERY_BUFFER_SIZE,
-                "5000");
-        builder = diffusion_remote_server_builder_connection_option(
-                builder,
-                DIFFUSION_REMOTE_SERVER_CONNECTION_OPTION_INPUT_BUFFER_SIZE,
-                "1024"); // kilobytes
-        builder = diffusion_remote_server_builder_connection_option(
-                builder,
-                DIFFUSION_REMOTE_SERVER_CONNECTION_OPTION_OUTPUT_BUFFER_SIZE,
-                "2048"); // kilobytes
-        builder = diffusion_remote_server_builder_connection_option(
-                builder,
-                DIFFUSION_REMOTE_SERVER_CONNECTION_OPTION_MAXIMUM_QUEUE_SIZE,
-                "7500");
-        builder = diffusion_remote_server_builder_connection_option(
-                builder,
-                DIFFUSION_REMOTE_SERVER_CONNECTION_OPTION_CONNECTION_TIMEOUT,
-                "120000"); // milliseconds
-        builder = diffusion_remote_server_builder_connection_option(
-                builder,
-                DIFFUSION_REMOTE_SERVER_CONNECTION_OPTION_WRITE_TIMEOUT,
-                "300000"); // milliseconds
+        diffusion_remote_server_builder_principal(
+                builder, "admin"
+        );
+        diffusion_remote_server_builder_missing_topic_notification_filter(
+                builder, "*/A/B/C/D//"
+        );
+        diffusion_remote_server_builder_connection_option(
+                builder, DIFFUSION_REMOTE_SERVER_CONNECTION_OPTION_RECONNECTION_TIMEOUT, "120000"       // milliseconds
+        );
+        diffusion_remote_server_builder_connection_option(
+                builder, DIFFUSION_REMOTE_SERVER_CONNECTION_OPTION_RETRY_DELAY, "2000"                  // milliseconds
+        );
+        diffusion_remote_server_builder_connection_option(
+                builder, DIFFUSION_REMOTE_SERVER_CONNECTION_OPTION_RECOVERY_BUFFER_SIZE, "5000"
+        );
+        diffusion_remote_server_builder_connection_option(
+                builder, DIFFUSION_REMOTE_SERVER_CONNECTION_OPTION_INPUT_BUFFER_SIZE, "1024"            // kilobytes
+        );
+        diffusion_remote_server_builder_connection_option(
+                builder, DIFFUSION_REMOTE_SERVER_CONNECTION_OPTION_OUTPUT_BUFFER_SIZE, "2048"           // kilobytes
+        );
+        diffusion_remote_server_builder_connection_option(
+                builder, DIFFUSION_REMOTE_SERVER_CONNECTION_OPTION_MAXIMUM_QUEUE_SIZE, "7500"
+        );
+        diffusion_remote_server_builder_connection_option(
+                builder, DIFFUSION_REMOTE_SERVER_CONNECTION_OPTION_CONNECTION_TIMEOUT, "120000"         // milliseconds
+        );
+        diffusion_remote_server_builder_connection_option(
+                builder, DIFFUSION_REMOTE_SERVER_CONNECTION_OPTION_WRITE_TIMEOUT, "300000"              // milliseconds
+        );
 
         CREDENTIALS_T *remote_server_credentials = credentials_create_password("password");
-        builder = diffusion_remote_server_builder_credentials(
-                builder,
-                remote_server_credentials);
+        diffusion_remote_server_builder_credentials(builder, remote_server_credentials);
 
         DIFFUSION_API_ERROR api_error = { 0 };
-        DIFFUSION_REMOTE_SERVER_T *remote_server =
-                diffusion_remote_server_builder_create(
-                        builder,
-                        "remote server 1",          // remote server name
-                        "ws://localhost:9091",      // remote server URL
-                        &api_error);                // api error in case of invalid parameters
+        DIFFUSION_REMOTE_SERVER_T *remote_server = diffusion_remote_server_builder_create_secondary_initiator(
+                builder,
+                "remote server 1",      // remote server name
+                "ws://localhost:9091",  // remote server URL
+                &api_error              // api error in case of invalid parameters
+        );
 
-        /*
-         * Create the remote server definition in the Diffusion server
-         */
+        // Create the remote server definition in the Diffusion server
         DIFFUSION_CREATE_REMOTE_SERVER_PARAMS_T create_remote_server_params = {
                 .remote_server = remote_server,
                 .on_remote_server_created = on_remote_server_created,
@@ -297,9 +311,7 @@ int main(int argc, char** argv)
         diffusion_create_remote_server(session, create_remote_server_params, NULL);
         sleep(2);
 
-        /*
-         * List all remote servers defined in the Diffusion server
-         */
+        // List all remote servers defined in the Diffusion server
         DIFFUSION_LIST_REMOTE_SERVERS_PARAMS_T list_remote_servers_params = {
                 .on_remote_servers_listed = on_remote_servers_listed,
                 .on_error = on_error
@@ -307,9 +319,7 @@ int main(int argc, char** argv)
         diffusion_list_remote_servers(session, list_remote_servers_params, NULL);
         sleep(2);
 
-        /*
-         * Check remote server we created.
-         */
+        // Check remote server we created.
         DIFFUSION_CHECK_REMOTE_SERVER_PARAMS_T check_remote_server_params = {
                 .name = "remote server 1",
                 .on_remote_server_checked = on_remote_server_checked,
@@ -318,9 +328,7 @@ int main(int argc, char** argv)
         diffusion_check_remote_server(session, check_remote_server_params, NULL);
         sleep(2);
 
-        /*
-         * Remove remote server we created.
-         */
+        // Remove remote server we created.
         DIFFUSION_REMOVE_REMOTE_SERVER_PARAMS_T remove_remote_server_params = {
                 .name = "remote server 1",
                 .on_remote_server_removed = on_remote_server_removed,
@@ -329,9 +337,7 @@ int main(int argc, char** argv)
         diffusion_remove_remote_server(session, remove_remote_server_params, NULL);
         sleep(2);
 
-        /*
-         * Close session and free resources.
-         */
+        // Close session and free resources.
         session_close(session, NULL);
         session_free(session);
 

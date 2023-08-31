@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019 Push Technology Ltd.
+ * Copyright (C) 2019, 2023 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,10 @@
  *******************************************************************************/
 package com.pushtechnology.diffusion.examples;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.TopicUpdate;
 import com.pushtechnology.diffusion.client.features.TopicUpdate.JsonPatchResult;
@@ -22,10 +26,6 @@ import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 import com.pushtechnology.diffusion.datatype.json.JSONDataType;
-
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * This example demonstrates the use of partial update. A JSON patch is used to
@@ -38,7 +38,7 @@ import java.util.concurrent.TimeoutException;
  * To perform a partial update the topic must have a JSON value and the client
  * must have the 'update_topic' permission for the path.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.4
  * @see <a href="https://tools.ietf.org/html/rfc6902">JavaScript Object Notation (JSON) Patch</a>
  */

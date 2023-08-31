@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2015, 2018 Push Technology Ltd.
+ * Copyright (C) 2015, 2023 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package com.pushtechnology.diffusion.examples;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.control.clients.ClientControl;
@@ -36,7 +37,7 @@ import com.pushtechnology.diffusion.client.session.SessionId;
  * It also has a method which makes use of filtered subscription to change the
  * topic that all matching clients are subscribed to.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.6
  */
 public final class ControlClientUsingSessionProperties {
@@ -50,7 +51,8 @@ public final class ControlClientUsingSessionProperties {
     /**
      * Constructor.
      */
-    public ControlClientUsingSessionProperties() {
+    public ControlClientUsingSessionProperties()
+        throws Exception {
 
         session =
             Diffusion.sessions().principal("control").password("password")
@@ -66,7 +68,7 @@ public final class ControlClientUsingSessionProperties {
          * The country and department properties only are requested.
          */
         clientControl.setSessionPropertiesListener(
-            new ClientControl.SessionPropertiesListener.Default() {
+            new ClientControl.SessionPropertiesStream.Default() {
                 @Override
                 public void onSessionOpen(
                     SessionId sessionId,
@@ -81,7 +83,8 @@ public final class ControlClientUsingSessionProperties {
                     }
                 }
             },
-            "$Country", "$Department");
+            "$Country", "$Department").get(5, TimeUnit.SECONDS);
+
     }
 
     /**

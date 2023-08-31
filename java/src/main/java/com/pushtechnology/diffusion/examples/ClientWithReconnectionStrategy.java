@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2015 Push Technology Ltd.
+ * Copyright (C) 2014, 2023 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import com.pushtechnology.diffusion.client.session.reconnect.ReconnectionStrateg
  * This example class demonstrates the ability to set a custom
  * {@link ReconnectionStrategy} when creating sessions.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.5
  */
 public class ClientWithReconnectionStrategy {

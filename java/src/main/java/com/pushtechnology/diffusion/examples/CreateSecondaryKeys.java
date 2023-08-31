@@ -1,11 +1,11 @@
 /*******************************************************************************
- * Copyright (c) 2019 Push Technology Ltd., All Rights Reserved.
+ * Copyright (c) 2019, 2023 DiffusionData Ltd., All Rights Reserved.
  *
  * Use is subject to license terms.
  *
  * NOTICE: All information contained herein is, and remains the
- * property of Push Technology. The intellectual and technical
- * concepts contained herein are proprietary to Push Technology and
+ * property of DiffusionData. The intellectual and technical
+ * concepts contained herein are proprietary to DiffusionData and
  * may be covered by U.S. and Foreign Patents, patents in process, and
  * are protected by trade secret or copyright law.
  *******************************************************************************/
@@ -33,7 +33,7 @@ import com.pushtechnology.diffusion.datatype.json.JSONDataType;
  * It presents a simplified sportsbook and uses a topic view to create a
  * secondary key on the country sporting events take place in.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.3
  */
 public final class CreateSecondaryKeys implements AutoCloseable {

@@ -1,7 +1,7 @@
 package com.pushtechnology.diffusion.examples;
 
 /*******************************************************************************
- * Copyright (C) 2021 Push Technology Ltd.
+ * Copyright (C) 2021, 2023 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
 /**
  * An example of creating a topic view.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.7
  */
  public final class CreateTopicView {

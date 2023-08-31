@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016, 2019 Push Technology Ltd.
+ * Copyright (C) 2016, 2023 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
 /**
  * A client that creates and updates JSON topics.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.7
  */
 public final class ProducingJson extends AbstractClient {

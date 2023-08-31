@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2022 Push Technology Ltd.
+ * Copyright © 2022 - 2023 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using PushTechnology.ClientInterface.Client.Factories;
+using PushTechnology.ClientInterface.Client.Features;
 using PushTechnology.ClientInterface.Client.Session;
 using PushTechnology.ClientInterface.Client.Topics;
 using static System.Console;
@@ -78,7 +79,7 @@ namespace PushTechnology.ClientInterface.Example.Publishing {
                 return;
             }
 
-            var updateConstraint = Diffusion.UpdateConstraints.Value("Value1");
+            var updateConstraint = Diffusion.UpdateConstraints.Value(UpdateConstraintOperator.IS, "Value1");
             builder = builder.Constraint(updateConstraint);
             var stream2 = builder.Build<string>(topicPath);
 
@@ -93,6 +94,21 @@ namespace PushTechnology.ClientInterface.Example.Publishing {
                 WriteLine($"Failed to update topic '{topicPath}' : {ex}.");
                 session.Close();
                 return;
+            }
+
+            var retryInterval = 100; // In milliseconds
+            var numberOfRetries = 5;
+            var stream3 = builder.Build<string>(topicPath, new RetryStrategy(retryInterval, numberOfRetries));
+
+            // Set the topic value with retry strategy
+            try
+            {
+                await stream3.SetAsync("Value3");
+                WriteLine($"Topic value set successfully with 'Value3'.");
+            }
+            catch (Exception ex)
+            {
+                WriteLine($"Failed to update topic '{topicPath}' : {ex}.");
             }
 
             // Close the session

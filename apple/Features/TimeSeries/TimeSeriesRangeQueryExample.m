@@ -1,6 +1,6 @@
 //  Diffusion Client Library for iOS, tvOS and OS X / macOS - Examples
 //
-//  Copyright (C) 2020 Push Technology Ltd.
+//  Copyright (C) 2020 - 2023 DiffusionData Ltd.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@
          // append value to the topic (Publisher)
          [self appendValue:@"hello world!" toTimeSeriesTopic:topicPath usingSession:session];
          [self appendValue:@"Diffusion" toTimeSeriesTopic:topicPath usingSession:session];
-         [self appendValue:@"Push Technology" toTimeSeriesTopic:topicPath usingSession:session];
+         [self appendValue:@"DiffusionData" toTimeSeriesTopic:topicPath usingSession:session];
 
          // range query to see the topic values after append
          [self rangeQueryValuesOfTopic:topicPath usingSession:session];

@@ -1,6 +1,6 @@
 //  Diffusion Client Library for iOS, tvOS and OS X / macOS - Examples
 //
-//  Copyright (C) 2021 Push Technology Ltd.
+//  Copyright (C) 2021 - 2023 DiffusionData Ltd.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -53,11 +53,11 @@
         PTDiffusionCredentials *remoteServerCredentials = PTDiffusionCredentials.noCredentials;
 
         // use the builder to create the remote server object
-        PTDiffusionRemoteServer *const remoteServer =
+        PTDiffusionSecondaryInitiatorRemoteServer *const remoteServer =
             [[[[PTDiffusionRemoteServerBuilder new]
                principal:remoteServerPrincipal]
               credentials:remoteServerCredentials]
-             createWithName:@"New remote server" andURL:@"ws://new.server.url.com"];
+             createSecondaryInitiatorWithName:@"New remote server" andURL:@"ws://new.server.url.com"];
 
         // creating a remote server with default Connection Options
         [session.remoteServers createRemoteServer:remoteServer
@@ -91,12 +91,12 @@
                                                 PTDiffusionRemoteServerConnectionOption.connectionTimeout: @"15000"
             };
 
-            PTDiffusionRemoteServer *const remoteServer_2 =
+            PTDiffusionSecondaryInitiatorRemoteServer *const remoteServer_2 =
                 [[[[[PTDiffusionRemoteServerBuilder new]
                     principal:remoteServerPrincipal]
                    credentials:remoteServerCredentials]
                   connectionOptions:connectionOptions]
-                 createWithName:@"New remote server 2" andURL:@"ws://another.server.url.com"];
+                 createSecondaryInitiatorWithName:@"New remote server 2" andURL:@"ws://another.server.url.com"];
 
             [session.remoteServers createRemoteServer:remoteServer_2
                                     completionHandler:^(PTDiffusionCreateRemoteServerResult * _Nullable result,

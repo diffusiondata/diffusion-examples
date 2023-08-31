@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2020 Push Technology Ltd.
+ * Copyright (C) 2014, 2023 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +38,7 @@ import com.pushtechnology.diffusion.client.types.PathPermission;
  * <P>
  * This uses the {@link SecurityControl} feature only.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.3
  */
 public class ControlClientChangingSecurity {

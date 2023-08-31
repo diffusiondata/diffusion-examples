@@ -1,5 +1,5 @@
 /**
- * Copyright © 2021 Push Technology Ltd.
+ * Copyright © 2021 - 2023 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,8 +43,8 @@ namespace PushTechnology.ClientInterface.Example.Features
 
             IRemoteServer server = null;
 
-            var builder = Diffusion.NewRemoteServerBuilder();
-            var remoteServer1 = builder
+            var builder = (ISecondaryInitiatorBuilder)Diffusion<ISecondaryInitiatorBuilder>.NewRemoteServerBuilder(RemoteServerType.SECONDARY_INITIATOR);
+            var secondaryInitiator = builder
                         .Principal("principal")
                         .Credentials(Diffusion.Credentials.Password("password"))
                         .ConnectionOptions(new Dictionary<RemoteServerConnectionOption, string>()
@@ -54,11 +54,11 @@ namespace PushTechnology.ClientInterface.Example.Features
                                             { RemoteServerConnectionOption.WRITE_TIMEOUT, "2000" }
                                             })
                         .MissingTopicNotificationFilter("filter")
-                        .Create("Server1", "ws://host:8080");
+                        .Build("Server1", "ws://host:8080");
 
             try
             {
-                server = await session.RemoteServers.CreateRemoteServerAsync(remoteServer1);
+                server = await session.RemoteServers.CreateRemoteServerAsync(secondaryInitiator);
 
                 WriteLine($"Remote server '{server.Name}' was created.");
             }
@@ -79,7 +79,7 @@ namespace PushTechnology.ClientInterface.Example.Features
                 {
                     WriteLine($"Name: '{remoteServer.Name}', Url: '{remoteServer.ServerUrl}', Principal: '{remoteServer.Principal}', Missing Topic Notification Filter: '{remoteServer.MissingTopicNotificationFilter}'");
 
-                    foreach(var connectionOption in remoteServer.ConnectionOptions)
+                    foreach (var connectionOption in remoteServer.ConnectionOptions)
                     {
                         WriteLine($"Connection Option: '{connectionOption.Key}', Value: '{connectionOption.Value}'");
                     }

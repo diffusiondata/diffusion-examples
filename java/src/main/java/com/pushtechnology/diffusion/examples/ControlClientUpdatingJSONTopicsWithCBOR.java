@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2021 Push Technology Ltd.
+ * Copyright (C) 2021, 2023 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ import com.pushtechnology.diffusion.datatype.json.JSONDataType;
  * and so subsequent set calls can compare with the last value
  * and send only the differences to the server.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.8
  * @see ClientConsumingJSONTopics
  */

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018, 2019 Push Technology Ltd.
+ * Copyright (C) 2018, 2023 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import com.pushtechnology.diffusion.client.topics.details.TopicType;
  * Also for simplicity all topic creations are blocking and there is no specific
  * error handling.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.1
  */
 public final class ControlClientUsingTopicLifecycleProperties {

@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2019, 2021 Push Technology Ltd.
+ * Copyright © 2019 - 2023 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

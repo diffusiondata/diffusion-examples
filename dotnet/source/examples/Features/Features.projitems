@@ -33,7 +33,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)SessionTrees.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SecurityControl.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RemoteServers.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SubscriptionControlRoutingHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SubscriptionControlSubscribe.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SubscriptionControlSubscribeFilter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TopicViews.cs" />

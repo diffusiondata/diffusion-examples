@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018, 2022 Push Technology Ltd.
+ * Copyright (C) 2018, 2023 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package com.pushtechnology.diffusion.examples.runnable;
 
 import static com.pushtechnology.diffusion.client.Diffusion.newTopicSpecification;
+import static com.pushtechnology.diffusion.client.features.UpdateConstraint.Operator.IS;
 import static com.pushtechnology.diffusion.client.topics.details.TopicType.INT64;
 
 import java.util.concurrent.Executors;
@@ -55,7 +56,7 @@ import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
  * constraint. If another session has changed the topic value, the update will
  * fail and the client will retry with the latest known value.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.2
  */
 public final class CompetitiveIncrement extends AbstractClient {
@@ -185,7 +186,7 @@ public final class CompetitiveIncrement extends AbstractClient {
                 "long/increment",
                 Long.class,
                 currentValue + 1,
-                CONSTRAINTS.value(currentValue))
+                CONSTRAINTS.value(IS, currentValue))
             .whenComplete((result, ex) -> {
                 if (ex != null) {
                     // Handle any failure

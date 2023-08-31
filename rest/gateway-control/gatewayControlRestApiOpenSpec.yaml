@@ -1,0 +1,1024 @@
+openapi: 3.0.3
+info:
+  title: Open API 3.0 specification document for Gateway Control API
+  description: |-
+    This document presents complete specification about the Gateway Control REST API and all endpoints it supports. The Gateway Control REST API can be used to manage Gateway clients connected to a Diffusion server. 
+
+  contact:
+    email: support@diffusiondata.com
+  version: 1.0.0
+externalDocs:
+  description: Find out more about Diffusion data
+  url: http://www.diffusiondata.com
+servers:
+  - url: https://localhost:8080/rest/
+tags:
+  - name: session token
+    description: Operations on session tokens
+  - name: client
+    description: Operations on connected Gateway clients
+    externalDocs:
+      description: Find out more about Gateway clients
+      url: http://www.diffusiondata.com
+  - name: service
+    description: Operations on a service of a Gateway client
+    externalDocs:
+      description: Find out more about services
+      url: http://www.diffusiondata.com
+  - name: sharedConfig
+    description: Operations on the sharedConfig of a Gateway client
+    externalDocs:
+      description: Find out more about sharedConfigs
+      url: http://www.diffusiondata.com
+
+paths:
+  /login:
+    post:
+      tags:
+        - session token
+      summary: Obtain a session token.
+      description: This is the first call that needs to be made, before calling any REST endpoints as all other endpoints are required to pass a session token in their header.
+      operationId: login
+      security:
+        - basicAuth: []
+      requestBody:
+        description: Details required to login and establish session with server.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        '401':
+          description: Authentication failed due to invalid principal/password
+        '400':
+          $ref: '#/components/responses/malformedRequest'
+
+  /logout:
+    delete:
+      tags:
+        - session token
+      summary: Invalidate the session token.
+      description: This endpoint can be called to invalidate the created session token. Once the token is invalidated, it cannot be used again for the REST calls.
+      operationId: logout
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful operation
+        '404':
+          description: "Session token not found"
+        '400':
+          $ref: '#/components/responses/malformedRequest'
+
+  /gateway/v1/clients:
+    get:
+      tags:
+        - client
+      summary: Get details of all clients that are registered or connected to the server.
+      description: Returns a list of details for all Gateway clients that are registered or connected to the server. The result can be filtered by passing a list of types and IDs of clients in the request URL. If no parameters are supplied, all available client details will be returned.
+      operationId: getClients
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: types
+          in: query
+          description: A comma separated list of client types that are used to filter the result.
+          example: 'kafka-adapter,cdc-adapter'
+          required: false
+          schema:
+            type: string
+        - name: ids
+          in: query
+          description: A comma separated list of client IDs that are used to filter the result.
+          example: 'local-adapter'
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Client'
+        '500':
+          $ref: '#/components/responses/serverError'
+        '401':
+          $ref: '#/components/responses/sessionAuthFailure'
+        '400':
+          $ref: '#/components/responses/malformedRequest'
+        '403':
+          $ref: '#/components/responses/unauthorized'
+
+  /gateway/v1/client/configuration:
+    get:
+      tags:
+        - client
+      summary: Get the complete configuration of the client.
+      operationId: getClientConfiguration
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: clientSessionId
+          in: query
+          description: The session ID of the client.
+          example: '79a0d3295db21d31-0000000000000001'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Configuration'
+        '500':
+          $ref: '#/components/responses/serverError'
+        '401':
+          $ref: '#/components/responses/sessionAuthFailure'
+        '400':
+          $ref: '#/components/responses/malformedRequest'
+        '403':
+          $ref: '#/components/responses/unauthorized'
+        '404':
+          $ref: '#/components/responses/notFound'
+
+  /gateway/v1/client/status:
+    get:
+      tags:
+        - client
+      summary: Get the complete status of the client.
+      operationId: getClientStatus
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: clientSessionId
+          in: query
+          description: The session ID of the client.
+          example: '79a0d3295db21d31-0000000000000001'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Status'
+        '500':
+          $ref: '#/components/responses/serverError'
+        '401':
+          $ref: '#/components/responses/sessionAuthFailure'
+        '400':
+          $ref: '#/components/responses/malformedRequest'
+        '403':
+          $ref: '#/components/responses/unauthorized'
+        '404':
+          $ref: '#/components/responses/notFound'
+
+  /gateway/v1/client/operations:
+    get:
+      tags:
+        - client
+      summary: Get the list of operations supported by the client.
+      operationId: getClientOperations
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: clientSessionId
+          in: query
+          description: The session ID of the client.
+          example: '79a0d3295db21d31-0000000000000001'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Operation'
+        '500':
+          $ref: '#/components/responses/serverError'
+        '401':
+          $ref: '#/components/responses/sessionAuthFailure'
+        '400':
+          $ref: '#/components/responses/malformedRequest'
+        '403':
+          $ref: '#/components/responses/unauthorized'
+        '404':
+          $ref: '#/components/responses/notFound'
+
+  /gateway/v1/client/operation/invoke:
+    post:
+      tags:
+        - client
+      summary: Invoke an operation on the client.
+      operationId: invokeClientOperation
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: clientSessionId
+          in: query
+          description: The session ID of the client.
+          example: '79a0d3295db21d31-0000000000000001'
+          required: true
+          schema:
+            type: string
+        - name: operationName
+          in: query
+          description: The name of operation to invoke.
+          example: 'pause'
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Details required to invoke an operation against the client session.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OperationRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationResponse'
+        '500':
+          $ref: '#/components/responses/serverError'
+        '401':
+          $ref: '#/components/responses/sessionAuthFailure'
+        '400':
+          $ref: '#/components/responses/malformedRequest'
+        '403':
+          $ref: '#/components/responses/unauthorized'
+        '404':
+          $ref: '#/components/responses/notFound'
+
+  /gateway/v1/client/serviceTypes:
+    get:
+      tags:
+        - client
+      summary: Get the list of serviceTypes supported by the client.
+      operationId: getServiceTypes
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: clientSessionId
+          in: query
+          description: The session ID of the client.
+          example: '79a0d3295db21d31-0000000000000001'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ServiceTypes'
+        '500':
+          $ref: '#/components/responses/serverError'
+        '401':
+          $ref: '#/components/responses/sessionAuthFailure'
+        '400':
+          $ref: '#/components/responses/malformedRequest'
+        '403':
+          $ref: '#/components/responses/unauthorized'
+        '404':
+          $ref: '#/components/responses/notFound'
+
+  /gateway/v1/client/sharedConfigTypes:
+    get:
+      tags:
+        - client
+      summary: Get the list of sharedConfigTypes supported by the client
+      operationId: getSharedConfigTypes
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: clientSessionId
+          in: query
+          description: The session ID of the client.
+          example: '79a0d3295db21d31-0000000000000001'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SharedConfigTypes'
+        '500':
+          $ref: '#/components/responses/serverError'
+        '401':
+          $ref: '#/components/responses/sessionAuthFailure'
+        '400':
+          $ref: '#/components/responses/malformedRequest'
+        '403':
+          $ref: '#/components/responses/unauthorized'
+        '404':
+          $ref: '#/components/responses/notFound'
+
+  /gateway/v1/sub/configuration:
+    get:
+      tags:
+        - client
+      summary: Get the configuration of a service or sharedConfig instance.
+      operationId: getSubConfiguration
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: clientSessionId
+          in: query
+          description: The session ID of the client.
+          example: '79a0d3295db21d31-0000000000000001'
+          required: true
+          schema:
+            type: string
+        - name: type
+          in: query
+          description: The type of service or sharedConfig instance
+          required: true
+          schema:
+            type: string
+        - name: name
+          in: query
+          description: The name of service or sharedConfig instance
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Configuration'
+        '500':
+          $ref: '#/components/responses/serverError'
+        '401':
+          $ref: '#/components/responses/sessionAuthFailure'
+        '400':
+          $ref: '#/components/responses/malformedRequest'
+        '403':
+          $ref: '#/components/responses/unauthorized'
+        '404':
+          $ref: '#/components/responses/notFound'
+
+    delete:
+      tags:
+        - client
+      summary: Delete existing service or sharedConfig instance
+      operationId: deleteSubConfiguration
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: clientSessionId
+          in: query
+          description: The session ID of client
+          example: '79a0d3295db21d31-0000000000000001'
+          required: true
+          schema:
+            type: string
+        - name: type
+          in: query
+          description: The type of service or sharedConfig instance
+          required: true
+          schema:
+            type: string
+        - name: name
+          in: query
+          description: The name of service or sharedConfig instance
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+        '500':
+          $ref: '#/components/responses/serverError'
+        '401':
+          $ref: '#/components/responses/sessionAuthFailure'
+        '400':
+          $ref: '#/components/responses/malformedRequest'
+        '403':
+          $ref: '#/components/responses/unauthorized'
+        '404':
+          $ref: '#/components/responses/notFound'
+
+  /gateway/v1/service/operations:
+    get:
+      tags:
+        - service
+      summary: Get the list of operations of the service.
+      operationId: getServiceOperations
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: clientSessionId
+          in: query
+          description: The session ID of the client.
+          example: '79a0d3295db21d31-0000000000000001'
+          required: true
+          schema:
+            type: string
+        - name: serviceType
+          in: query
+          description: The service type name
+          required: true
+          schema:
+            type: string
+        - name: serviceName
+          in: query
+          description: The service name
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Operation'
+        '500':
+          $ref: '#/components/responses/serverError'
+        '401':
+          $ref: '#/components/responses/sessionAuthFailure'
+        '400':
+          $ref: '#/components/responses/malformedRequest'
+        '403':
+          $ref: '#/components/responses/unauthorized'
+        '404':
+          $ref: '#/components/responses/notFound'
+
+
+  /gateway/v1/service/statuses:
+    get:
+      tags:
+        - service
+      summary: Get the list of statuses of the service.
+      operationId: getServiceStatuses
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: clientSessionId
+          in: query
+          description: The session ID of client.
+          example: '79a0d3295db21d31-0000000000000001'
+          required: true
+          schema:
+            type: string
+        - name: serviceType
+          in: query
+          description: The service type name
+          required: true
+          schema:
+            type: string
+        - name: serviceName
+          in: query
+          description: The service name
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Status'
+        '500':
+          $ref: '#/components/responses/serverError'
+        '401':
+          $ref: '#/components/responses/sessionAuthFailure'
+        '400':
+          $ref: '#/components/responses/malformedRequest'
+        '403':
+          $ref: '#/components/responses/unauthorized'
+        '404':
+          $ref: '#/components/responses/notFound'
+
+
+  /gateway/v1/service/operation/invoke:
+    post:
+      tags:
+        - service
+      summary: Invoke an operation against the service.
+      operationId: invokeServiceOperation
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: clientSessionId
+          in: query
+          description: The session ID of the client.
+          example: '79a0d3295db21d31-0000000000000001'
+          required: true
+          schema:
+            type: string
+        - name: operationName
+          in: query
+          description: The name of operation to invoke.
+          example: 'pause'
+          required: true
+          schema:
+            type: string
+        - name: serviceType
+          in: query
+          description: The service type name
+          required: true
+          schema:
+            type: string
+        - name: serviceName
+          in: query
+          description: The service name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Details required to invoke an operation against the service of the client.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OperationRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationResponse'
+        '500':
+          $ref: '#/components/responses/serverError'
+        '401':
+          $ref: '#/components/responses/sessionAuthFailure'
+        '400':
+          $ref: '#/components/responses/malformedRequest'
+        '403':
+          $ref: '#/components/responses/unauthorized'
+        '404':
+          $ref: '#/components/responses/notFound'
+
+  /gateway/v1/service:
+    post:
+      tags:
+        - service
+      summary: Add a new service
+      operationId: AddService
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: clientSessionId
+          in: query
+          description: The session ID of client
+          example: '79a0d3295db21d31-0000000000000001'
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Details required to add a new service to the client.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Service'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
+        '500':
+          $ref: '#/components/responses/serverError'
+        '401':
+          $ref: '#/components/responses/sessionAuthFailure'
+        '400':
+          $ref: '#/components/responses/malformedRequest'
+        '403':
+          $ref: '#/components/responses/unauthorized'
+        '404':
+          $ref: '#/components/responses/notFound'
+
+    put:
+      tags:
+        - service
+      summary: Update existing service
+      operationId: updateService
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: clientSessionId
+          in: query
+          description: The session ID of client
+          example: '79a0d3295db21d31-0000000000000001'
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: New service details
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Service'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
+        '500':
+          $ref: '#/components/responses/serverError'
+        '401':
+          $ref: '#/components/responses/sessionAuthFailure'
+        '400':
+          $ref: '#/components/responses/malformedRequest'
+        '403':
+          $ref: '#/components/responses/unauthorized'
+        '404':
+          $ref: '#/components/responses/notFound'
+
+  /gateway/v1/sharedConfig:
+    post:
+      tags:
+        - sharedConfig
+      summary: Add a new sharedConfig instance to the client.
+      operationId: AddSharedConfig
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: clientSessionId
+          in: query
+          description: The session ID of the client.
+          example: '79a0d3295db21d31-0000000000000001'
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Details required to add a new sharedConfig to the client.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SharedConfig'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SharedConfig'
+        '500':
+          $ref: '#/components/responses/serverError'
+        '401':
+          $ref: '#/components/responses/sessionAuthFailure'
+        '400':
+          $ref: '#/components/responses/malformedRequest'
+        '403':
+          $ref: '#/components/responses/unauthorized'
+        '404':
+          $ref: '#/components/responses/notFound'
+    put:
+      tags:
+        - sharedConfig
+      summary: Update an existing sharedConfig instance of the client.
+      operationId: updateSharedConfig
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: clientSessionId
+          in: query
+          description: The session ID of the client.
+          example: '79a0d3295db21d31-0000000000000001'
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: New sharedConfig details
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SharedConfig'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SharedConfig'
+        '500':
+          $ref: '#/components/responses/serverError'
+        '401':
+          $ref: '#/components/responses/sessionAuthFailure'
+        '400':
+          $ref: '#/components/responses/malformedRequest'
+        '403':
+          $ref: '#/components/responses/unauthorized'
+        '404':
+          $ref: '#/components/responses/notFound'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+    basicAuth:
+      type: http
+      scheme: basic
+
+  schemas:
+    Token:
+      required:
+        - token
+      type: object
+      properties:
+        token:
+          type: string
+          description: Authentication token to be used for successive calls.
+          example: "90a0d3295db21d31-0000000000000001"
+    ClientKey:
+      required:
+        - id
+        - type
+      type: object
+      properties:
+        id:
+          type: string
+          description: "Gateway client identifier"
+          example: "Kafka-application-1"
+        type:
+          type: string
+          description: "Type of Gateway client. The combination of Gateway ID and type formulates a unique identifier for the gateway client instance which is connected to the Diffusion server."
+          example: "KafkaAdapter"
+    ConnectedClients:
+      type: object
+      properties:
+        activeSessionId:
+          type: string
+          description: "Session ID of the active gateway client, which is connected to the Diffusion server"
+          example: "79a0d3295db21d31-0000000000000001"
+        passiveSessionIds:
+          description: "The list of session IDs of passive gateway clients which are connected to the Diffusion server"
+          type: array
+          items:
+            type: string
+          example: ["79a0d3295db21d31-0000000000000002", "79a0d3295db21d31-0000000000000003"]
+        configurationMode:
+          type: string
+          description: "Configuration mode of the active client instance"
+          enum:
+            - DYNAMIC
+            - STATIC
+    Client:
+      required:
+        - key
+      type: object
+      properties:
+        key:
+          $ref: '#/components/schemas/ClientKey'
+        connectedClients:
+          $ref: '#/components/schemas/ConnectedClients'
+    Configuration:
+      required:
+        - schema
+        - configuration
+      type: object
+      properties:
+        schema:
+          type: object
+          description: "JSON Schema of the configuration"
+        configuration:
+          type: object
+          description: "Complete configuration of the client as a JSON string"
+    LoginRequest:
+      required:
+        - sessionProperties
+      type: object
+      properties:
+        sessionProperties:
+          type: object
+          description: "Key-value pair of session properties to use for session authentication"
+    Status:
+      required:
+        - level
+        - timestamp
+        - title
+        - description
+      type: object
+      properties:
+        level:
+          type: string
+          description: "Level of status"
+          enum:
+            - GREEN
+            - AMBER
+            - RED
+        timestamp:
+          type: string
+          description: "The timestamp instant when the event occurred"
+          example: "Wed Jan 04 2023 16:11:10 GMT+0000"
+        title:
+          type: string
+          description: "Title of the status"
+          example: "Diffusion topic subscription"
+        description:
+          type: string
+          description: "Description of the status"
+          example: "Subscribed to selector: ?kafka//"
+    Operation:
+      required:
+        - name
+        - summary
+        - description
+        - inputSchema
+        - outputSchema
+      type: object
+      properties:
+        name:
+          type: string
+          description: "Name of operation"
+          example: "Pause"
+        summary:
+          type: string
+          description: "A short summary of what the operation does"
+          example: "Pauses all active services"
+        description:
+          type: string
+          description: A detailed description of what the operation does, how to use it, and what results to expect.
+        inputSchema:
+          type: object
+          description: A JSON schema which describes the input to the operation. An empty object means that the operation has no required input.
+        outputSchema:
+          type: object
+          description: A JSON schema which describes the output from the operation. An empty object means that the operation has no output.
+
+    OperationRequest:
+      required:
+        - input
+      type: object
+      properties:
+        input:
+          type: object
+          description: The JSON input required for the operation, or null if the operation does not require input.
+
+    OperationResponse:
+      required:
+        - output
+      type: object
+      properties:
+        output:
+          type: string
+          description: The response after invoking an operation.
+          example: "Success"
+
+    ServiceTypes:
+      required:
+        - name
+        - description
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the service type.
+          example: "PUBLISHING_SOURCE"
+        description:
+          type: string
+          description: Defines the functionality of the service type.
+          example: Consumes from a JSON Diffusion topic and publishes to Kafka.
+        schema:
+          type: object
+          description: The JSON schema which describes the input required in order to define a service of this type.
+
+    SharedConfigTypes:
+      required:
+        - name
+        - description
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the sharedConfig type.
+          example: "KAFKA_CONNECTION_DETAIL"
+        description:
+          type: string
+          description: Defines detail about the sharedConfig type.
+          example: Shared configuration containing the Kafka cluster connection details, which can be used for all service types.
+        schema:
+          type: object
+          description: The JSON schema which describes the input required in order to define a sharedConfig of this type.
+
+    Service:
+      required:
+        - serviceName
+        - serviceType
+        - description
+        - config
+      type: object
+      properties:
+        serviceName:
+          type: string
+          description: Name of the service.
+        serviceType:
+          type: string
+          description: Type of the service.
+        description:
+          type: string
+          description: Defines detail about the service.
+        configuration:
+          $ref: '#/components/schemas/ServiceConfiguration'
+
+    SharedConfig:
+      required:
+        - id
+        - description
+        - configuration
+      type: object
+      properties:
+        sharedConfigName:
+          type: string
+          description: Name of the sharedConfig.
+        sharedConfigType:
+          type: string
+          description: Type of the sharedConfig.
+        description:
+          type: string
+          description: Defines detail about the sharedConfig.
+        config:
+          type: object
+          description: The JSON configuration of the sharedConfig.
+
+    ServiceConfiguration:
+      type: object
+      properties:
+        sharedConfigName:
+          type: string
+          description: The name of shared configuration.
+        framework:
+          type: object
+          description: The framework specific configuration.
+        application:
+          type: object
+          description: The application specific configuration.
+
+    Error:
+      required:
+        - errorCode
+        - message
+      type: object
+      properties:
+        erorrCode:
+          type: string
+          description: "Error code to represent the specific error that occured when calling the endpoint."
+          example: "REST-ERROR-101"
+        message:
+          type: string
+          description: "Detail about the error that occurred."
+          example: "Errorred"
+  responses:
+    serverError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    sessionAuthFailure:
+      description: Authentication failed due to an invalid session token.
+    malformedRequest:
+      description: Malformed request, e.g. missing Authorization header.
+    unauthorized:
+      description: The principal associated with the session token is not authorized to perform the request.
+    notFound:
+      description: "Resource not found"

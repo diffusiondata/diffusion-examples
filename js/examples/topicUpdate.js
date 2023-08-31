@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 - 2022 Push Technology Ltd.
+ * Copyright (C) 2018 - 2023 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,14 @@
  * limitations under the License.
  *******************************************************************************/
 
-var diffusion = require('diffusion');
-var session;
+const diffusion = require('diffusion');
+const session;
 
-var stringDataType = diffusion.datatypes.string();
-var jsonDataType = diffusion.datatypes.json();
-var TopicType = diffusion.topics.TopicType;
+const stringDataType = diffusion.datatypes.string();
+const jsonDataType = diffusion.datatypes.json();
+const intDataType = diffusion.datatypes.int64();
+const TopicType = diffusion.topics.TopicType;
+const UpdateConstraintOperator = diffusion.topicUpdate.UpdateConstraintOperator;
 
 
 function basicSetOperation() {
@@ -29,63 +31,67 @@ function basicSetOperation() {
 }
 
 function setOperationWithValueConstraint() {
-    var constraint = diffusion.updateConstraints().value('hello', stringDataType);
+    const constraint = diffusion.updateConstraints().value('hello', stringDataType);
     return session.topicUpdate.set('foo_topic', stringDataType, 'world', {constraint});
 }
 
 function setOperationWithSessionLockConstraint() {
     return session.lock("lock")
         .then(function(sessionLock){
-            var constraint = diffusion.updateConstraints().locked(sessionLock);
+            const constraint = diffusion.updateConstraints().locked(sessionLock);
             return session.topicUpdate.set('foo_topic', stringDataType, 'lorem ipsum', {constraint});
         });
 }
 
 function setOperationWithPartialJSONConstraint() {
-    return session.lock("lock")
-        .then(function(sessionLock){
-            var constraint = diffusion.updateConstraints().jsonValue()
-                .with('/foo', 'foo', stringDataType)
-                .without('/bar');
-            return session.topicUpdate.set('bar_topic', jsonDataType, {foo:'baz', bar:'bar'}, {constraint});
-        });
+    const constraint = diffusion.updateConstraints().jsonValue()
+        .with('/foo', 'foo', UpdateConstraintOperator.IS, stringDataType)
+        .without('/bar');
+    return session.topicUpdate.set('bar_topic', jsonDataType, {foo:'baz', bar:'bar'}, {constraint});
+}
+
+function setOperationWithPartialJSONConstraintOnInt() {
+    const constraint = updateConstraints().jsonValue()
+        .with('/sequence', 42, topicUpdate.UpdateConstraintOperator.LT, intDataType)
+        .without('/bar');
+    return session.topicUpdate.set('bar_topic', jsonDataType, {sequence: 42, bar:'bar'}, {constraint});
 }
 
 function basicAddAndSetOperation() {
-    var topicSpec = new diffusion.topics.TopicSpecification(TopicType.STRING);
+    const topicSpec = new diffusion.topics.TopicSpecification(TopicType.STRING);
     return session.topicUpdate.set('baz_topic', stringDataType, 'hello', {specification: topicSpec});
 }
 
 function addAndSetOperationWithNoTopicConstraint() {
-    var topicSpec = new diffusion.topics.TopicSpecification(TopicType.STRING);
-    var constraint = diffusion.updateConstraints().noTopic();
+    const topicSpec = new diffusion.topics.TopicSpecification(TopicType.STRING);
+    const constraint = diffusion.updateConstraints().noTopic();
     return session.topicUpdate.set('qux_topic', stringDataType, 'hello', {specification: topicSpec, constraint});
 }
 
 function createUpdateStream() {
-    var stream = session.topicUpdate.newUpdateStreamBuilder()
+    const stream = session.topicUpdate.newUpdateStreamBuilder()
         .build('foo_topic', stringDataType);
     stream.validate();
     stream.set('hello');
-    var cachedValue = stream.get();
+    const cachedValue = stream.get();
     return stream.set('world');
 }
 
 function createUpdateStreamWithValueConstraint() {
-    var constraint = diffusion.updateConstraints().value('world', stringDataType);
-    var stream = session.topicUpdate.newUpdateStreamBuilder()
+    const constraint = diffusion.updateConstraints().value('world', stringDataType);
+    const stream = session.topicUpdate.newUpdateStreamBuilder()
         .constraint(constraint)
         .build('foo_topic', stringDataType);
     stream.validate();
     stream.set('hello');
-    var cachedValue = stream.get();
+    const cachedValue = stream.get();
     return stream.set('world');
 }
 
 
 function createUpdateStreamThatAddsTopic() {
-    var topicSpec = new diffusion.topics.TopicSpecification(TopicType.STRING);
-    var stream = session.topicUpdate.newUpdateStreamBuilder()
+    const topicSpec = new diffusion.topics.TopicSpecification(TopicType.STRING);
+    const stream = session.topicUpdate.newUpdateStreamBuilder()
         .specification(topicSpec)
         .build('quux_topic', stringDataType);
     // the first call to validate() or set() resolves in a TopicCreationResult
@@ -97,14 +103,14 @@ function createUpdateStreamThatAddsTopic() {
         }
     });
     stream.set('hello');
-    var cachedValue = stream.get();
+    const cachedValue = stream.get();
     return stream.set('world');
 }
 
 function createUpdateStreamThatAddsTopicWithNoTopicConstraint() {
-    var topicSpec = new diffusion.topics.TopicSpecification(TopicType.STRING);
-    var constraint = diffusion.updateConstraints().noTopic();
-    var stream = session.topicUpdate.newUpdateStreamBuilder()
+    const topicSpec = new diffusion.topics.TopicSpecification(TopicType.STRING);
+    const constraint = diffusion.updateConstraints().noTopic();
+    const stream = session.topicUpdate.newUpdateStreamBuilder()
         .specification(topicSpec)
         .constraint(constraint)
         .build('quuz_topic', stringDataType);
@@ -117,7 +123,7 @@ function createUpdateStreamThatAddsTopicWithNoTopicConstraint() {
         }
     });
     stream.set('hello');
-    var cachedValue = stream.get();
+    const cachedValue = stream.get();
     return stream.set('world');
 }
 
@@ -143,6 +149,7 @@ diffusion.connect({
 .then(setOperationWithValueConstraint)
 .then(setOperationWithSessionLockConstraint)
 .then(setOperationWithPartialJSONConstraint)
+.then(setOperationWithPartialJSONConstraintOnInt)
 .then(basicAddAndSetOperation)
 .then(addAndSetOperationWithNoTopicConstraint)
 .then(createUpdateStream)

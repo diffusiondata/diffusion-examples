@@ -1,11 +1,11 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2022 Push Technology Ltd., All Rights Reserved.
+ * Copyright (c) 2018, 2023 DiffusionData Ltd., All Rights Reserved.
  *
  * Use is subject to license terms.
  *
  * NOTICE: All information contained herein is, and remains the
- * property of Push Technology. The intellectual and technical
- * concepts contained herein are proprietary to Push Technology and
+ * property of DiffusionData. The intellectual and technical
+ * concepts contained herein are proprietary to DiffusionData and
  * may be covered by U.S. and Foreign Patents, patents in process, and
  * are protected by trade secret or copyright law.
  *******************************************************************************/
@@ -14,6 +14,7 @@ package com.pushtechnology.diffusion.examples;
 
 import static com.pushtechnology.diffusion.client.Diffusion.newTopicSpecification;
 import static com.pushtechnology.diffusion.client.Diffusion.updateConstraints;
+import static com.pushtechnology.diffusion.client.features.UpdateConstraint.Operator.IS;
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -36,7 +37,7 @@ import com.pushtechnology.diffusion.client.topics.details.TopicType;
 /**
  * Example showing the use of the {@link TopicUpdate} feature.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.2
  */
 public final class TopicUpdateExample {
@@ -67,7 +68,7 @@ public final class TopicUpdateExample {
             // Acquire a lock
             .lock("a/lock")
             // Construct a constraint that requires the lock to be held and the value of the topic to be 5
-            .thenApply(lock -> constraints.value(5L).and(constraints.locked(lock)))
+            .thenApply(lock -> constraints.value(IS, 5L).and(constraints.locked(lock)))
             // Increments the topic value from 5 to 6 if the lock is still held
             .thenCompose(constraint -> update.<Long>set("a/path", Long.class, 6L, constraint))
             .whenComplete(TopicUpdateExample::updateHandler);
@@ -105,7 +106,7 @@ public final class TopicUpdateExample {
             () -> updater.set("random/long", Long.class, random.nextLong()),
             5,
             SECONDS)
-        .whenComplete(TopicUpdateExample::updateHandler);
+            .whenComplete(TopicUpdateExample::updateHandler);
     }
 
     /**
@@ -153,7 +154,7 @@ public final class TopicUpdateExample {
 
         session
             .lock("a/lock")
-            .thenApply(lock -> constraints.value(5L).and(constraints.locked(lock)))
+            .thenApply(lock -> constraints.value(IS, 5L).and(constraints.locked(lock)))
             // Create an update stream. The constraint will not be evaluated yet.
             .thenApply(constraint -> update.newUpdateStreamBuilder()
                 .constraint(constraint).build("a/path", Long.class))
@@ -282,10 +283,10 @@ public final class TopicUpdateExample {
      * @return a future representing the task
      */
     private static CompletableFuture<?> runPeriodicallyUntilFirstFailure(
-            ScheduledExecutorService executor,
-            Supplier<CompletableFuture<?>> task,
-            long period,
-            TimeUnit unit) {
+        ScheduledExecutorService executor,
+        Supplier<CompletableFuture<?>> task,
+        long period,
+        TimeUnit unit) {
 
         final CompletableFuture<?> taskHandle = new CompletableFuture<>();
         scheduleNextUpdate(executor, task, period, unit, taskHandle);

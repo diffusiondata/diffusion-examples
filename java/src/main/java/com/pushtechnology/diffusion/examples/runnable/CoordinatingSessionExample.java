@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018, 2022 Push Technology Ltd.
+ * Copyright (C) 2018, 2023 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ import com.pushtechnology.diffusion.client.topics.details.TopicType;
  * transferred when a session loses connection. The client handles transient
  * issues caused by cluster repartitioning.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.2
  */
 public final class CoordinatingSessionExample extends AbstractClient {
@@ -102,9 +102,9 @@ public final class CoordinatingSessionExample extends AbstractClient {
         final TopicSpecification specification = newTopicSpecification(TopicType.INT64);
         final Supplier<UpdateStream<Long>> updateStreamFactory =
             () -> topicUpdate.newUpdateStreamBuilder()
-            .specification(specification)
-            .constraint(locked)
-            .build(path, Long.class);
+                .specification(specification)
+                .constraint(locked)
+                .build(path, Long.class);
 
         final UpdateStream<Long> updateStream = updateStreamFactory.get();
         updateStream

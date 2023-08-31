@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2017, 2023 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import com.pushtechnology.diffusion.client.topics.details.TopicType;
  * but the same technique could be used for {@link TopicType#INT64 INT64} or
  * {@link TopicType#DOUBLE DOUBLE} topics.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.0
  * @see ControlClientUpdatingSimpleTopics
  */

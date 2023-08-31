@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2020 Push Technology Ltd.
+ * Copyright © 2020 - 2023 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using PushTechnology.ClientInterface.Client.Factories;
+using PushTechnology.ClientInterface.Client.Features;
 using PushTechnology.ClientInterface.Client.Session;
 using PushTechnology.ClientInterface.Client.Topics;
 using static System.Console;
@@ -50,9 +51,9 @@ namespace PushTechnology.ClientInterface.Example.Publishing {
             // Add and set the topic with constraint and expect success
             try
             {
-                await topicUpdate.AddAndSetAsync(topicPath, topicControl.NewSpecification(TopicType.STRING), "Value1", updateConstraint); 
+                await topicUpdate.AddAndSetAsync(topicPath, topicControl.NewSpecification(TopicType.STRING), "0", updateConstraint); 
 
-                WriteLine($"Topic '{topicPath}' successfully added as the topic did not originally exist - with it's value set to 'Value1'.");
+                WriteLine($"Topic '{topicPath}' successfully added as the topic did not originally exist - with it's value set to '0'.");
             }
             catch (Exception ex)
             {
@@ -61,20 +62,43 @@ namespace PushTechnology.ClientInterface.Example.Publishing {
                 return;
             }
 
-            var updateConstraint2 = Diffusion.UpdateConstraints.Value("Value1");
-
-            // Set the topic value with constraint and expect success
+            // Set the topic value with constraints and expect success
             try
             {
-                await topicUpdate.AddAndSetAsync(topicPath, topicControl.NewSpecification(TopicType.STRING), "Value2", updateConstraint2);
+                await topicUpdate.AddAndSetAsync(topicPath, topicControl.NewSpecification(TopicType.STRING), "1", Diffusion.UpdateConstraints.Value(UpdateConstraintOperator.IS, "0"));
+                WriteLine($"Topic value set successfully with '1' as topic value was previously '0'.");
 
-                WriteLine($"Topic value set successfully with 'Value2' as topic value was previously 'Value1'.");
+                await topicUpdate.AddAndSetAsync(topicPath, topicControl.NewSpecification(TopicType.STRING), "2", Diffusion.UpdateConstraints.Value(UpdateConstraintOperator.EQ, 1));
+                WriteLine($"Topic value set successfully with '2' as topic value was previously '1'.");
+
+                await topicUpdate.AddAndSetAsync(topicPath, topicControl.NewSpecification(TopicType.STRING), "3.0", Diffusion.UpdateConstraints.Value(UpdateConstraintOperator.GT, 1.999999));
+                WriteLine($"Topic value set successfully with '3.0' as topic value was previously '2'.");
+
+                await topicUpdate.AddAndSetAsync(topicPath, topicControl.NewSpecification(TopicType.STRING), "Hello", Diffusion.UpdateConstraints.Value(UpdateConstraintOperator.LE, 3.1));
+                WriteLine($"Topic value set successfully with 'Hello' as topic value was previously '3.0'.");
+
+                await topicUpdate.AddAndSetAsync(topicPath, topicControl.NewSpecification(TopicType.STRING), "000001", Diffusion.UpdateConstraints.Value(UpdateConstraintOperator.EQ, "Hello"));
+                WriteLine($"Topic value set successfully with '000001' as topic value was previously 'Hello'.");
+
+                await topicUpdate.AddAndSetAsync(topicPath, topicControl.NewSpecification(TopicType.STRING), "THE END", Diffusion.UpdateConstraints.Value(UpdateConstraintOperator.GE, 0.9));
+                WriteLine($"Topic value set successfully with 'THE END' as topic value was previously '000001'.");
             }
             catch (Exception ex)
             {
                 WriteLine($"Failed to update topic '{topicPath}' : {ex}.");
                 session.Close();
                 return;
+            }
+
+            // Remove the string topic
+            try
+            {
+                await session.TopicControl.RemoveTopicsAsync(topicPath, cancellationToken);
+                WriteLine($"Topic '{topicPath}' successfully removed.");
+            }
+            catch (Exception ex)
+            {
+                WriteLine($"Failed to remove topic '{topicPath}' : {ex}.");
             }
 
             // Close the session

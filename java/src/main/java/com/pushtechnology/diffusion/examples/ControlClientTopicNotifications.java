@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017, 2108 Push Technology Ltd.
+ * Copyright (C) 2017, 2023 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
  * Examples for using the {@link TopicNotifications} feature to receive
  * notifications for the topic tree.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.0
  */
 public class ControlClientTopicNotifications {

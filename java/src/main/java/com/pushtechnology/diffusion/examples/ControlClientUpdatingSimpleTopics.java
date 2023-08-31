@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017, 2019 Push Technology Ltd.
+ * Copyright (C) 2017, 2023 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
  * To send updates to a topic, the client session requires the 'update_topic'
  * permission for that branch of the topic tree.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.0
  */
 public final class ControlClientUpdatingSimpleTopics {

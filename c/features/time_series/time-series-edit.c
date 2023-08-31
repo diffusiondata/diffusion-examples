@@ -1,5 +1,5 @@
 /**
- * Copyright © 2020 - 2022 Push Technology Ltd.
+ * Copyright © 2020 - 2023 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  *
  * This example is written in C99. Please use an appropriate C99 capable compiler
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.6
  */
 
@@ -208,7 +208,7 @@ int main(int argc, char** argv)
          */
         append_value_to_time_series_topic(session, (char *)topic_name, "hello world!");
         append_value_to_time_series_topic(session, (char *)topic_name, "Diffusion");
-        append_value_to_time_series_topic(session, (char *)topic_name, "Push Technology");
+        append_value_to_time_series_topic(session, (char *)topic_name, "DiffusionData");
 
         /*
          * Edit the first event in the times series topic

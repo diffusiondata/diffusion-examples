@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2018 Push Technology Ltd.
+ * Copyright (C) 2014, 2023 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 /**
  * This provides a number of examples of using the Diffusion API.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.0
  */
 package com.pushtechnology.diffusion.examples;

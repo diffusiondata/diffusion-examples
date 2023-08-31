@@ -73,9 +73,11 @@ SOURCES 	=	connect-async.c \
 				features/topic_control/missing-topic-notification.c \
 				features/topic_control/add-topics.c \
 				features/topic_update/update-record.c \
+				features/topic_update/recoverable-update-stream.c \
 				features/topic_update/topic-update.c \
 				features/topic_update/topic-update-stream.c \
 				features/topic_update/topic-update-with-constraint.c \
+				features/topic_update/topic-update-with-value-comparison-constraint.c \
 				features/topic_update/topic-update-add-and-set.c \
 				features/topic_views/topic-views.c \
 				features/topic_views/topic-views-get.c \
@@ -124,7 +126,9 @@ TARGETS 	= 	connect-async \
 				topic-update-record \
 				topic-update \
 				topic-update-stream \
+				topic-update-recoverable-update-stream \
 				topic-update-with-constraint \
+				topic-update-with-value-comparison-constraint \
 				topic-update-add-and-set \
 				topic-views \
 				topic-views-get \
@@ -239,7 +243,13 @@ topic-update: features/topic_update/topic-update.c
 topic-update-stream: features/topic_update/topic-update-stream.c
 		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
 
+topic-update-recoverable-update-stream: features/topic_update/recoverable-update-stream.c
+		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
+
 topic-update-with-constraint: features/topic_update/topic-update-with-constraint.c
+		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
+
+topic-update-with-value-comparison-constraint: features/topic_update/topic-update-with-value-comparison-constraint.c
 		$(CC) $^ $(CFLAGS) $(LDFLAGS) -lm -o $(BINDIR)/$@
 
 topic-update-add-and-set: features/topic_update/topic-update-add-and-set.c

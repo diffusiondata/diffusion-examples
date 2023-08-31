@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019 - 2022 Push Technology Ltd.
+ * Copyright (C) 2019 - 2023 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,9 @@ export async function topicUpdateExample(): Promise<void> {
 
     const stringDataType = datatypes.string();
     const jsonDataType = datatypes.json();
+    const intDataType = datatypes.int64();
     const TopicType = topics.TopicType;
-
+    const UpdateConstraintOperator = topicUpdate.UpdateConstraintOperator;
 
     // Connect to the server. Change these options to suit your own environment.
     // Node.js does not accept self-signed certificates by default. If you have
@@ -54,11 +55,17 @@ export async function topicUpdateExample(): Promise<void> {
     }
 
     async function setOperationWithPartialJSONConstraint() {
-        const sessionLock: SessionLock = await session.lock("lock");
         const constraint = updateConstraints().jsonValue()
-            .with('/foo', 'foo', stringDataType)
+            .with('/foo', 'foo', UpdateConstraintOperator.IS, stringDataType)
             .without('/bar');
         await session.topicUpdate.set('bar_topic', jsonDataType, {foo:'baz', bar:'bar'}, {constraint});
+    }
+
+    async function setOperationWithPartialJSONConstraintOnInt() {
+        const constraint = updateConstraints().jsonValue()
+            .with('/sequence', 42, topicUpdate.UpdateConstraintOperator.LT, intDataType)
+            .without('/bar');
+        await session.topicUpdate.set('bar_topic', jsonDataType, {sequence: 42, bar:'bar'}, {constraint});
     }
 
     async function basicAddAndSetOperation() {
@@ -82,7 +89,8 @@ export async function topicUpdateExample(): Promise<void> {
     }
 
     async function createUpdateStreamWithValueConstraint() {
-        const constraint = updateConstraints().value('world', stringDataType);
+        const constraint = updateConstraints()
+            .value(topicUpdate.UpdateConstraintOperator.IS, 'world', stringDataType);
         const stream = session.topicUpdate.newUpdateStreamBuilder()
             .constraint(constraint)
             .build('foo_topic', stringDataType);
@@ -91,7 +99,6 @@ export async function topicUpdateExample(): Promise<void> {
         const cachedValue = stream.get();
         return stream.set('world');
     }
-
 
     async function createUpdateStreamThatAddsTopic() {
         const topicSpec = new topics.TopicSpecification(TopicType.STRING);
@@ -132,14 +139,15 @@ export async function topicUpdateExample(): Promise<void> {
     await session.topics.add('foo_topic', TopicType.STRING);
     await session.topics.add('bar_topic', TopicType.JSON);
 
-    await basicSetOperation;
-    await setOperationWithValueConstraint;
-    await setOperationWithSessionLockConstraint;
-    await setOperationWithPartialJSONConstraint;
-    await basicAddAndSetOperation;
-    await addAndSetOperationWithNoTopicConstraint;
-    await createUpdateStream;
-    await createUpdateStreamWithValueConstraint;
-    await createUpdateStreamThatAddsTopic;
-    await createUpdateStreamThatAddsTopicWithNoTopicConstraint;
+    await basicSetOperation();
+    await setOperationWithValueConstraint();
+    await setOperationWithSessionLockConstraint();
+    await setOperationWithPartialJSONConstraint();
+    await setOperationWithPartialJSONConstraintOnInt();
+    await basicAddAndSetOperation();
+    await addAndSetOperationWithNoTopicConstraint();
+    await createUpdateStream();
+    await createUpdateStreamWithValueConstraint();
+    await createUpdateStreamThatAddsTopic();
+    await createUpdateStreamThatAddsTopicWithNoTopicConstraint();
 }

@@ -1,0 +1,784 @@
+{
+	"info": {
+		"_postman_id": "af0b024c-1a1e-481c-a469-b3888c5acbbc",
+		"name": "GatewayControlRESTApis",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseJson = pm.response.json();",
+							"",
+							"pm.collectionVariables.set(\"sessionToken\", responseJson.token)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "password",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "admin",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n   \"sessionProperties\": {\n       \"key\": \"value\"\n   }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/login",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "logout",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{sessionToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/logout",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"logout"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getClientDetails",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseJson = pm.response.json();",
+							"",
+							"responseJson.forEach(function (item, index) {",
+							"    if(item.connectedClientDetails != null) {",
+							"        if(item.connectedClientDetails.activeSessionId != null) {",
+							"            console.log(item.connectedClientDetails.activeSessionId)",
+							"            pm.collectionVariables.set(\"clientSessionId\", item.connectedClientDetails.activeSessionId)",
+							"        }",
+							"    }",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{sessionToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{gatewayUrl}}/clients",
+					"host": [
+						"{{gatewayUrl}}"
+					],
+					"path": [
+						"clients"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getStatus",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{sessionToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{gatewayUrl}}/client/status?clientSessionId={{clientSessionId}}",
+					"host": [
+						"{{gatewayUrl}}"
+					],
+					"path": [
+						"client",
+						"status"
+					],
+					"query": [
+						{
+							"key": "clientSessionId",
+							"value": "{{clientSessionId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getConfiguration",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{sessionToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{gatewayUrl}}/client/configuration?clientSessionId={{clientSessionId}}",
+					"host": [
+						"{{gatewayUrl}}"
+					],
+					"path": [
+						"client",
+						"configuration"
+					],
+					"query": [
+						{
+							"key": "clientSessionId",
+							"value": "{{clientSessionId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getOperations",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{sessionToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{gatewayUrl}}/client/operations?clientSessionId={{clientSessionId}}",
+					"host": [
+						"{{gatewayUrl}}"
+					],
+					"path": [
+						"client",
+						"operations"
+					],
+					"query": [
+						{
+							"key": "clientSessionId",
+							"value": "{{clientSessionId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "invokeClientOperation",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{sessionToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{gatewayUrl}}/client/operation/invoke?clientSessionId={{clientSessionId}}&operationName=PAUSE",
+					"host": [
+						"{{gatewayUrl}}"
+					],
+					"path": [
+						"client",
+						"operation",
+						"invoke"
+					],
+					"query": [
+						{
+							"key": "clientSessionId",
+							"value": "{{clientSessionId}}"
+						},
+						{
+							"key": "operationName",
+							"value": "PAUSE"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getServiceTypes",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{sessionToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{gatewayUrl}}/client/serviceTypes?clientSessionId={{clientSessionId}}",
+					"host": [
+						"{{gatewayUrl}}"
+					],
+					"path": [
+						"client",
+						"serviceTypes"
+					],
+					"query": [
+						{
+							"key": "clientSessionId",
+							"value": "{{clientSessionId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getSharedConfigTypes",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{sessionToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{gatewayUrl}}/client/sharedConfigTypes?clientSessionId={{clientSessionId}}",
+					"host": [
+						"{{gatewayUrl}}"
+					],
+					"path": [
+						"client",
+						"sharedConfigTypes"
+					],
+					"query": [
+						{
+							"key": "clientSessionId",
+							"value": "{{clientSessionId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getSubConfiguration",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{sessionToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{gatewayUrl}}/sub/configuration?clientSessionId={{clientSessionId}}&type=KAFKA_CLUSTER&name=localKafkaCluster",
+					"host": [
+						"{{gatewayUrl}}"
+					],
+					"path": [
+						"sub",
+						"configuration"
+					],
+					"query": [
+						{
+							"key": "clientSessionId",
+							"value": "{{clientSessionId}}"
+						},
+						{
+							"key": "type",
+							"value": "KAFKA_CLUSTER"
+						},
+						{
+							"key": "name",
+							"value": "localKafkaCluster"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "removeSubConfig",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{sessionToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{gatewayUrl}}/sub/configuration?clientSessionId={{clientSessionId}}&type=KAFKA_CLUSTER&name=localKafkaCluster",
+					"host": [
+						"{{gatewayUrl}}"
+					],
+					"path": [
+						"sub",
+						"configuration"
+					],
+					"query": [
+						{
+							"key": "clientSessionId",
+							"value": "{{clientSessionId}}"
+						},
+						{
+							"key": "type",
+							"value": "KAFKA_CLUSTER"
+						},
+						{
+							"key": "name",
+							"value": "localKafkaCluster"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getServiceStatus",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{sessionToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{gatewayUrl}}/service/status?clientSessionId={{clientSessionId}}&serviceType=SUBSCRIPTION_SERVICE&serviceName=regexSubscription_fx",
+					"host": [
+						"{{gatewayUrl}}"
+					],
+					"path": [
+						"service",
+						"status"
+					],
+					"query": [
+						{
+							"key": "clientSessionId",
+							"value": "{{clientSessionId}}"
+						},
+						{
+							"key": "serviceType",
+							"value": "SUBSCRIPTION_SERVICE"
+						},
+						{
+							"key": "serviceName",
+							"value": "regexSubscription_fx"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getServiceOperations",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{sessionToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{gatewayUrl}}/service/operations?clientSessionId={{clientSessionId}}&serviceType=SUBSCRIPTION_SERVICE&serviceName=regexSubscription_fx",
+					"host": [
+						"{{gatewayUrl}}"
+					],
+					"path": [
+						"service",
+						"operations"
+					],
+					"query": [
+						{
+							"key": "clientSessionId",
+							"value": "{{clientSessionId}}"
+						},
+						{
+							"key": "serviceType",
+							"value": "SUBSCRIPTION_SERVICE"
+						},
+						{
+							"key": "serviceName",
+							"value": "regexSubscription_fx"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "invokeServiceOperation",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{sessionToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{gatewayUrl}}/service/operation/invoke?clientSessionId={{clientSessionId}}&operationName=PAUSE&serviceType=SUBSCRIPTION_SERVICE&serviceName=regexSubscription_fx",
+					"host": [
+						"{{gatewayUrl}}"
+					],
+					"path": [
+						"service",
+						"operation",
+						"invoke"
+					],
+					"query": [
+						{
+							"key": "clientSessionId",
+							"value": "{{clientSessionId}}"
+						},
+						{
+							"key": "operationName",
+							"value": "PAUSE"
+						},
+						{
+							"key": "serviceType",
+							"value": "SUBSCRIPTION_SERVICE"
+						},
+						{
+							"key": "serviceName",
+							"value": "regexSubscription_fx"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "addService",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{sessionToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"serviceName\": \"RestSubscriptionService\",\n    \"description\": \"Consumes from Kafka topic starting with 'rest' with key of type 'String' and value of type 'JSON'\",\n    \"serviceType\": \"SUBSCRIPTION_SERVICE\",\n    \"config\": {\n        \"sharedConfigName\": \"localKafkaCluster\",\n        \"framework\": {\n            \"publicationRetries\": 5,\n            \"retryIntervalMs\": 5000,\n            \"topicProperties\": {\n                \"basePath\": \"\",\n                \"persistencePolicy\": \"SERVER\",\n                \"timeSeries\": true,\n                \"timeSeriesRetainedRange\": \"last 1H\",\n                \"publishesValueOnly\": false,\n                \"doNotRetainValue\": false\n            }\n        },\n        \"application\": {\n            \"consumerGroupId\": \"diffusionKafkaAdapter\",\n            \"headers\": [\n                \"$all\"\n            ],\n            \"regexSubscription\": true,\n            \"consumerCount\": 3,\n            \"configuration\": {\n                \"auto.offset.reset\": \"latest\"\n            },\n            \"valueType\": \"JSON\",\n            \"diffusionTopicPattern\": \"kafka/${topic}/${partition}\",\n            \"kafkaTopics\": [\n                \"rest.*\"\n            ],\n            \"keyType\": \"STRING\"\n        }\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{gatewayUrl}}/service?clientSessionId={{clientSessionId}}",
+					"host": [
+						"{{gatewayUrl}}"
+					],
+					"path": [
+						"service"
+					],
+					"query": [
+						{
+							"key": "clientSessionId",
+							"value": "{{clientSessionId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "updateService",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{sessionToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"serviceName\": \"RestSubscriptionService\",\n    \"serviceType\": \"SUBSCRIPTION_SERVICE\",\n    \"config\": {\n        \"sharedConfigName\": \"localKafkaCluster\",\n        \"framework\": {\n            \"publicationRetries\": 5,\n            \"retryIntervalMs\": 5000,\n            \"topicProperties\": {\n                \"basePath\": \"\",\n                \"persistencePolicy\": \"SERVER\",\n                \"timeSeries\": true,\n                \"timeSeriesRetainedRange\": \"last 1H\",\n                \"publishesValueOnly\": false,\n                \"doNotRetainValue\": false\n            }\n        },\n        \"application\": {\n            \"consumerGroupId\": \"diffusionKafkaAdapter\",\n            \"headers\": [\n                \"$all\"\n            ],\n            \"regexSubscription\": true,\n            \"consumerCount\": 3,\n            \"configuration\": {\n                \"auto.offset.reset\": \"earliest\"\n            },\n            \"valueType\": \"JSON\",\n            \"diffusionTopicPattern\": \"kafka/${topic}/${partition}\",\n            \"kafkaTopics\": [\n                \"rest.*\"\n            ],\n            \"keyType\": \"STRING\"\n        }\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{gatewayUrl}}/service?clientSessionId={{clientSessionId}}",
+					"host": [
+						"{{gatewayUrl}}"
+					],
+					"path": [
+						"service"
+					],
+					"query": [
+						{
+							"key": "clientSessionId",
+							"value": "{{clientSessionId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "addSharedConfig",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{sessionToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"sharedConfigName\": \"remoteKafkaCluster\",\n    \"sharedConfigType\": \"KAFKA_CLUSTER\",\n    \"description\": \"Remote Kafka cluster details\",\n    \"config\": {\n    \"application\": {\n        \"bootstrapServers\": [\n        \"http://remote:9092\",\n        \"http://remote:9093\"\n        ]\n    }\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{gatewayUrl}}/sharedConfig?clientSessionId={{clientSessionId}}",
+					"host": [
+						"{{gatewayUrl}}"
+					],
+					"path": [
+						"sharedConfig"
+					],
+					"query": [
+						{
+							"key": "clientSessionId",
+							"value": "{{clientSessionId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "updateSharedConfig",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{sessionToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"sharedConfigName\": \"remoteKafkaCluster\",\n    \"sharedConfigType\": \"KAFKA_CLUSTER\",\n    \"description\": \"Remote Kafka cluster details\",\n    \"config\": {\n    \"application\": {\n        \"bootstrapServers\": [\n        \"http://remote:9092\",\n        \"http://remote:9093\",\n        \"http://remote:9094\"\n        ]\n    }\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{gatewayUrl}}/sharedConfig?clientSessionId={{clientSessionId}}",
+					"host": [
+						"{{gatewayUrl}}"
+					],
+					"path": [
+						"sharedConfig"
+					],
+					"query": [
+						{
+							"key": "clientSessionId",
+							"value": "{{clientSessionId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080/rest",
+			"type": "default"
+		},
+		{
+			"key": "sessionToken",
+			"value": "",
+			"type": "default"
+		},
+		{
+			"key": "clientSessionId",
+			"value": "",
+			"type": "default"
+		},
+		{
+			"key": "gatewayUrl",
+			"value": "http://localhost:8080/rest/gateway/control/v1",
+			"type": "default"
+		}
+	]
+}

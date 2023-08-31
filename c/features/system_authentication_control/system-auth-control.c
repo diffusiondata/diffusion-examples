@@ -1,5 +1,5 @@
 /**
- * Copyright © 2014 - 2022 Push Technology Ltd.
+ * Copyright © 2014 - 2023 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  *
  * This example is written in C99. Please use an appropriate C99 capable compiler
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.5
  */
 

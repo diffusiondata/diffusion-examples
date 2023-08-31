@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2015, 2020 Push Technology Ltd.
+ * Copyright (C) 2015, 2023 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import com.pushtechnology.diffusion.client.session.Session;
  * messages to clients using message filters. It also demonstrates the ability
  * to register a request handler with an interest in session property values.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.5
  */
 public final class ControlClientUsingFiltersAndProperties {

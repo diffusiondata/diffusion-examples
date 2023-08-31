@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2022 Push Technology Ltd.
+ * Copyright (C) 2022, 2023 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Arrays;
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.TopicUpdate;
 import com.pushtechnology.diffusion.client.features.control.RemoteServers;
+import com.pushtechnology.diffusion.client.features.control.RemoteServers.SecondaryInitiator.SecondaryInitiatorBuilder;
 import com.pushtechnology.diffusion.client.features.control.topics.views.TopicViews;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
@@ -33,7 +34,7 @@ import com.pushtechnology.diffusion.datatype.json.JSONDataType;
  * Two sessions are established and a remote topic view is created to map part
  * of the topic tree from the primary server to the secondary server
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.5
  */
 public final class CreateRemoteTopicView {
@@ -91,10 +92,10 @@ public final class CreateRemoteTopicView {
         throws Exception {
 
         session.feature(RemoteServers.class).createRemoteServer(
-            Diffusion.newRemoteServerBuilder()
+            Diffusion.newRemoteServerBuilder(SecondaryInitiatorBuilder.class)
                 .principal("admin")
                 .credentials(Diffusion.credentials().password("password"))
-                .create(name, primaryServerUrl))
+                .build(name, primaryServerUrl))
             .get(5, SECONDS);
 
     }

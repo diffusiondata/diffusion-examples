@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Push Technology Ltd.
+ * Copyright (C) 2016, 2023 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.features.TimeSeries;
-import com.pushtechnology.diffusion.client.features.Topics;
 import com.pushtechnology.diffusion.client.features.TimeSeries.Event;
 import com.pushtechnology.diffusion.client.features.TimeSeries.Query;
+import com.pushtechnology.diffusion.client.features.Topics;
 import com.pushtechnology.diffusion.client.features.Topics.ValueStream;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
@@ -54,7 +54,7 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  * subscribed, the ChatView will be asynchronously updated with new messages and
  * edits to existing messages.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.0
  */
 public final class TimeSeriesQueryExample {

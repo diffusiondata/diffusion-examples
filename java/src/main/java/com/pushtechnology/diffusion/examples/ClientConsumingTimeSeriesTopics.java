@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2017 Push Technology Ltd.
+ * Copyright (C) 2017, 2023 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import com.pushtechnology.diffusion.client.session.Session;
  * This demonstrates a client session subscribing to a
  * {@link TimeSeries} topic.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.0
  * @see ControlClientUpdatingTimeSeriesTopics
  * @see TimeSeriesQueryExample
@@ -38,7 +38,7 @@ public class ClientConsumingTimeSeriesTopics {
 
     private static final String TOPIC_PATH = "foo/timeseries";
 
-    private Session session;
+    private final Session session;
 
     /**
      * Constructor.

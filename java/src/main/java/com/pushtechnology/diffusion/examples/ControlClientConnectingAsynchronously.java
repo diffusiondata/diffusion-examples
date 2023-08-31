@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2018 Push Technology Ltd.
+ * Copyright (C) 2014, 2023 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import com.pushtechnology.diffusion.client.topics.details.TopicType;
  * This is a simple example of a client that uses asynchronous connection to
  * connect, create a topic and then disconnect.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.3
  */
 public final class ControlClientConnectingAsynchronously {

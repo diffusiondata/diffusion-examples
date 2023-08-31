@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2014, 2022 Push Technology Ltd.
+ * Copyright (C) 2014, 2023 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
  * To send updates to a topic, the client session requires the 'update_topic'
  * permission for that branch of the topic tree.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.0
  */
 public class ControlClientAsExclusiveUpdater {
@@ -116,12 +116,12 @@ public class ControlClientAsExclusiveUpdater {
         final CompletableFuture<Void> failureHandler = new CompletableFuture<>();
         final ScheduledFuture<?> theFeeder = scheduler.scheduleAtFixedRate(
             () -> updateStream
-                    .set(provider.getPrice())
-                    .whenComplete((result, ex) -> {
-                        if (ex != null) {
-                            failureHandler.completeExceptionally(ex);
-                        }
-                    }),
+                .set(provider.getPrice())
+                .whenComplete((result, ex) -> {
+                    if (ex != null) {
+                        failureHandler.completeExceptionally(ex);
+                    }
+                }),
             1,
             1,
             SECONDS);

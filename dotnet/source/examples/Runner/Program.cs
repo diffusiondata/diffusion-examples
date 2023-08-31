@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright © 2016 - 2022 Push Technology Ltd.
+ * Copyright © 2016 - 2023 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,9 +160,6 @@ namespace PushTechnology.ClientInterface.Examples.Runner {
 
                 /// Start client control set session properties listener example
                 //runner.Start(new ClientControlSetSessionPropertiesListener(), secureUrl);
-
-                /// Start subscription control routing handler example
-                //runner.Start(new SubscriptionControlRoutingHandler(), secureUrl);
 
                 /// Start subscription control subscribe example
                 //runner.Start(new SubscriptionControlSubscribe(), secureUrl);
