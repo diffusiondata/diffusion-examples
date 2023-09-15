@@ -26,7 +26,7 @@ import com.pushtechnology.diffusion.client.topics.details.TopicType;
  * This is a simple example of a client that uses asynchronous connection to
  * connect, create a topic and then disconnect.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.3
  */
 public final class ControlClientConnectingAsynchronously {

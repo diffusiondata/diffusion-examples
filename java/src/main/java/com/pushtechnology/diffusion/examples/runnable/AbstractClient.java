@@ -30,7 +30,7 @@ import com.pushtechnology.diffusion.client.session.Session;
  * Abstract client. Supporting a simplified state model and starting and
  * stopping the client.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.7
  */
 public abstract class AbstractClient {

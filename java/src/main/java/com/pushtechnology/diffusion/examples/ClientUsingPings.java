@@ -28,7 +28,7 @@ import com.pushtechnology.diffusion.client.session.Session;
  * <P>
  * This uses the 'Pings' feature only.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.0
  */
 public final class ClientUsingPings {

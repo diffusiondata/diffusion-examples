@@ -28,7 +28,7 @@ import com.pushtechnology.diffusion.client.session.reconnect.ReconnectionStrateg
  * This example class demonstrates the ability to set a custom
  * {@link ReconnectionStrategy} when creating sessions.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.5
  */
 public class ClientWithReconnectionStrategy {

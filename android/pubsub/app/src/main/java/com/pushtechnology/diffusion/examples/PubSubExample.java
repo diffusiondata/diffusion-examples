@@ -43,7 +43,7 @@ import java8.util.concurrent.CompletableFuture;
  * Start a Diffusion server and the Android emulator on the same machine, then
  * build and deploy this example to the emulator.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.2
  */
 public class PubSubExample extends Activity {

@@ -29,7 +29,7 @@ import com.pushtechnology.diffusion.client.session.Session;
  * This demonstrates a client session subscribing to a
  * {@link TimeSeries} topic.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.0
  * @see ControlClientUpdatingTimeSeriesTopics
  * @see TimeSeriesQueryExample

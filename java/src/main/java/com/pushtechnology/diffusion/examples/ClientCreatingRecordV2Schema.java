@@ -25,7 +25,7 @@ import com.pushtechnology.diffusion.datatype.recordv2.schema.SchemaBuilder;
  * <P>
  * Note that no client session is required in order to create a schema.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.0
  */
 public final class ClientCreatingRecordV2Schema {

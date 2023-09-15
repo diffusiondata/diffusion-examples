@@ -59,7 +59,7 @@ import com.pushtechnology.diffusion.datatype.json.JSONDataType;
  * and so subsequent set calls can compare with the last value
  * and send only the differences to the server.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.8
  * @see ClientConsumingJSONTopics
  */

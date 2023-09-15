@@ -32,7 +32,7 @@ import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
  * created that will be automatically removed when the number of subscribers
  * falls to and remains at zero for 10 seconds.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  */
 public final class ControlClientDeletesTopicsWithoutSubscribers {
 

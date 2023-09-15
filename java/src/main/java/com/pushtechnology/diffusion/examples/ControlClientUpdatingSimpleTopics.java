@@ -39,7 +39,7 @@ import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
  * To send updates to a topic, the client session requires the 'update_topic'
  * permission for that branch of the topic tree.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.0
  */
 public final class ControlClientUpdatingSimpleTopics {

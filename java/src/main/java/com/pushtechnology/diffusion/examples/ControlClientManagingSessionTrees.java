@@ -31,7 +31,7 @@ import com.pushtechnology.diffusion.client.session.Session;
  * This demonstrates creating, retrieving, and removing a branch mapping table
  * for the {@code market/prices} topic tree branch.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.7
  */
 public final class ControlClientManagingSessionTrees {

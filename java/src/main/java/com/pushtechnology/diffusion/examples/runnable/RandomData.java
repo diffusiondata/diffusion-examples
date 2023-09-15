@@ -32,7 +32,7 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
 /**
  * Random data for examples.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.7
  */
 public final class RandomData {

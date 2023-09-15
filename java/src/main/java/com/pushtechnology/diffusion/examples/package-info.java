@@ -16,7 +16,7 @@
 /**
  * This provides a number of examples of using the Diffusion API.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.0
  */
 package com.pushtechnology.diffusion.examples;

@@ -29,7 +29,7 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
  * A control client that responds to JSON requests send by the
  * {@link SendingJson} client.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.7
  */
 public final class ReceivingJson extends AbstractClient {

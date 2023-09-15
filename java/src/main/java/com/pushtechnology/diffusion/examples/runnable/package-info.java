@@ -17,7 +17,7 @@
  * This provides a number of runnable examples of using the Diffusion API. The examples provide main methods
  * as entry points. The Diffusion Client Library must be present on the classpath for them to run.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.7
  */
 package com.pushtechnology.diffusion.examples.runnable;

@@ -37,7 +37,7 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
 /**
  * A client that creates and updates JSON topics.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.7
  */
 public final class ProducingJson extends AbstractClient {

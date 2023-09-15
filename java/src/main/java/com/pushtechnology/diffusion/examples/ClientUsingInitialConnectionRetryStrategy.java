@@ -21,7 +21,7 @@ import com.pushtechnology.diffusion.client.session.retry.RetryStrategy;
 /**
  * This demonstrates a client's use of an initial connection retry strategy.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.9
  */
 public class ClientUsingInitialConnectionRetryStrategy {

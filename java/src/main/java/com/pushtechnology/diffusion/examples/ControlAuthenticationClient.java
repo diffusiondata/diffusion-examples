@@ -32,7 +32,7 @@ import com.pushtechnology.diffusion.client.types.Credentials;
  * This is a control client which registers an authentication handler with a
  * Diffusion server.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.0
  */
 public final class ControlAuthenticationClient {

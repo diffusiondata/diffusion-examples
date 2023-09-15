@@ -34,7 +34,7 @@ import com.pushtechnology.diffusion.client.topics.details.TopicType;
  * An example of registering a missing topic notification handler and processing
  * notifications using a control client.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  */
 public final class ControlClientHandlingMissingTopicNotification {
 

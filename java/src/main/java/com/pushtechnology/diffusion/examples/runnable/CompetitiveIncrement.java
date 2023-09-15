@@ -55,7 +55,7 @@ import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
  * constraint. If another session has changed the topic value, the update will
  * fail and the client will retry with the latest known value.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 6.2
  */
 public final class CompetitiveIncrement extends AbstractClient {

@@ -27,7 +27,7 @@ import com.pushtechnology.diffusion.client.session.SessionId;
  * <P>
  * This uses the 'SubscriptionControl' feature.
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.0
  */
 public class ControlClientSubscriptionControl {

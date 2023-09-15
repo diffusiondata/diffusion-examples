@@ -14,7 +14,7 @@
  *
  * This example is written in C99. Please use an appropriate C99 capable compiler
  *
- * @author Push Technology Limited
+ * @author DiffusionData Limited
  * @since 5.0
  */
 
