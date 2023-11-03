@@ -11,7 +11,7 @@
 
     <groupId>com.pushtechnology.diffusion</groupId>
     <artifactId>diffusion-api-java-examples</artifactId>
-    <version>6.5.15</version>
+    <version>6.5.16</version>
     <packaging>jar</packaging>
     <description>Diffusion public API examples.</description>
 
@@ -54,7 +54,7 @@
         <dependency>
             <groupId>com.pushtechnology.diffusion</groupId>
             <artifactId>diffusion-client</artifactId>
-            <version>6.5.15</version>
+            <version>6.5.16</version>
             <scope>runtime</scope>
         </dependency>
 
