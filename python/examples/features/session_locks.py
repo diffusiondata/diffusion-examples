@@ -10,7 +10,7 @@ from diffusion.session.locks.session_locks import SessionLock
 LOCK_NAME = "lockA"
 
 
-async def main(
+async def run_session_locks(
     server_url: str = "<url>",
     principal: str = "<principal>",
     password: str = "<password>",
@@ -45,7 +45,7 @@ class ContendedCluster(object):
             await asyncio.sleep(1)
             await self.release_lock1()
         except Exception as ex:
-            print(f"Failed to get lock 1 : {traceback.format_exc()}.")
+            print(f"Failed to get lock 1, got exception {ex} : {traceback.format_exc()}.")
 
     async def acquire_lock_session2(self):
         try:
@@ -65,7 +65,7 @@ class ContendedCluster(object):
             await self._session_lock1.unlock()
             print("Lock 1 has been released.")
         except Exception as ex:
-            print(f"Failed to release lock 1 : {traceback.format_exc()}.")
+            print(f"Failed to release lock 1, got exception {ex} : {traceback.format_exc()}.")
 
     async def release_lock2(self):
         try:
@@ -73,9 +73,14 @@ class ContendedCluster(object):
             await self._session_lock2.unlock()
             print("Lock 2 has been released.")
         except Exception as ex:
-            print(f"Failed to release lock 2 : {traceback.format_exc()}.")
+            print(f"Failed to release lock 2, got exception {ex} : {traceback.format_exc()}.")
 
 
-asyncio.run(
-    main(server_url="ws://localhost:8080", principal="control", password="password")
-)
+async def main():
+    await run_session_locks(
+        server_url="ws://localhost:8080", principal="control", password="password"
+    )
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
