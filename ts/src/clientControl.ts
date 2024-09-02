@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+/* eslint deprecation/deprecation: 0 */
 
 import { connect, clients, Session, SessionProperties, SessionId, SessionEventType } from 'diffusion';
 

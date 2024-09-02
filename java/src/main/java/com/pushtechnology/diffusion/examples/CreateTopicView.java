@@ -1,7 +1,7 @@
 package com.pushtechnology.diffusion.examples;
 
 /*******************************************************************************
- * Copyright (C) 2021, 2023 DiffusionData Ltd.
+ * Copyright (C) 2021, 2024 DiffusionData Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package com.pushtechnology.diffusion.examples;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import java.util.Arrays;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.TopicUpdate;
@@ -78,9 +80,11 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
      * The path mapping clause is the part after the 'to' keyword. path is a directive, with '2' as its only parameter.
      * The clause will make reference topics for all the topics under Accounts/Premium at Premium-Accounts-Only
      */
-    private void createTopicView() {
+    private void createTopicView() throws ExecutionException, InterruptedException, TimeoutException {
         final String viewSpecification = "map ?Accounts/Premium// to Premium-Accounts-Only/<path(2)>";
-        session.feature(TopicViews.class).createTopicView("premium-view", viewSpecification);
+        session.feature(TopicViews.class)
+            .createTopicView("premium-view", viewSpecification)
+            .get(5, SECONDS);
     }
 
     /**
