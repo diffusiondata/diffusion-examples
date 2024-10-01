@@ -59,10 +59,10 @@ static int on_unsubscription(const char* topic_path,
 }
 
 static int on_value(const char* topic_path,
-             const TOPIC_SPECIFICATION_T *const specification,
+             const TOPIC_SPECIFICATION_T * specification,
              const DIFFUSION_DATATYPE datatype,
-             const DIFFUSION_VALUE_T *const old_value,
-             const DIFFUSION_VALUE_T *const new_value,
+             const DIFFUSION_VALUE_T * old_value,
+             const DIFFUSION_VALUE_T * new_value,
              void *context)
 {
         DIFFUSION_API_ERROR api_error;
@@ -81,7 +81,7 @@ static int on_value(const char* topic_path,
         return HANDLER_SUCCESS;
 }
 
-static void on_close() 
+static void on_close()
 {
         printf("Value stream closed\n");
 }

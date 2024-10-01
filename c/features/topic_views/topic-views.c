@@ -113,7 +113,7 @@ static int on_topic_update(void *context)
 
 static int on_subscription(
         const char *const topic_path,
-        const TOPIC_SPECIFICATION_T *const specification,
+        const TOPIC_SPECIFICATION_T * specification,
         void *context)
 {
         printf("Subscribed to \"%s\"\n", topic_path);
@@ -123,10 +123,10 @@ static int on_subscription(
 
 static int on_value(
         const char *const topic_path,
-        const TOPIC_SPECIFICATION_T *const specification,
+        const TOPIC_SPECIFICATION_T * specification,
         DIFFUSION_DATATYPE datatype,
-        const DIFFUSION_VALUE_T *const old_value,
-        const DIFFUSION_VALUE_T *const new_value,
+        const DIFFUSION_VALUE_T * old_value,
+        const DIFFUSION_VALUE_T * new_value,
         void *context)
 {
         char *result;

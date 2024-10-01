@@ -79,10 +79,10 @@ static int on_error(
 // Handler for value stream
 static int on_value(
         const char* topic_path,
-        const TOPIC_SPECIFICATION_T *const specification,
+        const TOPIC_SPECIFICATION_T * specification,
         const DIFFUSION_DATATYPE datatype,
-        const DIFFUSION_VALUE_T *const old_value,
-        const DIFFUSION_VALUE_T *const new_value,
+        const DIFFUSION_VALUE_T * old_value,
+        const DIFFUSION_VALUE_T * new_value,
         void *context)
 {
         DIFFUSION_API_ERROR api_error;
@@ -196,7 +196,7 @@ int main(int argc, char** argv)
 
         printf("Loop has started.\n");
         while(time(NULL) < end_time) {
-                DIFFUSION_UPDATE_CONSTRAINT_VALUE_T *constraint_value =
+                DIFFUSION_UPDATE_CONSTRAINT_VALUE_T * constraint_value =
                         diffusion_update_constraint_value_from_int64(comparison_value);
 
                 DIFFUSION_TOPIC_UPDATE_CONSTRAINT_T *update_constraint =

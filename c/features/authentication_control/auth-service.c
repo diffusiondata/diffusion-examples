@@ -158,7 +158,7 @@ static int on_authenticator_authenticate(
                 return HANDLER_SUCCESS;
         }
 
-        char *password = malloc(credentials->data->len + 1);
+        char *password = calloc(credentials->data->len + 1, sizeof(char));
         memmove(password, credentials->data->data, credentials->data->len);
         password[credentials->data->len] = '\0';
 
