@@ -1,0 +1,67 @@
+package com.pushtechnology.client.sdk.example.serverconfiguration.systemauthenticationcontrol;
+
+import java.util.Collections;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.pushtechnology.diffusion.client.Diffusion;
+import com.pushtechnology.diffusion.client.features.control.clients.ClientControl;
+import com.pushtechnology.diffusion.client.features.control.clients.SystemAuthenticationControl;
+import com.pushtechnology.diffusion.client.session.Session;
+
+public class TrustClientProposedPropertyMatchesExample {
+
+    private static final Logger LOG =
+        LoggerFactory.getLogger(TrustClientProposedPropertyMatchesExample.class);
+
+    public static void main(String[] args) {
+
+        final Session adminSession = Diffusion.sessions()
+            .principal("admin")
+            .password("password")
+            .open("ws://localhost:8080");
+
+        final SystemAuthenticationControl authenticationControl =
+            adminSession.feature(SystemAuthenticationControl.class);
+
+        String updateScript = authenticationControl.scriptBuilder()
+            .trustClientProposedPropertyMatches("name", ".*_Flintstone")
+            .script();
+
+        authenticationControl.updateStore(updateScript).join();
+
+        final Session sessionWithAllowedProp =
+            Diffusion.sessions()
+                .property("name", "Fred_Flintstone")
+                .principal("admin")
+                .password("password")
+                .open("ws://localhost:8080");
+
+        Map<String, String> properties;
+
+        properties = adminSession.feature(ClientControl.class)
+            .getSessionProperties(sessionWithAllowedProp.getSessionId(),
+                Collections.singleton("name")).join();
+
+        LOG.info("Session properties: {}", properties);
+
+        final Session sessionWithNotAllowedProp =
+            Diffusion.sessions()
+                .property("name", "Barney_Rubble")
+                .principal("admin")
+                .password("password")
+                .open("ws://localhost:8080");
+
+        properties = adminSession.feature(ClientControl.class)
+            .getSessionProperties(sessionWithNotAllowedProp.getSessionId(),
+                Collections.singleton("name")).join();
+
+        LOG.info("Empty properties: {}", properties);
+
+        sessionWithNotAllowedProp.close();
+        sessionWithAllowedProp.close();
+        adminSession.close();
+    }
+}

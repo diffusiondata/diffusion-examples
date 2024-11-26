@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+    <CheckEolTargetFramework>false</CheckEolTargetFramework>
+    <RootNamespace>PushTechnology.ClientInterface.Example</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>..\</OutputPath>
+    <LangVersion>7.2</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>..\</OutputPath>
+    <LangVersion>7.2</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NLog" Version="[5.3.0,)" />
+    <PackageReference Include="NUnit" Version="[3.14.0,)" />
+    <PackageReference Include="NUnit3TestAdapter" Version="[3.16.0,)" />
+    <PackageReference Include="RestSharp" Version="[110.0.0,)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Diffusion.Client">
+      <HintPath>..\Diffusion.Client.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
