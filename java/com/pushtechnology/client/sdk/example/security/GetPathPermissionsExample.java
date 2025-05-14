@@ -24,6 +24,12 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
+/**
+ * This example demonstrates how to retrieve path permissions using the
+ * Security feature.
+ *
+ * @author DiffusionData Limited
+ */
 public class GetPathPermissionsExample {
 
     private static final Logger LOG = LoggerFactory.getLogger(
@@ -31,12 +37,12 @@ public class GetPathPermissionsExample {
 
     public static void main(String[] args) throws Exception {
 
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        Set<PathPermission> pathPermissions = session.feature(Security.class)
+        final Set<PathPermission> pathPermissions = session.feature(Security.class)
             .getPermissionsForPath(".*//")
             .join();
 

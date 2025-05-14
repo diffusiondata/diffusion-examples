@@ -23,6 +23,12 @@ import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.control.Metrics;
 import com.pushtechnology.diffusion.client.session.Session;
 
+/**
+ * This example demonstrates how to retrieve server metrics for network outbound
+ * bytes using the Metrics feature in Diffusion.
+ *
+ * @author DiffusionData Limited
+ */
 public class GetMetricsOutboundBytesExample {
 
     private static final Logger LOG = LoggerFactory.getLogger(
@@ -30,24 +36,24 @@ public class GetMetricsOutboundBytesExample {
 
     public static void main(String[] args) {
 
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        Metrics metricsControl = session.feature(Metrics.class);
+        final Metrics metricsControl = session.feature(Metrics.class);
 
-        Metrics.MetricsResult result = metricsControl.metricsRequest()
+        final Metrics.MetricsResult result = metricsControl.metricsRequest()
             .currentServer()
             .filter(Collections.singleton("diffusion_network_outbound_bytes"))
             .fetch().join();
 
-        String serverName = result.getServerNames().iterator().next();
+        final String serverName = result.getServerNames().iterator().next();
 
-        Metrics.MetricSampleCollection collection =
+        final Metrics.MetricSampleCollection collection =
             result.getMetrics(serverName).get(0);
 
-        Metrics.MetricSample sample = collection.getSamples().get(0);
+        final Metrics.MetricSample sample = collection.getSamples().get(0);
 
         LOG.info("{}: {} {} ({})",
             collection.getName(),

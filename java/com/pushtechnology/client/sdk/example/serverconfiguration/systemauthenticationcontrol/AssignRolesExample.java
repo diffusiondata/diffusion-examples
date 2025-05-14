@@ -9,6 +9,14 @@ import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.control.clients.SystemAuthenticationControl;
 import com.pushtechnology.diffusion.client.session.Session;
 
+/**
+ * This example demonstrates how to assign roles to a principal using the system
+ * authentication control feature.
+ * <P>
+ * The 'super_user' principal is assigned the 'ADMINISTRATOR' role.
+ *
+ * @author DiffusionData Limited
+ */
 public class AssignRolesExample {
 
     private static final Logger LOG =

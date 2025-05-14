@@ -29,11 +29,19 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This example demonstrates how to monitor topic notifications in Diffusion.
+ * <P>
+ * The example registers a topic notification listener to observe changes to topics
+ * and their descendants within a selected topic tree.
+ *
+ * @author DiffusionData Limited
+ */
 public class MonitoringTopicNotificationsExample {
 
     public static void main(String[] args) {
 
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
@@ -43,12 +51,12 @@ public class MonitoringTopicNotificationsExample {
         final TopicSpecification myTopicSpec = Diffusion.newTopicSpecification(
             TopicType.STRING);
 
-        TopicNotifications.NotificationRegistration registration =
+        final TopicNotifications.NotificationRegistration registration =
             notifications.addListener(new MyTopicListener()).join();
 
         registration.select(">my");
 
-        Map<String, String> myTopicData = new HashMap<String, String>() {{
+        final Map<String, String> myTopicData = new HashMap<String, String>() {{
             put("my/topic/path", "Good morning");
             put("my/other/topic/path", "Good afternoon");
             put("other/path/of/the/topic/tree", "This will not generate a notification");
@@ -66,9 +74,9 @@ public class MonitoringTopicNotificationsExample {
         session.close();
     }
 
-    static class MyTopicListener implements TopicNotificationListener {
+     static final class MyTopicListener implements TopicNotificationListener {
 
-        static final Logger LOG =
+        private static final Logger LOG =
             LoggerFactory.getLogger(MyTopicListener.class);
 
         @Override

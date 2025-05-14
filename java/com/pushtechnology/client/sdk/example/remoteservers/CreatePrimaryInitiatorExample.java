@@ -25,6 +25,11 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This example demonstrates how to create a primary initiator remote server in Diffusion.
+ *
+ * @author DiffusionData Limited
+ */
 public class CreatePrimaryInitiatorExample {
 
     private static final Logger LOG = LoggerFactory.getLogger(
@@ -32,18 +37,18 @@ public class CreatePrimaryInitiatorExample {
 
     public static void main(String[] args) {
 
-        Session adminSession = Diffusion.sessions()
+        final Session adminSession = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        RemoteServers remoteServersControl =
+        final RemoteServers remoteServersControl =
             adminSession.feature(RemoteServers.class);
 
-        RemoteServers.PrimaryInitiator.PrimaryInitiatorBuilder builder =
+        final RemoteServers.PrimaryInitiator.PrimaryInitiatorBuilder builder =
             Diffusion.newRemoteServerBuilder(PrimaryInitiatorBuilder.class);
 
-        List<String> urls = new ArrayList<String>(){{
+        final List<String> urls = new ArrayList<String>() {{
             add("ws://new.server.url.com:8080");
             add("ws://new.server.url.com:8081");
             add("ws://new.server.url.com:8082");

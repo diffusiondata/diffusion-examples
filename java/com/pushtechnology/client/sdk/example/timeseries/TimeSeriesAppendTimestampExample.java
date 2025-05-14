@@ -29,13 +29,21 @@ import org.slf4j.LoggerFactory;
 import java.time.Instant;
 import java.util.Random;
 
+/**
+ * This example demonstrates how to append events with user-supplied timestamps to a time series topic in Diffusion.
+ * <P>
+ * A time series topic is created with a specified retained range and subscription range.
+ * Events containing double values are appended with explicitly defined timestamps.
+ *
+ * @author DiffusionData Limited
+ */
 public class TimeSeriesAppendTimestampExample {
 
     private static final Logger LOG =
         LoggerFactory.getLogger(TimeSeriesAppendTimestampExample.class);
 
     public static void main(String[] args) {
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");

@@ -33,6 +33,7 @@ export async function sessionManagementSubscriptionControl(): Promise<void> {
         ['unsubscribed client', 'Unsubscribed from my/topic/path/hello']
     ]);
     const subscribedPromise = promiseWithResolvers<void>();
+    const unsubscribeTopicPromise = promiseWithResolvers<void>();
     /// end::log
     /// tag::session_management_subscription_control[]
     // Connect to the server.
@@ -110,6 +111,7 @@ export async function sessionManagementSubscriptionControl(): Promise<void> {
             console.log(`Unsubscribed from ${topic}: ${reason}`);
             /// tag::log
             check.log(`Unsubscribed from ${topic}`);
+            unsubscribeTopicPromise.resolve();
             /// end::log
         },
         value : (topic, spec, newValue, oldValue) => {
@@ -118,6 +120,9 @@ export async function sessionManagementSubscriptionControl(): Promise<void> {
     });
 
     await unsubscribePromise;
+    /// tag::log
+    await unsubscribeTopicPromise.promise;
+    /// end::log
 
     await session1.closeSession();
     await session2.closeSession();

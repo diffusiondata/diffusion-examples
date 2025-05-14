@@ -24,13 +24,22 @@ import com.pushtechnology.diffusion.client.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This example demonstrates how to send messages to a specific session using
+ * its session ID with the Diffusion messaging feature.
+ * <P>
+ * The example sets up request streams for specific paths and uses a session ID
+ * to directly target a session for messaging.
+ * The targeted session processes the message and sends a response back to the sender.
+ *
+ * @author DiffusionData Limited
+ */
 public class MessagingSendToSessionIdExample {
 
     private static final Logger LOG =
         LoggerFactory.getLogger(MessagingSendToSessionIdExample.class);
 
-    public static void main(String[] args)
-        throws Exception {
+    public static void main(String[] args) throws Exception {
 
         final String serverUrl = "ws://localhost:8080";
 

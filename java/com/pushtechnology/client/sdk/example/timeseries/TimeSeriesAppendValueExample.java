@@ -28,17 +28,22 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Random;
 
+/**
+ * This example demonstrates how to append events to a time series topic in Diffusion.
+ *
+ * @author DiffusionData Limited
+ */
 public class TimeSeriesAppendValueExample {
     private static final Logger LOG =
         LoggerFactory.getLogger(TimeSeriesAppendValueExample.class);
 
     public static void main(String[] args) {
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        TopicSpecification mySpec = Diffusion.newTopicSpecification(TopicType.TIME_SERIES)
+        final TopicSpecification mySpec = Diffusion.newTopicSpecification(TopicType.TIME_SERIES)
             .withProperty(TopicSpecification.TIME_SERIES_EVENT_VALUE_TYPE, DOUBLE_DATATYPE_NAME)
             .withProperty(TopicSpecification.TIME_SERIES_RETAINED_RANGE, "limit 15 last 10s")
             .withProperty(TopicSpecification.TIME_SERIES_SUBSCRIPTION_RANGE, "limit 3");
@@ -55,8 +60,8 @@ public class TimeSeriesAppendValueExample {
             System.out.println("Topic already exists.");
         }
 
-        TimeSeries timeSeries = session.feature(TimeSeries.class);
-        Random r = new Random();
+        final TimeSeries timeSeries = session.feature(TimeSeries.class);
+        final Random r = new Random();
 
         for (int i = 0; i < 25; i++) {
             timeSeries.append("my/time/series/topic/path", Double.class, r.nextDouble())

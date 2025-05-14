@@ -22,6 +22,15 @@ import com.pushtechnology.diffusion.client.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This example demonstrates how to restrict edit permissions for a role using
+ * the security control feature in Diffusion.
+ * <P>
+ * The example locks the `EXAMPLE` role, making it editable only by the specified
+ * `admin` principal.
+ *
+ * @author DiffusionData Limited
+ */
 public class RestrictRoleEditPermissionsExample {
 
     private static final Logger LOG = LoggerFactory.getLogger(
@@ -29,13 +38,13 @@ public class RestrictRoleEditPermissionsExample {
 
     public static void main(String[] args) throws Exception {
 
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        SecurityControl securityControl = session.feature(SecurityControl.class);
-        ScriptBuilder builder = securityControl.scriptBuilder();
+        final SecurityControl securityControl = session.feature(SecurityControl.class);
+        final ScriptBuilder builder = securityControl.scriptBuilder();
 
         builder.setRoleLockedByPrincipal("EXAMPLE", "admin");
 

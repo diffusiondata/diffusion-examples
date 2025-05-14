@@ -25,6 +25,11 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This example demonstrates how to create a secondary acceptor remote server in Diffusion.
+ *
+ * @author DiffusionData Limited
+ */
 public class CreateSecondaryAcceptorExample {
 
     private static final Logger LOG = LoggerFactory.getLogger(
@@ -32,19 +37,19 @@ public class CreateSecondaryAcceptorExample {
 
     public static void main(String[] args) {
 
-        Session adminSession = Diffusion.sessions()
+        final Session adminSession = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        RemoteServers remoteServersControl =
+        final RemoteServers remoteServersControl =
             adminSession.feature(RemoteServers.class);
 
-        RemoteServers.SecondaryAcceptor.SecondaryAcceptorBuilder builder =
+        final RemoteServers.SecondaryAcceptor.SecondaryAcceptorBuilder builder =
             Diffusion.newRemoteServerBuilder(SecondaryAcceptorBuilder.class);
 
-        Map<RemoteServers.RemoteServer.ConnectionOption, String>
-            myConnectionOptions = new HashMap<RemoteServers.RemoteServer.ConnectionOption, String>(){{
+        final Map<RemoteServers.RemoteServer.ConnectionOption, String>
+            myConnectionOptions = new HashMap<RemoteServers.RemoteServer.ConnectionOption, String>() {{
             put(RemoteServers.RemoteServer.ConnectionOption.WRITE_TIMEOUT, "2000");
             put(RemoteServers.RemoteServer.ConnectionOption.MAXIMUM_QUEUE_SIZE, "1000");
             put(RemoteServers.RemoteServer.ConnectionOption.CONNECTION_TIMEOUT, "15000");

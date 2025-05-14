@@ -27,6 +27,15 @@ import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
+/**
+ * This example demonstrates how to update a topic in Diffusion using the
+ * 'noTopic' constraint.
+ * <P>
+ * The example creates a topic and uses an update constraint to ensure updates
+ * are only allowed if no topic exists at the specified path.
+ *
+ * @author DiffusionData Limited
+ */
 public class AddAndSetNoTopicConstraintExample {
 
     private static final Logger LOG =
@@ -34,13 +43,13 @@ public class AddAndSetNoTopicConstraintExample {
 
     public static void main(String[] args) {
 
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        TopicSpecification specification = Diffusion.newTopicSpecification(TopicType.JSON);
-        JSON value = Diffusion.dataTypes().json()
+        final TopicSpecification specification = Diffusion.newTopicSpecification(TopicType.JSON);
+        final JSON value = Diffusion.dataTypes().json()
             .fromJsonString("{ \"diffusion\": \"data\" }");
 
         // create a topic with a value
@@ -49,7 +58,7 @@ public class AddAndSetNoTopicConstraintExample {
         LOG.info("Topic updated");
 
         // only allow updates if there is no topic at the given path
-        UpdateConstraint constraint = Diffusion.updateConstraints().noTopic();
+        final UpdateConstraint constraint = Diffusion.updateConstraints().noTopic();
 
         try {
             // attempt to update the topic with the constraint, this will fail

@@ -25,13 +25,22 @@ import com.pushtechnology.diffusion.client.session.SessionId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This example demonstrates how to send messages to sessions matching a filter
+ * using the Diffusion messaging feature.
+ * <P>
+ * The example sets up request streams for specific paths and uses a
+ * session filter to target sessions based on principal values.
+ * Matching sessions process the message and send responses back to the sender.
+ *
+ * @author DiffusionData Limited
+ */
 public class MessagingSendToSessionFilterExample {
 
     private static final Logger LOG =
         LoggerFactory.getLogger(MessagingSendToSessionFilterExample.class);
 
-    public static void main(String[] args)
-        throws Exception {
+    public static void main(String[] args) throws Exception {
 
         final String serverUrl = "ws://localhost:8080";
 

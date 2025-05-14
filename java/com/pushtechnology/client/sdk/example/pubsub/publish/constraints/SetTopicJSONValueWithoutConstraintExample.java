@@ -27,6 +27,15 @@ import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
+/**
+ * This example demonstrates how to update a JSON topic in Diffusion using the
+ * 'without' constraint.
+ * <P>
+ * The example creates a JSON topic and uses an update constraint to restrict
+ * updates if a specific JSON path is already present.
+ *
+ * @author DiffusionData Limited
+ */
 public class SetTopicJSONValueWithoutConstraintExample {
 
     private static final Logger LOG =
@@ -34,12 +43,12 @@ public class SetTopicJSONValueWithoutConstraintExample {
 
     public static void main(String[] args) {
 
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        JSON value = Diffusion.dataTypes().json()
+        final JSON value = Diffusion.dataTypes().json()
             .fromJsonString("{ \"diffusion\": \"data\" }");
 
         session.feature(TopicControl.class).addTopic("my/topic/path", TopicType.JSON).join();
@@ -48,7 +57,7 @@ public class SetTopicJSONValueWithoutConstraintExample {
         LOG.info("Topic updated");
 
         // only allow updates if the specified position in the json object does not exist
-        UpdateConstraint constraint = Diffusion.updateConstraints()
+        final UpdateConstraint constraint = Diffusion.updateConstraints()
             .jsonValue().without("/diffusion");
 
         try {

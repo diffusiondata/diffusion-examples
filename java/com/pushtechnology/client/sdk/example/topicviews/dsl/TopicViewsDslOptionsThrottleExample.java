@@ -14,88 +14,100 @@
  *******************************************************************************/
 package com.pushtechnology.client.sdk.example.topicviews.dsl;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
-
-import com.pushtechnology.diffusion.client.Diffusion;
-import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
-import com.pushtechnology.diffusion.client.features.Topics;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
-import com.pushtechnology.diffusion.client.session.Session;
-import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
-import com.pushtechnology.diffusion.client.topics.details.TopicType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pushtechnology.diffusion.client.Diffusion;
+import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
+import com.pushtechnology.diffusion.client.features.Topics;
+import com.pushtechnology.diffusion.client.features.control.topics.views.TopicView;
+import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
+import com.pushtechnology.diffusion.client.topics.details.TopicType;
+
+/**
+ * This example demonstrates how to use the topic view throttle clause.
+ * <P>
+ * A topic view is created that limits updates to at most one every 10 seconds,
+ * even if the source topic updates more frequently.
+ *
+ * @author DiffusionData Limited
+ */
 public class TopicViewsDslOptionsThrottleExample {
 
     private static final Logger LOG =
         LoggerFactory.getLogger(TopicViewsDslOptionsThrottleExample.class);
 
     public static void main(String[] args) throws Exception {
-        Session session = Diffusion.sessions()
+
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
         final Topics topics = session.feature(Topics.class);
         final String topicPath = "my/topic/path";
+        final String viewSelector = "?views//";
+        final Topics.ValueStream<Long> valueStream = new MyStream();
 
         topics.addAndSet(
                 topicPath,
                 Diffusion.newTopicSpecification(TopicType.INT64), Long.class, 0L)
             .join();
         
-        topics.addFallbackStream(Long.class, new MyFallbackStream());
-        topics.subscribe("?views//").join();
+        topics.addStream(viewSelector, Long.class, valueStream);
+        topics.subscribe(viewSelector).join();
 
-        final String topicViewName = "topic_view_1";
-
-        topics.createTopicView(topicViewName,
-                "map my/topic/path to views/<path(0)> throttle to 1 update every 3 seconds")
+        final TopicView myView = topics.createTopicView("topic_view_1",
+                "map my/topic/path to views/<path(0)> throttle to 1 update every 10 seconds")
             .join();
 
-        System.out.println(topicViewName + " has been created");
+        LOG.info("Topic View {} has been created", myView.getName());
 
-        for (int i = 0; i < 15; i++) {
+        for (int i = 0; i < 5; i++) {
             topics.set(topicPath, Long.class, System.currentTimeMillis()).join();
-            SECONDS.sleep(1);
+            MILLISECONDS.sleep(500);
         }
 
-        topics.removeTopicView(topicViewName).join();
-        session.feature(TopicControl.class).removeTopics("?.*//").join();
+        topics.removeStream(valueStream);
         session.close();
-
-        LOG.info("Topic View <topic_view_1> has been created");
     }
-    
-    public static class MyFallbackStream implements Topics.ValueStream<Long> {
+
+    private static final class MyStream implements Topics.ValueStream<Long> {
+
+        @Override
+        public void onValue(
+            String topicPath,
+            TopicSpecification topicSpecification,
+            Long oldValue,
+            Long newValue) {
+            LOG.info("{} new value {}", topicPath, newValue);
+        }
 
         @Override
         public void onSubscription(String topicPath,
             TopicSpecification topicSpecification) {
-            System.out.printf("Subscribed to %s\n", topicPath);
+            LOG.info("Subscribed to {}", topicPath);
         }
 
         @Override
         public void onUnsubscription(String topicPath,
             TopicSpecification topicSpecification,
             Topics.UnsubscribeReason unsubscribeReason) {
-            System.out.printf("Unsubscribed from %s: %s\n", topicPath, unsubscribeReason);
+            LOG.info("Unsubscribed from {}", topicPath);
         }
 
         @Override
-        public void onValue(String topicPath,
-            TopicSpecification topicSpecification,
-            Long oldValue, Long newValue) {
-            System.out.printf("%s changed from %d to %d\n",
-                topicPath, oldValue, newValue);
+        public void onClose() {
+            LOG.info("stream closed");
         }
 
         @Override
-        public void onClose() {}
-
-        @Override
-        public void onError(ErrorReason errorReason) {}
+        public void onError(ErrorReason errorReason) {
+            LOG.error("stream error: {}", errorReason);
+        }
     }
 }

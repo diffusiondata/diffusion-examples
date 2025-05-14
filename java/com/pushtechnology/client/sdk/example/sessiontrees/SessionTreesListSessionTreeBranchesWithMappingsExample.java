@@ -21,6 +21,11 @@ import com.pushtechnology.diffusion.client.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This example demonstrates how to list session tree branches with mappings in Diffusion.
+ *
+ * @author DiffusionData Limited
+ */
 public class SessionTreesListSessionTreeBranchesWithMappingsExample {
 
     private static final Logger LOG =

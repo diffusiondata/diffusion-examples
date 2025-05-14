@@ -26,6 +26,15 @@ import org.slf4j.LoggerFactory;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * This example demonstrates how to set global permissions for a role using the
+ * security control feature in Diffusion.
+ * <P>
+ * The example assigns the `VIEW_SERVER` and `VIEW_SESSION` global permissions
+ * to the `CLIENT` role.
+ *
+ * @author DiffusionData Limited
+ */
 public class SetGlobalPermissionsExample {
 
     private static final Logger LOG = LoggerFactory.getLogger(
@@ -33,21 +42,21 @@ public class SetGlobalPermissionsExample {
 
     public static void main(String[] args) {
 
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        SecurityControl securityControl = session.feature(SecurityControl.class);
-        ScriptBuilder builder = securityControl.scriptBuilder();
+        final SecurityControl securityControl = session.feature(SecurityControl.class);
+        final ScriptBuilder builder = securityControl.scriptBuilder();
 
-        Set<GlobalPermission> myPermissions = new HashSet<GlobalPermission>(){{
+        final Set<GlobalPermission> myPermissions = new HashSet<GlobalPermission>() {{
             add(GlobalPermission.VIEW_SERVER);
             add(GlobalPermission.VIEW_SESSION);
         }};
 
         builder.setGlobalPermissions("CLIENT", myPermissions);
-        String script = builder.script();
+        final String script = builder.script();
 
         LOG.info("Adding the following permissions to the global permissions " +
             "of Role CLIENT: VIEW_SERVER and VIEW_SESSION");

@@ -27,6 +27,15 @@ import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
+/**
+ * This example demonstrates how to update a topic in Diffusion using the
+ * 'value' constraint.
+ * <P>
+ * The example creates a JSON topic and uses an update constraint to ensure
+ * updates are only allowed if the current value matches a specified value.
+ *
+ * @author DiffusionData Limited
+ */
 public class AddAndSetValueConstraintExample {
 
     private static final Logger LOG =
@@ -34,17 +43,17 @@ public class AddAndSetValueConstraintExample {
 
     public static void main(String[] args) {
 
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        TopicSpecification specification = Diffusion.newTopicSpecification(TopicType.JSON);
+        final TopicSpecification specification = Diffusion.newTopicSpecification(TopicType.JSON);
 
-        JSON initialValue = Diffusion.dataTypes().json()
+        final JSON initialValue = Diffusion.dataTypes().json()
             .fromJsonString("{ \"diffusion\": \"data\" }");
 
-        JSON differentValue = Diffusion.dataTypes().json()
+        final JSON differentValue = Diffusion.dataTypes().json()
             .fromJsonString("{ \"diffusion\": \"data2\" }");
 
         // create a topic with the initial value
@@ -53,7 +62,7 @@ public class AddAndSetValueConstraintExample {
         LOG.info("Topic updated");
 
         // only allow updates if the current value of the topic matches the initial value
-        UpdateConstraint constraint = Diffusion.updateConstraints().value(initialValue);
+        final UpdateConstraint constraint = Diffusion.updateConstraints().value(initialValue);
 
         // update the topic with the constraint, this works as the initial value has not yet changed
         session.feature(TopicUpdate.class)

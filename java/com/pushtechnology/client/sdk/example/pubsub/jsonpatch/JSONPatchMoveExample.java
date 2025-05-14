@@ -26,6 +26,15 @@ import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
+/**
+ * This example demonstrates how to apply a JSON Patch to move a value within a
+ * JSON topic in Diffusion.
+ * <P>
+ * The example creates a JSON topic, sets its initial value, and applies a JSON
+ * Patch to move a field's value from one location to another within the JSON object.
+ *
+ * @author DiffusionData Limited
+ */
 public class JSONPatchMoveExample {
 
     private static final Logger LOG =
@@ -69,10 +78,10 @@ public class JSONPatchMoveExample {
 
     static class MyStream implements Topics.ValueStream<JSON> {
 
-        private Logger LOG;
+        private Logger logger;
 
-        public MyStream(Logger logger) {
-            this.LOG = logger;
+        MyStream(Logger logger) {
+            this.logger = logger;
         }
         @Override
         public void onValue(
@@ -80,30 +89,30 @@ public class JSONPatchMoveExample {
             TopicSpecification topicSpecification,
             JSON oldValue,
             JSON newValue) {
-            LOG.info("{} new value {}",
+            logger.info("{} new value {}",
                 topicPath, newValue);
         }
 
         @Override
         public void onSubscription(String topicPath, TopicSpecification topicSpecification) {
-            LOG.info("Subscribed to: {}", topicPath);
+            logger.info("Subscribed to: {}", topicPath);
         }
 
         @Override
         public void onUnsubscription(String topicPath, TopicSpecification topicSpecification,
             Topics.UnsubscribeReason unsubscribeReason) {
-            LOG.info("Unsubscribed from: {}, reason: {}",
+            logger.info("Unsubscribed from: {}, reason: {}",
                 topicPath, unsubscribeReason);
         }
 
         @Override
         public void onClose() {
-            LOG.info("On close");
+            logger.info("On close");
         }
 
         @Override
         public void onError(ErrorReason errorReason) {
-            LOG.error("On error: {}", errorReason);
+            logger.error("On error: {}", errorReason);
         }
     }
 }

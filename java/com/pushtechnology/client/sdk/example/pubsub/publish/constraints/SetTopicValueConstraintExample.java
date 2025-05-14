@@ -27,6 +27,15 @@ import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
+/**
+ * This example demonstrates how to update a topic in Diffusion using the
+ * 'value' constraint.
+ * <P>
+ * The example creates a topic and uses an update constraint to ensure updates
+ * are only allowed if the current value matches a specified value.
+ *
+ * @author DiffusionData Limited
+ */
 public class SetTopicValueConstraintExample {
 
     private static final Logger LOG =
@@ -34,15 +43,15 @@ public class SetTopicValueConstraintExample {
 
     public static void main(String[] args) {
 
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        JSON value = Diffusion.dataTypes().json()
+        final JSON value = Diffusion.dataTypes().json()
             .fromJsonString("{ \"diffusion\": \"data\" }");
 
-        JSON differentValue = Diffusion.dataTypes().json()
+        final JSON differentValue = Diffusion.dataTypes().json()
             .fromJsonString("{ \"diffusion\": \"data2\" }");
 
         session.feature(TopicControl.class).addTopic("my/topic/path", TopicType.JSON).join();
@@ -50,7 +59,7 @@ public class SetTopicValueConstraintExample {
         LOG.info("Topic updated");
 
         // only allow updates if the current value of the topic matches the given value
-        UpdateConstraint constraint = Diffusion.updateConstraints().value(differentValue);
+        final UpdateConstraint constraint = Diffusion.updateConstraints().value(differentValue);
 
         try {
             // attempt a constrained update, this will fail as the topic

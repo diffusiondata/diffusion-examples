@@ -22,6 +22,15 @@ import com.pushtechnology.diffusion.client.session.Session.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This example demonstrates how to use a session state listener to monitor
+ * changes in the state of a Diffusion session.
+ * <P>
+ * The example registers a custom session listener that logs state transitions
+ * of the session.
+ *
+ * @author DiffusionData Limited
+ */
 public class SessionStateListenerExample {
 
     private static final Logger LOG = LoggerFactory

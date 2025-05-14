@@ -21,6 +21,14 @@ import com.pushtechnology.diffusion.client.session.SessionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This example demonstrates how to establish a synchronous connection
+ * to a Diffusion server using a try-with-resources statement.
+ * <P>
+ * The use of try-with-resources ensures that the session is automatically closed.
+ *
+ * @author DiffusionData Limited
+ */
 public class ConnectSyncTryWithResourcesExample {
 
     private static final Logger LOG =

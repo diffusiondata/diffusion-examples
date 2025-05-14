@@ -20,6 +20,12 @@ import com.pushtechnology.diffusion.client.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This example demonstrates how to establish a synchronous connection
+ * to a Diffusion server.
+ *
+ * @author DiffusionData Limited
+ */
 public class ConnectSyncExample {
 
     private static final Logger LOG =

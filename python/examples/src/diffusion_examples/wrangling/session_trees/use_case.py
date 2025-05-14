@@ -110,17 +110,22 @@ class UseCase(Example):
 
 
 class StringStream(ValueStreamHandler):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             diffusion.datatypes.STRING,
-            update=self.on_value,
+            update=self.on_update,
             subscribe=self.on_subscription,
             unsubscribe=self.on_subscription,
         )
 
-    async def on_value(
-        self, topic_path, topic_spec, old_value, topic_value
-    ):
+    async def on_update(
+            self,
+            topic_path: str,
+            topic_spec: TopicSpecification,
+            old_value: typing.Optional[diffusion.datatypes.JSON],
+            topic_value: typing.Optional[diffusion.datatypes.JSON],
+            **kwargs
+    ) -> None:
         print(
             f"{topic_path} changed from {old_value or 'NULL'} to {topic_value}."
         )
@@ -130,19 +135,20 @@ class StringStream(ValueStreamHandler):
         self,
         topic_path: str,
         topic_spec: TopicSpecification,
-        topic_value: typing.Optional[diffusion.datatypes.AbstractDataType],
-        reason: typing.Optional[typing.Any] = None,
-    ):
-        print(f"Subscribed to {topic_path}: {reason}.")
+        topic_value: typing.Optional[diffusion.datatypes.STRING],
+        **kwargs
+    ) -> None:
+        print(f"Subscribed to {topic_path}.")
 
     # noinspection PyUnusedLocal,PyMethodMayBeStatic
     async def on_unsubscription(
         self,
         topic_path: str,
         topic_spec: TopicSpecification,
-        topic_value: typing.Optional[diffusion.datatypes.AbstractDataType],
+        topic_value: typing.Optional[diffusion.datatypes.STRING],
         reason: typing.Optional[typing.Any],
-    ):
+        **kwargs
+    ) -> None:
         print(f"Unsubscribed from {topic_path}: {reason}.")
 
 
@@ -150,14 +156,19 @@ class AnotherStringStream(ValueStreamHandler):
     def __init__(self):
         super().__init__(
             diffusion.datatypes.STRING,
-            update=self.on_value,
+            update=self.on_update,
             subscribe=self.on_subscription,
             unsubscribe=self.on_subscription,
         )
 
-    async def on_value(
-        self, topic_path, topic_spec, old_value, topic_value
-    ):
+    async def on_update(
+            self,
+            topic_path: str,
+            topic_spec: TopicSpecification,
+            old_value: typing.Optional[diffusion.datatypes.STRING],
+            topic_value: typing.Optional[diffusion.datatypes.STRING],
+            **kwargs
+    ) -> None:
         print(
             f"{topic_path} changed from {old_value or 'NULL'} to {topic_value}."
         )
@@ -167,8 +178,8 @@ class AnotherStringStream(ValueStreamHandler):
             self,
             topic_path: str,
             topic_spec: TopicSpecification,
-            topic_value: typing.Optional[diffusion.datatypes.AbstractDataType],
-            reason: typing.Optional[typing.Any] = None,
+            topic_value: typing.Optional[diffusion.datatypes.STRING],
+            **kwargs
     ):
         print(f"Subscribed to {topic_path}.")
 
@@ -177,8 +188,9 @@ class AnotherStringStream(ValueStreamHandler):
             self,
             topic_path: str,
             topic_spec: TopicSpecification,
-            topic_value: typing.Optional[diffusion.datatypes.AbstractDataType],
+            topic_value: typing.Optional[diffusion.datatypes.STRING],
             reason: typing.Optional[typing.Any],
+            **kwargs
     ):
         print(f"Unsubscribed from {topic_path}: {reason}.")
 

@@ -28,6 +28,14 @@ import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
+/**
+ * This example demonstrates how to update a JSON topic in Diffusion with a constraint.
+ * <P>
+ * The example creates a JSON topic and uses an update constraint to allow updates
+ * only when the current value matches a specified condition.
+ *
+ * @author DiffusionData Limited
+ */
 public class AddAndSetJSONValueWithConstraintExample {
 
     private static final Logger LOG =
@@ -35,17 +43,17 @@ public class AddAndSetJSONValueWithConstraintExample {
 
     public static void main(String[] args) {
 
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        TopicSpecification specification = Diffusion.newTopicSpecification(TopicType.JSON);
+        final TopicSpecification specification = Diffusion.newTopicSpecification(TopicType.JSON);
 
-        JSON value = Diffusion.dataTypes().json()
+        final JSON value = Diffusion.dataTypes().json()
             .fromJsonString("{ \"diffusion\": \"data\" }");
 
-        JSON differentValue = Diffusion.dataTypes().json()
+        final JSON differentValue = Diffusion.dataTypes().json()
             .fromJsonString("{ \"diffusion\": \"data2\" }");
 
         // create a topic with a json value
@@ -55,7 +63,7 @@ public class AddAndSetJSONValueWithConstraintExample {
         LOG.info("Topic updated");
 
         // only allow updates if the value at the given json pointer matches the value supplied
-        UpdateConstraint constraint = Diffusion.updateConstraints()
+        final UpdateConstraint constraint = Diffusion.updateConstraints()
             .jsonValue().with("/diffusion", Operator.IS, "data");
 
         // update the topic with the constraint, this works as the initial value has not yet changed

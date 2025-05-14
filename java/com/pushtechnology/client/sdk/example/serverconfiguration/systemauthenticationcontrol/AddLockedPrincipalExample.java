@@ -9,6 +9,13 @@ import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.control.clients.SystemAuthenticationControl;
 import com.pushtechnology.diffusion.client.session.Session;
 
+/**
+ * This example demonstrates how to add a principal that is locked by another principal.
+ * <P>
+ * Upon creation the 'super_user' principal is locked by the 'admin' principal.
+ *
+ * @author DiffusionData Limited
+ */
 public class AddLockedPrincipalExample {
 
     private static final Logger LOG =

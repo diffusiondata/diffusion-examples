@@ -26,6 +26,11 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This example demonstrates how to remove remote servers in Diffusion.
+ *
+ * @author DiffusionData Limited
+ */
 public class RemoveRemoteServersExample {
 
     private static final Logger LOG = LoggerFactory.getLogger(
@@ -33,18 +38,18 @@ public class RemoveRemoteServersExample {
 
     public static void main(String[] args) throws Exception {
 
-        Session adminSession = Diffusion.sessions()
+        final Session adminSession = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        RemoteServers remoteServersControl =
+        final  RemoteServers remoteServersControl =
             adminSession.feature(RemoteServers.class);
 
-        SecondaryInitiatorBuilder builder =
+        final SecondaryInitiatorBuilder builder =
             Diffusion.newRemoteServerBuilder(SecondaryInitiatorBuilder.class);
 
-        Map<ConnectionOption, String> myConnectionOptions = new HashMap<ConnectionOption, String>(){{
+        final Map<ConnectionOption, String> myConnectionOptions = new HashMap<ConnectionOption, String>() {{
             put(ConnectionOption.RECONNECTION_TIMEOUT, "120000");
             put(ConnectionOption.MAXIMUM_QUEUE_SIZE, "1000");
             put(ConnectionOption.CONNECTION_TIMEOUT, "15000");

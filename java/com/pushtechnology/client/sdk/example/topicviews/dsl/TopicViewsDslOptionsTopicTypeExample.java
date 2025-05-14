@@ -14,24 +14,34 @@
  *******************************************************************************/
 package com.pushtechnology.client.sdk.example.topicviews.dsl;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-
-import com.pushtechnology.diffusion.client.Diffusion;
-import com.pushtechnology.diffusion.client.features.TimeSeries;
-import com.pushtechnology.diffusion.client.features.Topics;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
-import com.pushtechnology.diffusion.client.session.Session;
-import com.pushtechnology.diffusion.client.topics.details.TopicType;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pushtechnology.diffusion.client.Diffusion;
+import com.pushtechnology.diffusion.client.features.TimeSeries;
+import com.pushtechnology.diffusion.client.features.Topics;
+import com.pushtechnology.diffusion.client.features.control.topics.views.TopicView;
+import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.client.topics.details.TopicType;
+
+/**
+ * This example demonstrates how to specify the topic type in a topic view.
+ * <P>
+ * A topic view is created that maps a source topic to a new topic with a
+ * different topic type, converting an INT64 topic into a TIME_SERIES topic.
+ *
+ * @author DiffusionData Limited
+ */
 public class TopicViewsDslOptionsTopicTypeExample {
+
     private static final Logger LOG =
         LoggerFactory.getLogger(TopicViewsDslOptionsTopicTypeExample.class);
 
     public static void main(String[] args) throws Exception {
-        Session session = Diffusion.sessions()
+
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
@@ -44,20 +54,18 @@ public class TopicViewsDslOptionsTopicTypeExample {
                 Diffusion.newTopicSpecification(TopicType.INT64), Long.class, 0L)
             .join();
 
-        final String topicViewName = "topic_view_1";
-
-        topics.createTopicView(topicViewName,
+        final TopicView view = topics.createTopicView("topic_view_1",
                 "map my/topic/path to views/archive/<path(0)> type TIME_SERIES")
             .join();
 
-        System.out.println("topic_view_1 has been created");
+        LOG.info("Topic View {} has been created", view.getName());
 
-        for (int i = 0; i < 15; i++) {
+        for (int i = 0; i < 4; i++) {
             topics.set(topicPath, Long.class, System.currentTimeMillis()).join();
-            MILLISECONDS.sleep(500);
+            SECONDS.sleep(1);
         }
 
-        TimeSeries.QueryResult<Long> queryResult =
+        final TimeSeries.QueryResult<Long> queryResult =
             session.feature(TimeSeries.class)
                 .rangeQuery()
                 .forValues()
@@ -66,13 +74,9 @@ public class TopicViewsDslOptionsTopicTypeExample {
                 .selectFrom("views/archive/my/topic/path").join();
 
         queryResult.stream().forEach(
-            event -> System.out.println(event.value())
+            event -> LOG.info("event {} : value {}", event.sequence(), event.value())
         );
 
-        topics.removeTopicView(topicViewName).join();
-        session.feature(TopicControl.class).removeTopics("?.*//").join();
         session.close();
-
-        LOG.info("Topic View <topic_view_1> has been created");
     }
 }

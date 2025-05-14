@@ -28,13 +28,20 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletionException;
 
+/**
+ * This example demonstrates how to add and set a topic using an update stream
+ * in Diffusion.
+ * <P>
+ * The example creates a JSON topic using an update stream and sets its initial value.
+ *
+ * @author DiffusionData Limited
+ */
 public class AddAndSetTopicViaUpdateStreamExample {
 
     private static final Logger LOG =
         LoggerFactory.getLogger(AddAndSetTopicViaUpdateStreamExample.class);
 
-    public static void main(String[] args)
-        throws Throwable {
+    public static void main(String[] args) throws Throwable {
 
         try (Session session = Diffusion.sessions()
             .principal("admin")

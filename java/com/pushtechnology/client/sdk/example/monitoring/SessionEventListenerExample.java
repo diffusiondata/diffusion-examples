@@ -14,8 +14,9 @@
  *******************************************************************************/
 package com.pushtechnology.client.sdk.example.monitoring;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 import java.util.Collections;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +29,14 @@ import com.pushtechnology.diffusion.client.features.control.clients.ClientContro
 import com.pushtechnology.diffusion.client.features.control.clients.ClientControl.SessionEventStream.Event.Type;
 import com.pushtechnology.diffusion.client.session.Session;
 
+/**
+ * This example demonstrates how to monitor session events in Diffusion.
+ * <P>
+ * The example registers a session event listener to observe session lifecycle
+ * events and property changes for sessions matching a specified filter.
+ *
+ * @author DiffusionData Limited
+ */
 public class SessionEventListenerExample {
 
     public static void main(String[] args) throws Exception {
@@ -44,8 +53,6 @@ public class SessionEventListenerExample {
 
         final ClientControl clientControl = session1.feature(ClientControl.class);
 
-        // We specify the session properties to be returned and we
-        // exclude sessions with the 'admin' principal
         final SessionEventParameters parameters =
             Diffusion.newSessionEventParametersBuilder()
                 .properties(Session.ALL_FIXED_PROPERTIES)
@@ -61,7 +68,7 @@ public class SessionEventListenerExample {
         session2.close();
         registration.close();
 
-        Thread.sleep(2000);
+        SECONDS.sleep(2);
 
         session1.close();
     }

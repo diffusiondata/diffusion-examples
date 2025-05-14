@@ -14,57 +14,72 @@
  *******************************************************************************/
 package com.pushtechnology.client.sdk.example.sessionmanagement.clientcontrol;
 
-import com.pushtechnology.diffusion.client.Diffusion;
-import com.pushtechnology.diffusion.client.features.control.clients.ClientControl;
-import com.pushtechnology.diffusion.client.session.Session;
+import java.util.Collections;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.Map;
+import com.pushtechnology.diffusion.client.Diffusion;
+import com.pushtechnology.diffusion.client.features.control.clients.ClientControl;
+import com.pushtechnology.diffusion.client.session.Session;
 
+/**
+ * This example demonstrates how to change the roles of multiple sessions
+ * using a session filter.
+ * <P>
+ * The example uses the filter "$Principal is 'client'" to ensure the change
+ * only applies to 'client' sessions.
+ *
+ * @author DiffusionData Limited
+ */
 public class ChangeRolesViaSessionFilterExample {
 
-    private static final Logger LOG = LoggerFactory.getLogger(
-        ChangeRolesViaSessionFilterExample.class);
+    private static final Logger LOG =
+        LoggerFactory.getLogger(ChangeRolesViaSessionFilterExample.class);
 
     public static void main(String[] args) {
 
-        Session adminSession = Diffusion.sessions()
+        final Session adminSession = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        Session clientSession = Diffusion.sessions()
+        final Session clientSession1 = Diffusion.sessions()
             .principal("client")
             .password("password")
             .open("ws://localhost:8080");
 
-        ClientControl clientControl = adminSession.feature(ClientControl.class);
+        final Session clientSession2 = Diffusion.sessions()
+            .principal("client")
+            .password("password")
+            .open("ws://localhost:8080");
 
-        Map<String, String>
-            sessionProperties =  clientControl.getSessionProperties(clientSession.getSessionId(), Collections.singletonList(Session.ROLES)).join();
+        final ClientControl clientControl = adminSession.feature(ClientControl.class);
 
-        System.out.println(sessionProperties);
+        Map<String, String> sessionProperties = clientControl.getSessionProperties(
+            clientSession1.getSessionId(),
+            Collections.singletonList(Session.ROLES)).join();
 
+        LOG.info("roles: {}", sessionProperties.get(Session.ROLES));
 
-        Integer result = clientControl
+        final Integer result = clientControl
             .changeRoles(
                 "$Principal is 'client'",
                 Collections.emptySet(),
                 Collections.singleton("TOPIC_CONTROL"))
             .join();
 
-        System.out.printf("Updated %d session(s)\n", result);
+        LOG.info("Updated {} session(s)\n", result);
 
-        sessionProperties =  clientControl.getSessionProperties(clientSession.getSessionId(), Collections.singletonList(Session.ROLES)).join();
+        sessionProperties = clientControl.getSessionProperties(
+            clientSession1.getSessionId(),
+            Collections.singletonList(Session.ROLES)).join();
 
-        System.out.println(sessionProperties);
+        LOG.info("roles: {}", sessionProperties.get(Session.ROLES));
 
         adminSession.close();
-        clientSession.close();
-
-        LOG.info("Updated {} session(s)", result);
+        clientSession1.close();
+        clientSession2.close();
     }
 }

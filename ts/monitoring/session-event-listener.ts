@@ -21,12 +21,13 @@ import {
     SessionEventStream,
 } from 'diffusion';
 /// tag::log
-import { PartiallyOrderedCheckpointTester } from '../../../test/util';
+import { PartiallyOrderedCheckpointTester, promiseWithResolvers } from '../../../test/util';
 /// end::log
 
 export async function monitoringSessionEventListener(): Promise<void> {
     /// tag::log
     const check = new PartiallyOrderedCheckpointTester([[ 'Session open' ]]);
+    const sessionOpenPromise = promiseWithResolvers<void>();
     /// end::log
     /// tag::monitoring_session_event_listener[]
     // Connect to the server.
@@ -50,6 +51,7 @@ export async function monitoringSessionEventListener(): Promise<void> {
                 console.log(`New session: id=${event.sessionId}`);
                 /// tag::log
                 check.log(`Session open`);
+                sessionOpenPromise.resolve();
                 /// end::log
             } else if (event.type === clients.SessionEventStreamEventType.STATE) {
                 console.log(`Session state changed: id=${event.sessionId}, state=${event.state}`);
@@ -72,6 +74,9 @@ export async function monitoringSessionEventListener(): Promise<void> {
         filter: `$Principal NE 'admin'`
     });
 
+    /// tag::log
+    await sessionOpenPromise.promise;
+    /// end::log
     await session2.closeSession();
     await session1.closeSession();
     /// end::monitoring_session_event_listener[]

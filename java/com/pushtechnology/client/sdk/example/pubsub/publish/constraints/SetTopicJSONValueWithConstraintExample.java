@@ -28,6 +28,15 @@ import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
+/**
+ * This example demonstrates how to update a JSON topic in Diffusion using the
+ * 'with' constraint.
+ * <P>
+ * The example creates a JSON topic and uses an update constraint to ensure updates
+ * are only allowed if a specific JSON path matches a given value.
+ *
+ * @author DiffusionData Limited
+ */
 public class SetTopicJSONValueWithConstraintExample {
 
     private static final Logger LOG =
@@ -35,15 +44,15 @@ public class SetTopicJSONValueWithConstraintExample {
 
     public static void main(String[] args) {
 
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        JSON value = Diffusion.dataTypes().json()
+        final JSON value = Diffusion.dataTypes().json()
             .fromJsonString("{ \"diffusion\": \"data\" }");
 
-        JSON differentValue = Diffusion.dataTypes().json()
+        final JSON differentValue = Diffusion.dataTypes().json()
             .fromJsonString("{ \"diffusdion\": \"data2\" }");
 
         session.feature(TopicControl.class).addTopic("my/topic/path", TopicType.JSON).join();
@@ -51,7 +60,7 @@ public class SetTopicJSONValueWithConstraintExample {
         LOG.info("Topic updated");
 
         // only allow updates if the value at the given json pointer matches the value supplied
-        UpdateConstraint constraint = Diffusion.updateConstraints()
+        final UpdateConstraint constraint = Diffusion.updateConstraints()
             .jsonValue().with("/diffusion", Operator.IS, "data");
 
         // update the topic with the constraint, this works as the initial value has not yet changed

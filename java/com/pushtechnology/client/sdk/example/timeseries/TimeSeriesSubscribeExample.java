@@ -30,12 +30,17 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Random;
 
+/**
+ * This example demonstrates how to subscribe to a time series topic and receive updates.
+ *
+ * @author DiffusionData Limited
+ */
 public class TimeSeriesSubscribeExample {
     private static final Logger LOG =
         LoggerFactory.getLogger(TimeSeriesSubscribeExample.class);
 
     public static void main(String[] args) {
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
@@ -43,7 +48,6 @@ public class TimeSeriesSubscribeExample {
         final Random r = new Random();
         final String myTopicPath = "my/time/series/topic/path";
         final String myTopicSelector = "?my/time/series//";
-        double myValue;
 
         final Topics topics = session.feature(Topics.class);
         final TopicControl topicControl = session.feature(TopicControl.class);
@@ -60,6 +64,7 @@ public class TimeSeriesSubscribeExample {
         topics.addTimeSeriesStream(myTopicSelector, Double.class, new MyValueStream());
         topics.subscribe(myTopicSelector).join();
 
+        double myValue;
         for (int i = 0; i < 25; i++) {
             myValue = r.nextDouble();
 
@@ -72,7 +77,7 @@ public class TimeSeriesSubscribeExample {
 
         LOG.info("Topic has been created.");
     }
-    private static class MyValueStream implements Topics.ValueStream<TimeSeries.Event<Double>> {
+    private static final class MyValueStream implements Topics.ValueStream<TimeSeries.Event<Double>> {
 
         @Override
         public void onSubscription(String topicPath,
@@ -96,9 +101,9 @@ public class TimeSeriesSubscribeExample {
         }
 
         @Override
-        public void onClose() {}
+        public void onClose() { }
 
         @Override
-        public void onError(ErrorReason errorReason) {}
+        public void onError(ErrorReason errorReason) { }
     }
 }

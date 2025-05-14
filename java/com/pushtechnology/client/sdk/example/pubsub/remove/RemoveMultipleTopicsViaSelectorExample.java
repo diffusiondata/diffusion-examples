@@ -27,13 +27,21 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletionException;
 
+/**
+ * This example demonstrates how to remove multiple topics in Diffusion using a
+ * topic selector.
+ * <P>
+ * The example creates a set of topics and then uses a selector to remove topics
+ * that match the specified path pattern.
+ *
+ * @author DiffusionData Limited
+ */
 public class RemoveMultipleTopicsViaSelectorExample {
 
     private static final Logger LOG =
         LoggerFactory.getLogger(RemoveMultipleTopicsViaSelectorExample.class);
 
-    public static void main(String[] args)
-        throws Throwable {
+    public static void main(String[] args) throws Throwable {
 
         try (Session session = Diffusion.sessions()
             .principal("admin")

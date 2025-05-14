@@ -23,6 +23,12 @@ import com.pushtechnology.diffusion.client.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This example demonstrates how to remove a session metric collector using the
+ * Metrics feature.
+ *
+ * @author DiffusionData Limited
+ */
 public class RemoveSessionMetricCollectorExample {
 
     private static final Logger LOG = LoggerFactory.getLogger(
@@ -30,14 +36,14 @@ public class RemoveSessionMetricCollectorExample {
 
     public static void main(String[] args) throws Exception {
 
-        Session adminSession = Diffusion.sessions()
+        final Session adminSession = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        Metrics metricsControl = adminSession.feature(Metrics.class);
+        final Metrics metricsControl = adminSession.feature(Metrics.class);
 
-        Metrics.SessionMetricCollector sessionMetricCollector =
+        final  Metrics.SessionMetricCollector sessionMetricCollector =
             Diffusion.newSessionMetricCollectorBuilder()
                 .exportToPrometheus(false)
                 .maximumGroups(10)

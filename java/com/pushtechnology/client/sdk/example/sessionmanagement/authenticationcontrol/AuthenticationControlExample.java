@@ -28,6 +28,17 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
+/**
+ * This example demonstrates how to implement and use a custom authentication handler.
+ * <P>
+ * The custom authenticator defines rules for accepting or rejecting session
+ * establishment based on the principal.
+ * <P>
+ * Anonymous connections and connections with principals not starting with a
+ * specific prefix are rejected, while others are allowed.
+ *
+ * @author DiffusionData Limited
+ */
 public class AuthenticationControlExample {
 
     private static final Logger LOG =
@@ -62,7 +73,7 @@ public class AuthenticationControlExample {
             LOG.info(e.getMessage());
         }
 
-        Session session = sessions
+        final Session session = sessions
             .principal("diffusion_client")
             .password("password")
             .open("ws://localhost:8080");
@@ -75,7 +86,7 @@ public class AuthenticationControlExample {
         LOG.info(session.getState().toString());
     }
 
-    private static class MyAuthenticator implements ControlAuthenticator {
+    private static final class MyAuthenticator implements ControlAuthenticator {
 
         @Override
         public void authenticate(String principal, Credentials credentials,
@@ -100,9 +111,9 @@ public class AuthenticationControlExample {
         }
 
         @Override
-        public void onClose() {}
+        public void onClose() { }
 
         @Override
-        public void onError(ErrorReason errorReason) {}
+        public void onError(ErrorReason errorReason) { }
     }
 }

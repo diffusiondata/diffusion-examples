@@ -15,6 +15,9 @@ limitations under the License.
 
 import asyncio
 
+import typing
+
+from diffusion import SessionId
 from diffusion import sessions, Credentials
 from diffusion.messaging import RequestHandler
 from diffusion_examples.utils.program import Example
@@ -57,20 +60,22 @@ class MessageToSessionID(Example):
 
 
 class SimpleRequestStream(RequestHandler):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             self.on_request,
             diffusion.datatypes.STRING,
             diffusion.datatypes.STRING,
         )
 
-    async def on_close(self):
-        pass
-
-    async def on_error(self, error_reason):
-        pass
-
-    async def on_request(self, request: str, **kwargs):
+    async def on_request(
+        self,
+        request: typing.Optional[str],
+        *,
+        sender_session_id: typing.Optional[SessionId] = None,
+        session_properties: typing.Optional[typing.Mapping[str, typing.Any]] = None,
+        path: typing.Optional[str] = None,
+        **kwargs,
+    ) -> str:
         print(f"Received message: {request}.")
         return "Goodbye"
 
@@ -84,15 +89,18 @@ class AnotherRequestStream(RequestHandler):
             diffusion.datatypes.STRING,
         )
 
-    async def on_request(self, request: str,  **kwargs):
+    async def on_request(
+        self,
+        request: typing.Optional[str],
+        *,
+        sender_session_id: typing.Optional[SessionId] = None,
+        path: typing.Optional[str] = None,
+        **kwargs,
+    ):
         print(f"Received message: {request}.")
         return "I'm not supposed to receive a message."
 
-    async def on_close(self):
-        pass
 
-    async def on_error(self, error_reason):
-        pass
 
 
 if __name__ == "__main__":

@@ -19,10 +19,9 @@ import typing
 
 import diffusion.datatypes
 from diffusion import Credentials
-from diffusion.features.topics import TopicAddResponse, ValueStreamHandler
+from diffusion.features.topics import TopicAddResponse, ValueStreamHandler, TopicSpecification
 import diffusion.features.timeseries
 from diffusion_examples.utils.program import Example
-
 
 class TimeSeriesCrossCompatibleDatatypes(Example):
     async def run(
@@ -67,38 +66,56 @@ class TimeSeriesCrossCompatibleDatatypes(Example):
 
 
 class JSONStream(ValueStreamHandler):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             data_type=diffusion.datatypes.JSON,
             subscribe=self.on_subscription,
-            update=self.on_value,
+            update=self.on_update,
+            close=self.on_close,
             unsubscribe=self.on_unsubscription,
-            on_error=self.on_error,
         )
 
-    def on_close(self):
+    def on_close(
+            self,
+            topic_path: str,
+            topic_spec: TopicSpecification,
+            topic_value: typing.Optional[diffusion.datatypes.JSON],
+            **kwargs
+    ) -> None:
         pass
 
-    def on_error(self, error_reason):
-        pass
+    def on_subscription(
+            self,
+            topic_path: str,
+            topic_spec: TopicSpecification,
+            topic_value: typing.Optional[diffusion.datatypes.JSON],
+            **kwargs
+    ) -> None:
 
-    def on_subscription(self, topic_path, topic_spec, topic_value):
         print(f"Subscribed to {topic_path}.")
 
-    def on_unsubscription(self, topic_path, topic_spec, reason, topic_value):
+    def on_unsubscription(
+            self,
+            topic_path: str,
+            topic_spec: TopicSpecification,
+            topic_value: typing.Optional[diffusion.datatypes.JSON],
+            reason: typing.Optional[typing.Any],
+            **kwargs
+    ) -> None:
         print(f"Unsubscribed from {topic_path}: {reason}.")
 
-    def on_value(
+    def on_update(
         self,
-        topic_path,
-        topic_spec,
+        topic_path: str,
+        topic_spec: TopicSpecification,
         old_value: typing.Optional[diffusion.datatypes.JSON],
-        topic_value: diffusion.datatypes.JSON,
-    ):
+        topic_value: typing.Optional[diffusion.datatypes.JSON],
+        **kwargs
+    ) -> None:
         addition = (
             f"{topic_path} changed from "
             f"{('NULL' if old_value is None else old_value.value)}"
-            f" to {topic_value.value}."
+            f" to {'NULL' if topic_value is None else topic_value.value}."
         )
         print(addition)
 

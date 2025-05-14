@@ -15,12 +15,13 @@
 
 const diffusion = require('diffusion');
 /// tag::log
-const { PartiallyOrderedCheckpointTester } = require('../../../test/util');
+const { PartiallyOrderedCheckpointTester, promiseWithResolvers } = require('../../../test/util');
 /// end::log
 
 export async function monitoringSessionEventListener() {
     /// tag::log
     const check = new PartiallyOrderedCheckpointTester([[ 'Session open' ]]);
+    const sessionOpenPromise = promiseWithResolvers();
     /// end::log
     /// tag::monitoring_session_event_listener[]
     const session1 = await diffusion.connect({
@@ -43,6 +44,7 @@ export async function monitoringSessionEventListener() {
                 console.log(`New session: id=${event.sessionId}`);
                 /// tag::log
                 check.log(`Session open`);
+                sessionOpenPromise.resolve();
                 /// end::log
             } else if (event.type === diffusion.clients.SessionEventStreamEventType.STATE) {
                 console.log(`Session state changed: id=${event.sessionId}, state=${event.state}`);
@@ -64,6 +66,9 @@ export async function monitoringSessionEventListener() {
         filter: `$Principal NE 'admin'`
     });
 
+    /// tag::log
+    await sessionOpenPromise.promise;
+    /// end::log
     await session2.closeSession();
     await session1.closeSession();
     /// end::monitoring_session_event_listener[]

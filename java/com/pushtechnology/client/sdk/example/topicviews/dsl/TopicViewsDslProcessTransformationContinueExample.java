@@ -14,32 +14,45 @@
  *******************************************************************************/
 package com.pushtechnology.client.sdk.example.topicviews.dsl;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.features.Topics;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
 import com.pushtechnology.diffusion.client.features.control.topics.views.TopicView;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+/**
+ * This example demonstrates how to use the process transformation with a continue condition
+ * in a topic view.
+ * <P>
+ * A topic view is created that filters topics based on the value of the `/price_per_share` field,
+ * only allowing topics where the price is greater than 20 to be included in the view.
+ *
+ * @author DiffusionData Limited
+ */
 public class TopicViewsDslProcessTransformationContinueExample {
 
     private static final Logger LOG =
         LoggerFactory.getLogger(TopicViewsDslProcessTransformationContinueExample.class);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
         final Topics topics = session.feature(Topics.class);
+        final String viewSelector = "?views//";
+        final Topics.ValueStream<JSON> valueStream = new MyStream();
+
         final TopicSpecification mySpec = Diffusion
             .newTopicSpecification(TopicType.JSON);
 
@@ -60,45 +73,57 @@ public class TopicViewsDslProcessTransformationContinueExample {
                 "}");
 
         topics.addAndSet("my/topic/path/2", mySpec, JSON.class, jsonValue2).join();
-        topics.addFallbackStream(JSON.class, new MyFallbackStream());
-        topics.subscribe("?views//").join();
 
-        TopicView myTopicView = topics.createTopicView("topic_view_1",
-                "map my/topic/path// to views/<path(3)> process\n" +
+        topics.addStream(viewSelector, JSON.class, valueStream);
+        topics.subscribe(viewSelector).join();
+
+        final TopicView view = topics.createTopicView("topic_view_1",
+                "map ?my/topic/path// to views/<path(3)> process\n" +
                     "{\n" +
                     "  if '/price_per_share > 20' continue\n" +
                     "}")
             .join();
 
-        System.out.println("Topic View topic_view_1 has been created");
+        LOG.info("Topic View {} has been created", view.getName());
 
-        topics.removeTopicView("topic_view_1").join();
-        session.feature(TopicControl.class).removeTopics("?.*//").join();
+        SECONDS.sleep(1);
+
+        topics.removeStream(valueStream);
         session.close();
-
-        LOG.info("Topic View {} has been created", myTopicView.getName());
     }
 
-    static class MyFallbackStream implements Topics.ValueStream<JSON> {
+    private static final class MyStream implements Topics.ValueStream<JSON> {
+
+        @Override
+        public void onValue(
+            String topicPath,
+            TopicSpecification topicSpecification,
+            JSON oldValue,
+            JSON newValue) {
+            LOG.info("{} new value {}", topicPath, newValue.toJsonString());
+        }
 
         @Override
         public void onSubscription(String topicPath,
             TopicSpecification topicSpecification) {
-            System.out.printf("Subscribed to %s\n", topicPath);
+            LOG.info("Subscribed to {}", topicPath);
         }
 
         @Override
         public void onUnsubscription(String topicPath,
             TopicSpecification topicSpecification,
-            Topics.UnsubscribeReason unsubscribeReason) {}
+            Topics.UnsubscribeReason unsubscribeReason) {
+            LOG.info("Unsubscribed from {}", topicPath);
+        }
 
         @Override
-        public void onClose() {}
+        public void onClose() {
+            LOG.info("stream closed");
+        }
 
         @Override
-        public void onError(ErrorReason errorReason) {}
-
-        @Override public void onValue(String s,
-            TopicSpecification topicSpecification, JSON json, JSON v1) {}
+        public void onError(ErrorReason errorReason) {
+            LOG.error("stream error: {}", errorReason);
+        }
     }
 }

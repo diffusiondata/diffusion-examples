@@ -26,6 +26,15 @@ import org.slf4j.LoggerFactory;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * This example demonstrates how to set default path permissions for a role using
+ * the security control feature in Diffusion.
+ * <P>
+ * The example assigns `UPDATE_TOPIC` and `MODIFY_TOPIC` permissions to the
+ * `CLIENT` role as default path permissions.
+ *
+ * @author DiffusionData Limited
+ */
 public class SetDefaultPathPermissionsExample {
 
     private static final Logger LOG = LoggerFactory.getLogger(
@@ -33,21 +42,21 @@ public class SetDefaultPathPermissionsExample {
 
     public static void main(String[] args) {
 
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        SecurityControl securityControl = session.feature(SecurityControl.class);
-        ScriptBuilder builder = securityControl.scriptBuilder();
+        final  SecurityControl securityControl = session.feature(SecurityControl.class);
+        final ScriptBuilder builder = securityControl.scriptBuilder();
 
-        Set<PathPermission> myPermissions = new HashSet<PathPermission>(){{
+        final Set<PathPermission> myPermissions = new HashSet<PathPermission>() {{
             add(PathPermission.UPDATE_TOPIC);
             add(PathPermission.MODIFY_TOPIC);
         }};
 
         builder.setDefaultPathPermissions("CLIENT", myPermissions);
-        String script = builder.script();
+        final  String script = builder.script();
 
         LOG.info("Updating default permissions");
         securityControl.updateStore(script)

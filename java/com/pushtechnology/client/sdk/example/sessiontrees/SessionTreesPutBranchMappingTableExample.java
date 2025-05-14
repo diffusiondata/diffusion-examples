@@ -21,6 +21,13 @@ import com.pushtechnology.diffusion.client.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This example demonstrates how to define and create a session tree branch mapping table in Diffusion.
+ * <P>
+ * The branch mapping table routes clients to different topic paths based on their session principal.
+ *
+ * @author DiffusionData Limited
+ */
 public class SessionTreesPutBranchMappingTableExample {
 
     private static final Logger LOG =

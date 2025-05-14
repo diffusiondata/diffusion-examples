@@ -27,6 +27,15 @@ import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
+/**
+ * This example demonstrates how to use the logical 'or' operator to combine multiple
+ * constraints when updating a topic in Diffusion.
+ * <P>
+ * The example creates a topic and uses combined constraints to ensure updates are
+ * allowed if either the topic has no value or its current value matches a specified value.
+ *
+ * @author DiffusionData Limited
+ */
 public class UpdateConstraintOrOperatorExample {
 
     private static final Logger LOG =
@@ -34,22 +43,22 @@ public class UpdateConstraintOrOperatorExample {
 
     public static void main(String[] args) {
 
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        TopicSpecification specification = Diffusion.newTopicSpecification(TopicType.JSON);
+        final TopicSpecification specification = Diffusion.newTopicSpecification(TopicType.JSON);
 
-        JSON value = Diffusion.dataTypes().json()
+        final JSON value = Diffusion.dataTypes().json()
             .fromJsonString("{ \"diffusion\": \"data\" }");
 
-        JSON differentValue = Diffusion.dataTypes().json()
+        final JSON differentValue = Diffusion.dataTypes().json()
             .fromJsonString("{ \"diffusion\": \"data2\" }");
 
         // use the OR method to specify multiple constraints, the current
         // value of the topic must match the given value or there should be no topic
-        UpdateConstraint constraint = Diffusion.updateConstraints().value(value)
+        final UpdateConstraint constraint = Diffusion.updateConstraints().value(value)
             .or(Diffusion.updateConstraints().noTopic());
 
         // update the topic, this works as we satisfy the no topic constraint

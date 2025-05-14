@@ -13,6 +13,12 @@ import com.pushtechnology.diffusion.client.features.control.clients.ClientContro
 import com.pushtechnology.diffusion.client.features.control.clients.SystemAuthenticationControl;
 import com.pushtechnology.diffusion.client.session.Session;
 
+/**
+ * This example demonstrates how to allow a proposed session property only if
+ * its value matches a set of allowed values.
+ *
+ * @author DiffusionData Limited
+ */
 public class TrustClientProposedPropertyInExample {
 
     private static final Logger LOG =
@@ -28,13 +34,13 @@ public class TrustClientProposedPropertyInExample {
         final SystemAuthenticationControl authenticationControl =
             adminSession.feature(SystemAuthenticationControl.class);
 
-        final Set<String> allowedValues = new HashSet<String>(){{
+        final Set<String> allowedValues = new HashSet<String>() {{
             add("Fred");
             add("Wilma");
             add("Pebbles");
         }};
 
-        String updateScript = authenticationControl.scriptBuilder()
+        final String updateScript = authenticationControl.scriptBuilder()
             .trustClientProposedPropertyIn("Flintstone", allowedValues)
             .script();
 

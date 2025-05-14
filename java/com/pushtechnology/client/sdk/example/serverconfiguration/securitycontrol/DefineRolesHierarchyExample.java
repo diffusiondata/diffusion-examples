@@ -25,6 +25,14 @@ import org.slf4j.LoggerFactory;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * This example demonstrates how to define a roles hierarchy using the security
+ * control feature in Diffusion.
+ * <P>
+ * The example assigns a set of roles to an existing role by updating the security store.
+ *
+ * @author DiffusionData Limited
+ */
 public class DefineRolesHierarchyExample {
 
     private static final Logger LOG = LoggerFactory.getLogger(
@@ -32,15 +40,15 @@ public class DefineRolesHierarchyExample {
 
     public static void main(String[] args) throws Exception {
 
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        SecurityControl securityControl = session.feature(SecurityControl.class);
-        ScriptBuilder builder = securityControl.scriptBuilder();
+        final SecurityControl securityControl = session.feature(SecurityControl.class);
+        final ScriptBuilder builder = securityControl.scriptBuilder();
 
-        Set<String> myRoles = new HashSet<String>(){{
+        final Set<String> myRoles = new HashSet<String>() {{
             add("CLIENT");
             add("CLIENT_CONTROL");
         }};

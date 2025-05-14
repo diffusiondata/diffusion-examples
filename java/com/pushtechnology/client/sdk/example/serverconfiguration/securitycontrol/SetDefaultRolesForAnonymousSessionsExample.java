@@ -23,6 +23,14 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 
+/**
+ * This example demonstrates how to set default roles for anonymous sessions using
+ * the security control feature in Diffusion.
+ * <P>
+ * The example assigns the `AUTHENTICATION_HANDLER` role to all anonymous sessions.
+ *
+ * @author DiffusionData Limited
+ */
 public class SetDefaultRolesForAnonymousSessionsExample {
 
     private static final Logger LOG = LoggerFactory.getLogger(
@@ -30,13 +38,13 @@ public class SetDefaultRolesForAnonymousSessionsExample {
 
     public static void main(String[] args) throws Exception {
 
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        SecurityControl securityControl = session.feature(SecurityControl.class);
-        SecurityControl.ScriptBuilder builder = securityControl.scriptBuilder();
+        final SecurityControl securityControl = session.feature(SecurityControl.class);
+        final SecurityControl.ScriptBuilder builder = securityControl.scriptBuilder();
 
         builder.setRolesForAnonymousSessions(Collections.singleton("AUTHENTICATION_HANDLER"));
 

@@ -28,13 +28,18 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This example demonstrates subscribing to a single topic in Diffusion using
+ * its topic path, and receiving value updates.
+ *
+ * @author DiffusionData Limited
+ */
 public class SubscribeSingleTopicViaPathExample {
 
     private static final Logger LOG =
         LoggerFactory.getLogger(SubscribeSingleTopicViaPathExample.class);
 
-    public static void main(String[] args)
-        throws Exception {
+    public static void main(String[] args) throws Exception {
 
         try (Session session = Diffusion.sessions()
             .principal("admin")
@@ -45,8 +50,7 @@ public class SubscribeSingleTopicViaPathExample {
             final String topicSelectorExpression = ">my/topic/path";
 
             session.feature(TopicControl.class).addTopic(
-                    topicPath, Diffusion.newTopicSpecification(TopicType.JSON))
-                .join();
+                    topicPath, Diffusion.newTopicSpecification(TopicType.JSON)).join();
 
             final Topics topics = session.feature(Topics.class);
             final MyLoggingJsonStream valueStream = new MyLoggingJsonStream();
@@ -58,8 +62,10 @@ public class SubscribeSingleTopicViaPathExample {
             LOG.info("Subscribed.");
 
             topics.set(topicPath, JSON.class,
-                    Diffusion.dataTypes().json().fromJsonString("{ \"diffusion\": \"data\" }"))
-                .join();
+                    Diffusion.dataTypes().json().fromJsonString("{ \"diffusion\": \"data\" }")).join();
+
+            topics.set(topicPath, JSON.class,
+                Diffusion.dataTypes().json().fromJsonString("{ \"diffusion\": \"more data\" }")).join();
 
             topics.unsubscribe(topicSelectorExpression)
                 .join();

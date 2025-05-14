@@ -25,12 +25,21 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * This example demonstrates how to implement a custom reconnection strategy
+ * for a Diffusion session.
+ * <P>
+ * The example defines a custom ReconnectionStrategy that limits the number of
+ * reconnection attempts and schedules each attempt with a fixed delay.
+ *
+ * @author DiffusionData Limited
+ */
 public class ReconnectionStrategyExample {
 
     private static final Logger LOG =
         LoggerFactory.getLogger(ReconnectionStrategyExample.class);
 
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args) throws Exception {
 
         final Session session = Diffusion.sessions()
             .principal("admin")

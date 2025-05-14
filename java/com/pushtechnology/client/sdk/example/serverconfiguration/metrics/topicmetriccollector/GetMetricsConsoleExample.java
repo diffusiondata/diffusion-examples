@@ -26,6 +26,12 @@ import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.control.Metrics;
 import com.pushtechnology.diffusion.client.session.Session;
 
+/**
+ * This example demonstrates how to retrieve server metrics using the Metrics
+ * feature in Diffusion.
+ *
+ * @author DiffusionData Limited
+ */
 public class GetMetricsConsoleExample {
 
     private static final Logger LOG = LoggerFactory.getLogger(
@@ -33,14 +39,14 @@ public class GetMetricsConsoleExample {
 
     public static void main(String[] args) {
 
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        Metrics metricsControl = session.feature(Metrics.class);
+        final Metrics metricsControl = session.feature(Metrics.class);
 
-        Set<String> requiredMetrics = new HashSet<>(
+        final Set<String> requiredMetrics = new HashSet<>(
             Arrays.asList(
                 "diffusion_server_time_zone",
                 "diffusion_server_user_directory",
@@ -63,23 +69,23 @@ public class GetMetricsConsoleExample {
             )
         );
 
-        Metrics.MetricsResult result = metricsControl.metricsRequest()
+        final Metrics.MetricsResult result = metricsControl.metricsRequest()
             .filter(requiredMetrics)
             .fetch().join();
 
-        String serverName = result.getServerNames().iterator().next();
+        final String serverName = result.getServerNames().iterator().next();
 
-        List<Metrics.MetricSampleCollection> collections =
+        final List<Metrics.MetricSampleCollection> collections =
             result.getMetrics(serverName);
 
         collections.forEach(collection -> {
             collection.getSamples().forEach(metricSample -> {
 
-                String name = metricSample.getName();
-                String type = collection.getType().name();
-                String unit = collection.getUnit();
+                final String name = metricSample.getName();
+                final String type = collection.getType().name();
+                final String unit = collection.getUnit();
 
-                String value = "GAUGE".equals(type) ?
+                final String value = "GAUGE".equals(type) ?
                     String.valueOf(metricSample.getValue()) :
                     metricSample.getLabelValues().toString();
 

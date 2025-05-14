@@ -26,6 +26,15 @@ import org.slf4j.LoggerFactory;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * This example demonstrates how remove path permissions for a role using the
+ * security control feature in Diffusion.
+ * <P>
+ * The example first assigns the `UPDATE_TOPIC` and `MODIFY_TOPIC` permissions
+ * to the `CLIENT` role for a specified topic path, and then removes these permissions.
+ *
+ * @author DiffusionData Limited
+ */
 public class RemovePathPermissionsExample {
 
     private static final Logger LOG = LoggerFactory.getLogger(
@@ -33,21 +42,21 @@ public class RemovePathPermissionsExample {
 
     public static void main(String[] args) throws Exception {
 
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        SecurityControl securityControl = session.feature(SecurityControl.class);
-        ScriptBuilder builder = securityControl.scriptBuilder();
+        final SecurityControl securityControl = session.feature(SecurityControl.class);
+        final ScriptBuilder builder = securityControl.scriptBuilder();
 
-        Set<PathPermission> myPermissions = new HashSet<PathPermission>(){{
+        final Set<PathPermission> myPermissions = new HashSet<PathPermission>() {{
             add(PathPermission.UPDATE_TOPIC);
             add(PathPermission.MODIFY_TOPIC);
         }};
 
         builder.setPathPermissions("CLIENT", "my/topic/path", myPermissions);
-        String script = builder.script();
+        final String script = builder.script();
 
         LOG.info("Allowing Role CLIENT to update and modify my/topic/path");
 

@@ -26,30 +26,36 @@ import org.slf4j.LoggerFactory;
 import java.util.Collections;
 import java.util.Map;
 
+/**
+ * This example demonstrates how to change the roles of a session
+ * using its ID.
+ *
+ * @author DiffusionData Limited
+ */
 public class ChangeRolesViaSessionIdExample {
 
-    private static final Logger LOG = LoggerFactory.getLogger(
-        ChangeRolesViaSessionIdExample.class);
+    private static final Logger LOG =
+        LoggerFactory.getLogger(ChangeRolesViaSessionIdExample.class);
 
     public static void main(String[] args) throws Exception {
 
-        Session adminSession = Diffusion.sessions()
+        final Session adminSession = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        Session clientSession = Diffusion.sessions()
+        final Session clientSession = Diffusion.sessions()
             .principal("client")
             .password("password")
             .open("ws://localhost:8080");
 
-        ClientControl clientControl = adminSession.feature(ClientControl.class);
+        final ClientControl clientControl = adminSession.feature(ClientControl.class);
 
-        Map<String, String> sessionProperties =  clientControl.getSessionProperties(clientSession.getSessionId(), Collections.singletonList(Session.ROLES)).join();
+        Map<String, String> sessionProperties =  clientControl.getSessionProperties(
+            clientSession.getSessionId(),
+            Collections.singletonList(Session.ROLES)).join();
 
-        System.out.println(sessionProperties);
-
-
+        LOG.info("roles: {}", sessionProperties.get(Session.ROLES));
 
         adminSession.feature(ClientControl.class)
             .changeRoles(
@@ -57,15 +63,14 @@ public class ChangeRolesViaSessionIdExample {
                 Collections.emptySet(),
                 Collections.singleton("TOPIC_CONTROL")).join();
 
-        MILLISECONDS.sleep(500);
 
-        sessionProperties =  clientControl.getSessionProperties(clientSession.getSessionId(), Collections.singletonList(Session.ROLES)).join();
+        sessionProperties =  clientControl.getSessionProperties(
+            clientSession.getSessionId(),
+            Collections.singletonList(Session.ROLES)).join();
 
-        System.out.println(sessionProperties);
+        LOG.info("roles: {}", sessionProperties.get(Session.ROLES));
 
         adminSession.close();
         clientSession.close();
-
-        LOG.info("roles changed");
     }
 }

@@ -10,6 +10,15 @@ import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 
+/**
+ * This example demonstrates how to configure automatic topic removal in Diffusion.
+ * <P>
+ * The example creates multiple topics with different removal criteria, such as
+ * time-based removal, removal based on subscription or update conditions, and
+ * session-based removal rules.
+ *
+ * @author DiffusionData Limited
+ */
 public class RemoveTopicsWithAutomaticTopicRemovalExample {
 
     private static final Logger LOG =

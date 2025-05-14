@@ -27,6 +27,16 @@ import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
+/**
+ * This example demonstrates how to update a topic in Diffusion using the
+ * 'noValue' constraint.
+ * <P>
+ * The example creates a topic and uses an update constraint to ensure updates
+ * are only allowed if the topic currently has no value.
+ *
+ * @author DiffusionData Limited
+ */
+
 public class SetTopicNoValueConstraintExample {
 
     private static final Logger LOG =
@@ -34,18 +44,18 @@ public class SetTopicNoValueConstraintExample {
 
     public static void main(String[] args) {
 
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        JSON value = Diffusion.dataTypes().json()
+        final JSON value = Diffusion.dataTypes().json()
             .fromJsonString("{ \"diffusion\": \"data\" }");
 
         session.feature(TopicControl.class).addTopic("my/topic/path", TopicType.JSON).join();
 
         // only allow updates if the topic has no value
-        UpdateConstraint constraint = Diffusion.updateConstraints().noValue();
+        final UpdateConstraint constraint = Diffusion.updateConstraints().noValue();
 
         // set with constraint, this works as the topic has no value yet
         session.feature(TopicUpdate.class)

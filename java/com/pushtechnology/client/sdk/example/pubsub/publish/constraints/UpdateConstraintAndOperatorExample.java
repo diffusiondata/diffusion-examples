@@ -28,6 +28,16 @@ import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
+/**
+ * This example demonstrates how to use the logical 'and' operator to combine multiple
+ * constraints when updating a topic in Diffusion.
+ * <P>
+ * The example creates a topic and uses combined constraints to ensure updates
+ * are only allowed if the session holds a lock and no topic exists at the specified path.
+ *
+ * @author DiffusionData Limited
+ */
+
 public class UpdateConstraintAndOperatorExample {
 
     private static final Logger LOG =
@@ -35,21 +45,21 @@ public class UpdateConstraintAndOperatorExample {
 
     public static void main(String[] args) {
 
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        TopicSpecification specification = Diffusion.newTopicSpecification(TopicType.JSON);
+        final TopicSpecification specification = Diffusion.newTopicSpecification(TopicType.JSON);
 
-        JSON value = Diffusion.dataTypes().json()
+        final JSON value = Diffusion.dataTypes().json()
             .fromJsonString("{ \"diffusion\": \"data\" }");
 
-        SessionLock lock = session.lock("my/topic/path").join();
+        final SessionLock lock = session.lock("my/topic/path").join();
 
         // use the AND method to specify two constraints
         // we require a session lock and for no topic to exist
-        UpdateConstraint constraint = Diffusion.updateConstraints().locked(lock)
+        final UpdateConstraint constraint = Diffusion.updateConstraints().locked(lock)
             .and(Diffusion.updateConstraints().noTopic());
 
         // update the topic with the constraint, this works as we have the lock

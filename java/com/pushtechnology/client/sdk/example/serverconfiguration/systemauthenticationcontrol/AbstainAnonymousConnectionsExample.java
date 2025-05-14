@@ -13,6 +13,15 @@ import com.pushtechnology.diffusion.client.session.AuthenticationException;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.types.Credentials;
 
+/**
+ * This example demonstrates how to configure a Diffusion server to abstain from
+ * handling anonymous connections.
+ * <P>
+ * The system handler is configured to abstain, allowing a custom authentication
+ * handler to decide whether to permit anonymous connections.
+ *
+ * @author DiffusionData Limited
+ */
 public class AbstainAnonymousConnectionsExample {
 
     private static final Logger LOG =
@@ -59,9 +68,9 @@ public class AbstainAnonymousConnectionsExample {
 
     static class MyAuthenticator implements AuthenticationControl.ControlAuthenticator {
 
-        Logger logger;
+        private Logger logger;
 
-        public MyAuthenticator(Logger logger) {
+        MyAuthenticator(Logger logger) {
             this.logger = logger;
         }
 
@@ -82,9 +91,9 @@ public class AbstainAnonymousConnectionsExample {
         }
 
         @Override
-        public void onClose() {}
+        public void onClose() { }
 
         @Override
-        public void onError(ErrorReason errorReason) {}
+        public void onError(ErrorReason errorReason) { }
     }
 }

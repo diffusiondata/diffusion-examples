@@ -21,6 +21,15 @@ import com.pushtechnology.diffusion.client.session.retry.RetryStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This example demonstrates how to configure an initial retry strategy for
+ * session establishment.
+ * <P>
+ * The example sets up a retry strategy with specified delay and retry count
+ * for reconnect attempts when establishing a session.
+ *
+ * @author DiffusionData Limited
+ */
 public class InitialSessionEstablishmentRetryExample {
 
     private static final Logger LOG =

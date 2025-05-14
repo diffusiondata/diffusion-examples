@@ -22,6 +22,11 @@ import com.pushtechnology.diffusion.client.types.Credentials;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This example demonstrates how to change the principal for a session in Diffusion.
+ *
+ * @author DiffusionData Limited
+ */
 public class ChangePrincipalExample {
 
     private static final Logger LOG = LoggerFactory.getLogger(
@@ -29,9 +34,9 @@ public class ChangePrincipalExample {
 
     public static void main(String[] args) throws Exception {
 
-        Credentials credentials = Diffusion.credentials().password("password");
+        final Credentials credentials = Diffusion.credentials().password("password");
 
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .credentials(credentials)
             .open("ws://localhost:8080");

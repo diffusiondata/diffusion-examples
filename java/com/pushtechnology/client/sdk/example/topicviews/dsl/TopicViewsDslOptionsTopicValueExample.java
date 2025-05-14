@@ -16,22 +16,32 @@ package com.pushtechnology.client.sdk.example.topicviews.dsl;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.features.Topics;
+import com.pushtechnology.diffusion.client.features.control.topics.views.TopicView;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+/**
+ * This example demonstrates how to use the topic value transformation in a topic view.
+ * <P>
+ * A topic view is created that maps a source topic to a new topic, using part of the
+ * source topic's value as the new topic's value.
+ *
+ * @author DiffusionData Limited
+ */
 public class TopicViewsDslOptionsTopicValueExample {
-    private static final Logger LOG = LoggerFactory.getLogger(TopicViewsDslOptionsTopicValueExample.class);
 
-    public static void main(String[] args)
-        throws Exception {
+    private static final Logger LOG =
+        LoggerFactory.getLogger(TopicViewsDslOptionsTopicValueExample.class);
+
+    public static void main(String[] args) throws Exception {
 
         try (Session session = Diffusion.sessions()
             .principal("admin")
@@ -55,30 +65,22 @@ public class TopicViewsDslOptionsTopicValueExample {
 
             final String topicSelectorExpression = "?views//";
 
-            final MyLoggingJsonStream myLoggingJsonStream = new MyLoggingJsonStream();
-            topics.addFallbackStream(JSON.class, myLoggingJsonStream);
-            topics.subscribe(topicSelectorExpression)
-                .join();
+            final MyStream valueStream = new MyStream();
+            topics.addStream(topicSelectorExpression, JSON.class, valueStream);
+            topics.subscribe(topicSelectorExpression).join();
 
-            final String topicViewName = "topic_view_1";
-
-            topics.createTopicView(topicViewName,
+            final TopicView view = topics.createTopicView("topic_view_1",
                     "map my/topic/path to views/<scalar(/account)> as <value(/balance)>")
                 .join();
 
-            LOG.info("Topic View {} has been created.", topicViewName);
+            LOG.info("Topic View {} has been created.", view.getName());
 
-            topics.unsubscribe(topicSelectorExpression)
-                .join();
-
-            topics.removeStream(myLoggingJsonStream);
-
-            SECONDS.sleep(2);
+            SECONDS.sleep(1);
+            topics.removeStream(valueStream);
         }
     }
 
-    public static class MyLoggingJsonStream implements Topics.ValueStream<JSON> {
-        private static final Logger LOG = LoggerFactory.getLogger(MyLoggingJsonStream.class);
+    private static final class MyStream implements Topics.ValueStream<JSON> {
 
         @Override
         public void onValue(
@@ -86,37 +88,30 @@ public class TopicViewsDslOptionsTopicValueExample {
             TopicSpecification topicSpecification,
             JSON oldValue,
             JSON newValue) {
-
-            LOG.info("'{}' changed from '{}' to '{}}'.",
-                topicPath, oldValue, newValue);
+            LOG.info("{} new value {}", topicPath, newValue.toJsonString());
         }
 
         @Override
-        public void onSubscription(
-            String topicPath,
+        public void onSubscription(String topicPath,
             TopicSpecification topicSpecification) {
-
-            LOG.info("Subscribed to: '{}'.", topicPath);
+            LOG.info("Subscribed to {}", topicPath);
         }
 
         @Override
-        public void onUnsubscription(
-            String topicPath,
+        public void onUnsubscription(String topicPath,
             TopicSpecification topicSpecification,
             Topics.UnsubscribeReason unsubscribeReason) {
-
-            LOG.info("Unsubscribed from: '{}', reason: {}.",
-                topicPath, unsubscribeReason);
+            LOG.info("Unsubscribed from {}", topicPath);
         }
 
         @Override
         public void onClose() {
-            LOG.info("On close.");
+            LOG.info("stream closed");
         }
 
         @Override
         public void onError(ErrorReason errorReason) {
-            LOG.error("On error: {}.", errorReason);
+            LOG.error("stream error: {}", errorReason);
         }
     }
 }

@@ -24,13 +24,19 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletionException;
 
+/**
+ * This example demonstrates how to create a topic in Diffusion.
+ * <P>
+ * The example uses the `addTopic` method to create a JSON topic at a specified path.
+ *
+ * @author DiffusionData Limited
+ */
 public class AddTopicExample {
 
     private static final Logger LOG =
         LoggerFactory.getLogger(AddTopicExample.class);
 
-    public static void main(String[] args)
-        throws Throwable {
+    public static void main(String[] args) throws Throwable {
 
         try (Session session = Diffusion.sessions()
             .principal("admin")

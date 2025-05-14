@@ -26,6 +26,17 @@ import javax.net.ssl.X509TrustManager;
 
 import java.security.cert.X509Certificate;
 
+/**
+ * This example demonstrates how to establish a secure connection
+ * to a Diffusion server that accepts all SSL certificates.
+ * <P>
+ * The example creates a custom SSLContext that bypasses certificate validation,
+ * allowing connections to servers with any certificate.
+ * <P>
+ * Note: Accepting all certificates is insecure and should only be used for testing or development purposes.
+ *
+ * @author DiffusionData Limited
+ */
 public class ConnectAcceptingAllCertificatesExample {
 
     private static final Logger LOG =
@@ -39,8 +50,8 @@ public class ConnectAcceptingAllCertificatesExample {
             null,
             new TrustManager[] {
                 new X509TrustManager() {
-                    public void checkClientTrusted(X509Certificate[] certs, String authType) {}
-                    public void checkServerTrusted(X509Certificate[] certs, String authType) {}
+                    public void checkClientTrusted(X509Certificate[] certs, String authType) { }
+                    public void checkServerTrusted(X509Certificate[] certs, String authType) { }
                     public X509Certificate[] getAcceptedIssuers() {
                         return new X509Certificate[0];
                     }

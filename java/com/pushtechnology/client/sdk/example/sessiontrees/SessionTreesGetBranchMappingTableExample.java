@@ -21,6 +21,14 @@ import com.pushtechnology.diffusion.client.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This example demonstrates how to retrieve session tree branch mapping tables in Diffusion.
+ * <P>
+ * The example first creates and applies two branch mapping tables, then lists all session tree
+ * branches with mappings and retrieves the corresponding mapping tables.
+ *
+ * @author DiffusionData Limited
+ */
 public class SessionTreesGetBranchMappingTableExample {
 
     private static final Logger LOG =

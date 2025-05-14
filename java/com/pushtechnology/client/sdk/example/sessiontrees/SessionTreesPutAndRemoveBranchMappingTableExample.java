@@ -21,6 +21,14 @@ import com.pushtechnology.diffusion.client.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This example demonstrates how to add and remove a session tree branch mapping table in Diffusion.
+ * <P>
+ * The branch mapping table is first created and applied, then later replaced with an empty table
+ * to remove all mappings.
+ *
+ * @author DiffusionData Limited
+ */
 public class SessionTreesPutAndRemoveBranchMappingTableExample {
 
     private static final Logger LOG =

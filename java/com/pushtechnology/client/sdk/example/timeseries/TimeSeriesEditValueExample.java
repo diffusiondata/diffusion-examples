@@ -28,12 +28,17 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Random;
 
+/**
+ * This example demonstrates how to edit a time series topic by modifying a specific event.
+ *
+ * @author DiffusionData Limited
+ */
 public class TimeSeriesEditValueExample {
     private static final Logger LOG =
         LoggerFactory.getLogger(TimeSeriesEditValueExample.class);
 
     public static void main(String[] args) {
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");

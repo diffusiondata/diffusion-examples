@@ -22,6 +22,12 @@ import com.pushtechnology.diffusion.client.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This example demonstrates how to remove metric collectors using the Metrics
+ * feature in Diffusion.
+ *
+ * @author DiffusionData Limited
+ */
 public class RemoveTopicMetricCollectorExample {
 
     private static final Logger LOG = LoggerFactory.getLogger(
@@ -29,14 +35,14 @@ public class RemoveTopicMetricCollectorExample {
 
     public static void main(String[] args) {
 
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        Metrics metricsControl = session.feature(Metrics.class);
+        final Metrics metricsControl = session.feature(Metrics.class);
 
-        TopicMetricCollector topicMetricCollector =
+        final  TopicMetricCollector topicMetricCollector =
             Diffusion.newTopicMetricCollectorBuilder()
                 .exportToPrometheus(false)
                 .maximumGroups(10)

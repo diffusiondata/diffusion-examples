@@ -11,6 +11,12 @@ import com.pushtechnology.diffusion.client.features.control.clients.ClientContro
 import com.pushtechnology.diffusion.client.features.control.clients.SystemAuthenticationControl;
 import com.pushtechnology.diffusion.client.session.Session;
 
+/**
+ * This example demonstrates how to trust a proposed session property only if
+ * its value matches a specified regular expression.
+ *
+ * @author DiffusionData Limited
+ */
 public class TrustClientProposedPropertyMatchesExample {
 
     private static final Logger LOG =
@@ -26,7 +32,7 @@ public class TrustClientProposedPropertyMatchesExample {
         final SystemAuthenticationControl authenticationControl =
             adminSession.feature(SystemAuthenticationControl.class);
 
-        String updateScript = authenticationControl.scriptBuilder()
+        final String updateScript = authenticationControl.scriptBuilder()
             .trustClientProposedPropertyMatches("name", ".*_Flintstone")
             .script();
 

@@ -20,10 +20,16 @@ import com.pushtechnology.diffusion.client.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This example demonstrates how to establish an asynchronous connection
+ * to a Diffusion server.
+ *
+ * @author DiffusionData Limited
+ */
 public class ConnectAsyncExample {
-    
+
     private static final Logger LOG =
-        LoggerFactory.getLogger(ConnectAsyncExample.class);
+       LoggerFactory.getLogger(ConnectAsyncExample.class);
 
     public static void main(String[] args) {
 

@@ -14,6 +14,8 @@
  *******************************************************************************/
 package com.pushtechnology.client.sdk.example.topicviews.dsl;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.features.Topics;
@@ -27,20 +29,30 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This example demonstrates how to use the scalar directive in a topic view.
+ * <P>
+ * A JSON topic is created with account and balance information. The scalar directive
+ * is used to dynamically create topic paths based on the account number and currency.
+ *
+ * @author DiffusionData Limited
+ */
 public class TopicViewsDslScalarDirectiveExample {
 
     private static final Logger LOG =
         LoggerFactory.getLogger(TopicViewsDslScalarDirectiveExample.class);
 
-    public static void main(String[] args) {
-        Session session = Diffusion.sessions()
+    public static void main(String[] args) throws Exception {
+
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
         final Topics topics = session.feature(Topics.class);
-        final TopicSpecification mySpec = Diffusion
-            .newTopicSpecification(TopicType.JSON);
+        final String viewSelector = "?views//";
+        final Topics.ValueStream<JSON> valueStream = new MyStream();
+
         final JSON jsonValue = Diffusion.dataTypes().json()
             .fromJsonString("{\n" +
                 "  \"account\": \"1234\"," +
@@ -50,44 +62,59 @@ public class TopicViewsDslScalarDirectiveExample {
                 "  }" +
                 "}");
 
-        topics.addFallbackStream(JSON.class, new MyFallbackStream());
-        topics.addAndSet("my/topic/path", mySpec, JSON.class, jsonValue).join();
-        topics.subscribe("?views//").join();
+        topics.addAndSet("my/topic/path",
+                Diffusion.newTopicSpecification(TopicType.JSON),
+                JSON.class, jsonValue)
+            .join();
 
-        TopicView myTopicView = topics.createTopicView("topic_view_1",
+        topics.addStream(viewSelector, JSON.class, valueStream);
+        topics.subscribe(viewSelector).join();
+
+        final TopicView myTopicView = topics.createTopicView("topic_view_1",
                 " map my/topic/path to " +
                     "views/currency/<scalar(/balance/currency)>/account/<scalar(/account)>")
             .join();
 
-        System.out.println("Topic View topic_view_1 has been created");
-
-        topics.removeTopicView("topic_view_1").join();
-        session.feature(TopicControl.class).removeTopics("?.*//").join();
-        session.close();
-
         LOG.info("Topic View {} has been created", myTopicView.getName());
+
+        SECONDS.sleep(1);
+
+        topics.removeStream(valueStream);
+        session.close();
     }
 
-    static class MyFallbackStream implements Topics.ValueStream<JSON> {
+    private static final class MyStream implements Topics.ValueStream<JSON> {
+
+        @Override
+        public void onValue(
+            String topicPath,
+            TopicSpecification topicSpecification,
+            JSON oldValue,
+            JSON newValue) {
+            LOG.info("{} new value {}", topicPath, newValue.toJsonString());
+        }
 
         @Override
         public void onSubscription(String topicPath,
             TopicSpecification topicSpecification) {
-            System.out.printf("Subscribed to %s\n", topicPath);
+            LOG.info("Subscribed to {}", topicPath);
         }
 
         @Override
         public void onUnsubscription(String topicPath,
             TopicSpecification topicSpecification,
-            Topics.UnsubscribeReason unsubscribeReason) {}
+            Topics.UnsubscribeReason unsubscribeReason) {
+            LOG.info("Unsubscribed from {}", topicPath);
+        }
 
         @Override
-        public void onClose() {}
+        public void onClose() {
+            LOG.info("stream closed");
+        }
 
         @Override
-        public void onError(ErrorReason errorReason) {}
-
-        @Override public void onValue(String s,
-            TopicSpecification topicSpecification, JSON json, JSON v1) {}
+        public void onError(ErrorReason errorReason) {
+            LOG.error("stream error: {}", errorReason);
+        }
     }
 }

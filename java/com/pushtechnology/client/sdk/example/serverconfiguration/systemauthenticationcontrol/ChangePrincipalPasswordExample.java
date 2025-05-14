@@ -9,6 +9,12 @@ import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.control.clients.SystemAuthenticationControl;
 import com.pushtechnology.diffusion.client.session.Session;
 
+/**
+ * This example demonstrates how to change the password of a principal using the system
+ * authentication control feature.
+ *
+ * @author DiffusionData Limited
+ */
 public class ChangePrincipalPasswordExample {
 
     private static final Logger LOG =

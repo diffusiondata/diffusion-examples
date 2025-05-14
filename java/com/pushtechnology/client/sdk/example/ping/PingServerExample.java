@@ -21,6 +21,12 @@ import com.pushtechnology.diffusion.client.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This example demonstrates how to send a ping to the Diffusion server
+ * and receive a response.
+ *
+ * @author DiffusionData Limited
+ */
 public class PingServerExample {
 
     private static final Logger LOG =

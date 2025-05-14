@@ -8,6 +8,12 @@ import com.pushtechnology.diffusion.client.features.control.clients.SystemAuthen
 import com.pushtechnology.diffusion.client.session.AuthenticationException;
 import com.pushtechnology.diffusion.client.session.Session;
 
+/**
+ * This example demonstrates how to deny anonymous connections using the system
+ * authentication control feature.
+ *
+ * @author DiffusionData Limited
+ */
 public class DenyAnonymousConnectionsExample {
 
     private static final Logger LOG =

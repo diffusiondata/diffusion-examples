@@ -70,14 +70,14 @@ async def add_topic(session, topic, topic_specification):
 
 
 class FallbackStream(ValueStreamHandler):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             diffusion.datatypes.JSON,
             subscribe=self.on_subscription,
             unsubscribe=self.on_unsubscription,
-            value=self.on_value,
+            update=self.on_update,
         )
-        self._stream_values = []
+        self._stream_values: typing.List[str] = []
 
 
     # noinspection PyUnusedLocal,PyMethodMayBeStatic
@@ -85,9 +85,9 @@ class FallbackStream(ValueStreamHandler):
         self,
         topic_path: str,
         topic_spec: TopicSpecification,
-        topic_value: typing.Optional[diffusion.datatypes.AbstractDataType],
-        reason: typing.Optional[typing.Any] = None,
-    ):
+        topic_value: typing.Optional[diffusion.datatypes.JSON],
+        **kwargs
+    ) -> None:
         print(f"Subscribed to {topic_path}.")
 
     # noinspection PyUnusedLocal,PyMethodMayBeStatic
@@ -95,20 +95,22 @@ class FallbackStream(ValueStreamHandler):
         self,
         topic_path: str,
         topic_spec: TopicSpecification,
-        topic_value: typing.Optional[diffusion.datatypes.AbstractDataType],
+        topic_value: typing.Optional[diffusion.datatypes.JSON],
         reason: typing.Optional[typing.Any],
-    ):
+        **kwargs
+    ) -> None:
         print(f"Unsubscribed from {topic_path}: {reason}.")
 
     # noinspection PyUnusedLocal,PyMethodMayBeStatic
-    async def on_value(
+    async def on_update(
         self,
         topic_path: str,
         topic_spec: TopicSpecification,
         old_value: typing.Optional[diffusion.datatypes.JSON],
-        new_value: diffusion.datatypes.JSON,
-    ):
-        print(f"{topic_path} changed from {old_value} to {new_value}.")
+        topic_value: typing.Optional[diffusion.datatypes.JSON],
+        **kwargs
+    ) -> None:
+        print(f"{topic_path} changed from {old_value} to {topic_value}.")
 
 
 if __name__ == "__main__":

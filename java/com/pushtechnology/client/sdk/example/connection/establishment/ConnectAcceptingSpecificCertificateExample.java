@@ -14,17 +14,12 @@
  *******************************************************************************/
 package com.pushtechnology.client.sdk.example.connection.establishment;
 
-import static java.nio.file.Files.newInputStream;
-
-import java.io.InputStream;
-import java.nio.file.Paths;
-import java.security.KeyStore;
-import java.security.cert.CertificateFactory;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +27,14 @@ import org.slf4j.LoggerFactory;
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.session.Session;
 
+/**
+ * This example demonstrates how to establish a secure connection while accepting a specific certificate.
+ * <P>
+ * A custom trust manager is implemented to inspect and trust server certificates.
+ * An SSL context is created and configured with the trust manager before opening a secure session.
+ *
+ * @author DiffusionData Limited
+ */
 public class ConnectAcceptingSpecificCertificateExample {
 
     private static final Logger LOG =
@@ -39,15 +42,28 @@ public class ConnectAcceptingSpecificCertificateExample {
 
     public static void main(String[] args) throws Exception {
 
-        final SSLContext sslContext = SSLContext.getInstance("TLS");
-        sslContext.init(
-            null,
-            getTrustManagers(),
-            null);
+
+        final TrustManager trustManager = new X509TrustManager() {
+            @Override
+            public void checkClientTrusted(X509Certificate[] chain,
+                String authType) throws CertificateException { }
+
+            @Override
+            public void checkServerTrusted(X509Certificate[] chain,
+                String authType) throws CertificateException { }
+
+            @Override
+            public X509Certificate[] getAcceptedIssuers() {
+                return new X509Certificate[0];
+            }
+        };
+
+        final SSLContext context = SSLContext.getInstance("TLS");
+        context.init(null, new TrustManager[] { trustManager }, null);
 
         final Session session = Diffusion.sessions()
             .secureTransport(true)
-            .sslContext(sslContext)
+            .sslContext(context)
             .principal("admin")
             .password("password")
             .open("wss://localhost:8080");
@@ -57,22 +73,5 @@ public class ConnectAcceptingSpecificCertificateExample {
         // Insert work here
 
         session.close();
-    }
-
-    private static TrustManager[] getTrustManagers() throws Exception {
-        try (InputStream is =
-            newInputStream(Paths.get("src/main/resources/cert.crt"))) {
-
-            final X509Certificate certificate = (X509Certificate)
-                CertificateFactory.getInstance("X.509").generateCertificate(is);
-
-            final TrustManagerFactory trustManagerFactory = TrustManagerFactory
-                .getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            final KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            keyStore.load(null);
-            keyStore.setCertificateEntry("caCert", certificate);
-            trustManagerFactory.init(keyStore);
-            return trustManagerFactory.getTrustManagers();
-        }
     }
 }

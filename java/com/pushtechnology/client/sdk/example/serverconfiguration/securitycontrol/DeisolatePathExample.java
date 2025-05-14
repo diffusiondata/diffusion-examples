@@ -24,33 +24,39 @@ import org.slf4j.LoggerFactory;
 
 public class DeisolatePathExample {
 
+    /**
+     * This example demonstrates how to deisolate a topic path using the security
+     * control feature in Diffusion.
+     *
+     * @author DiffusionData Limited
+     */
     private static final Logger LOG = LoggerFactory.getLogger(
         DeisolatePathExample.class);
 
     public static void main(String[] args) throws Exception {
 
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        SecurityControl securityControl = session.feature(SecurityControl.class);
-        ScriptBuilder builder = securityControl.scriptBuilder();
+        final SecurityControl securityControl = session.feature(SecurityControl.class);
+        final ScriptBuilder builder = securityControl.scriptBuilder();
 
         builder.isolatePath("my/topic/path");
-        String script = builder.script();
+        final String script = builder.script();
 
         LOG.info("Isolating my/topic/path permissions from parent and default path permissions");
 
         securityControl.updateStore(script)
-            .whenComplete((r,ex) ->   LOG.info(script));
+            .whenComplete((r, ex) ->   LOG.info(script));
 
         builder.deisolatePath("my/topic/path");
 
         LOG.info("Desolating my/topic/path");
 
         securityControl.updateStore(script)
-            .whenComplete((r,ex) ->   LOG.info(builder.script()));
+            .whenComplete((r, ex) ->   LOG.info(builder.script()));
 
         session.close();
     }

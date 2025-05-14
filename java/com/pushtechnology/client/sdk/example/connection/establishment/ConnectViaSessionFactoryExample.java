@@ -21,6 +21,12 @@ import com.pushtechnology.diffusion.client.session.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This example demonstrates how to establish multiple connections
+ * to a Diffusion server using a shared SessionFactory.
+ *
+ * @author DiffusionData Limited
+ */
 public class ConnectViaSessionFactoryExample {
 
     private static final Logger LOG =

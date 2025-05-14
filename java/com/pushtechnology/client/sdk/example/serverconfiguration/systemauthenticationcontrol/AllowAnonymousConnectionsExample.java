@@ -9,6 +9,13 @@ import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.control.clients.SystemAuthenticationControl;
 import com.pushtechnology.diffusion.client.session.Session;
 
+/**
+ * This example demonstrates how to allow anonymous connections.
+ * <P>
+ * Anonymous connections are permitted with the 'CLIENT' role.
+ *
+ * @author DiffusionData Limited
+ */
 public class AllowAnonymousConnectionsExample {
 
     private static final Logger LOG =

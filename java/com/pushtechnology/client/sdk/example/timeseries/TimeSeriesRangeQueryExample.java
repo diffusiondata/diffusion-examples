@@ -29,6 +29,13 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Random;
 
+/**
+ * This example demonstrates how to query a range of events from a time series topic.
+ * <P>
+ * A range query is performed to retrieve events from sequence 5 to 15.
+ *
+ * @author DiffusionData Limited
+ */
 public class TimeSeriesRangeQueryExample {
     private static final Logger LOG = LoggerFactory.getLogger(TimeSeriesRangeQueryExample.class);
 

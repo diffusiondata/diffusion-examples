@@ -28,12 +28,17 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+/**
+ * This example demonstrates how to list topic views in Diffusion.
+ *
+ * @author DiffusionData Limited
+ */
 public class ListTopicViewsExample {
     private static final Logger
         LOG = LoggerFactory.getLogger(ListTopicViewsExample.class);
 
     public static void main(String[] args) {
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
@@ -60,12 +65,12 @@ public class ListTopicViewsExample {
 
         System.out.println("Topic View <topic_view_2> has been created");
 
-        List<TopicView> topicViews = topics.listTopicViews().join();
+        final List<TopicView> topicViews = topics.listTopicViews().join();
 
         topicViews.forEach(view -> {
-            String name = view.getName();
-            String spec = view.getSpecification();
-            String roles = view.getRoles().toString();
+            final  String name = view.getName();
+            final String spec = view.getSpecification();
+            final String roles = view.getRoles().toString();
 
             System.out.printf("Topic View <%s>: <%s> (<%s>)\n", name, spec, roles);
         });

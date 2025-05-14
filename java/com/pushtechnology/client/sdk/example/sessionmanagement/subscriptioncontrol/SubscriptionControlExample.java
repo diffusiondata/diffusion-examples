@@ -31,6 +31,14 @@ import com.pushtechnology.diffusion.client.session.SessionId;
 import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 
+/**
+ * This example demonstrates how to manage subscriptions for client sessions.
+ * <P>
+ * The example listens for new client sessions, subscribes them to a topic upon connection,
+ * and unsubscribes them after a delay.
+ *
+ * @author DiffusionData Limited
+ */
 public class SubscriptionControlExample {
 
     private static final Logger LOG =
@@ -38,13 +46,13 @@ public class SubscriptionControlExample {
 
     public static void main(String[] args) throws Exception {
 
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        ClientControl clientControl = session.feature(ClientControl.class);
-        TopicUpdate topicUpdate = session.feature(TopicUpdate.class);
+        final ClientControl clientControl = session.feature(ClientControl.class);
+        final TopicUpdate topicUpdate = session.feature(TopicUpdate.class);
 
         topicUpdate.addAndSet(
             "my/topic/path/hello",
@@ -55,18 +63,13 @@ public class SubscriptionControlExample {
         clientControl.addSessionEventListener(new MyEventStream(session),
             SessionEventParameters.DEFAULT);
 
-        Session clientSession = Diffusion.sessions()
+        final Session clientSession = Diffusion.sessions()
             .principal("client")
             .password("password")
             .open("ws://localhost:8080");
 
         clientSession.feature(Topics.class)
             .addFallbackStream(String.class, new MyFallbackStream());
-
-        clientControl.setSessionProperties(
-            clientSession.getSessionId(),
-            Collections.singletonMap("$Location", "Canada")
-        ).join();
 
         session.close();
         clientSession.close();
@@ -90,7 +93,7 @@ public class SubscriptionControlExample {
                 final SessionId sessionId = event.sessionId();
 
                 // if this is not the calling session, subscribe and unsubscribe it
-                if(!callerId.equals(sessionId)) {
+                if (!callerId.equals(sessionId)) {
                     controlSession.feature(SubscriptionControl.class)
                         .subscribe(sessionId, "?my/topic/path//");
 
@@ -117,7 +120,7 @@ public class SubscriptionControlExample {
         }
     }
 
-    static class MyFallbackStream implements Topics.ValueStream<String> {
+    private static final class MyFallbackStream implements Topics.ValueStream<String> {
 
         @Override
         public void onValue(String topicPath,
@@ -139,9 +142,9 @@ public class SubscriptionControlExample {
         }
 
         @Override
-        public void onClose() {}
+        public void onClose() { }
 
         @Override
-        public void onError(ErrorReason errorReason) {}
+        public void onError(ErrorReason errorReason) { }
     }
 }

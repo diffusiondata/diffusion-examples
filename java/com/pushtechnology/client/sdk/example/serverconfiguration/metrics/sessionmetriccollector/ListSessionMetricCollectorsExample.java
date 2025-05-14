@@ -26,6 +26,12 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+/**
+ * This example demonstrates how to list session metric collectors using the
+ * Metrics feature.
+ *
+ * @author DiffusionData Limited
+ */
 public class ListSessionMetricCollectorsExample {
 
     private static final Logger LOG = LoggerFactory.getLogger(
@@ -33,13 +39,13 @@ public class ListSessionMetricCollectorsExample {
 
     public static void main(String[] args) throws Exception {
 
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        Metrics metricsControl = session.feature(Metrics.class);
-        SessionMetricCollector.Builder builder = Diffusion.newSessionMetricCollectorBuilder();
+        final Metrics metricsControl = session.feature(Metrics.class);
+        final SessionMetricCollector.Builder builder = Diffusion.newSessionMetricCollectorBuilder();
 
         metricsControl.putSessionMetricCollector(builder
             .exportToPrometheus(false)
@@ -57,7 +63,7 @@ public class ListSessionMetricCollectorsExample {
             .groupByProperty("$Location")
             .create("Session Metric Collector 2", "$Principal is 'control'"));
 
-        List<SessionMetricCollector> collectors = metricsControl
+        final List<SessionMetricCollector> collectors = metricsControl
             .listSessionMetricCollectors()
             .join();
 

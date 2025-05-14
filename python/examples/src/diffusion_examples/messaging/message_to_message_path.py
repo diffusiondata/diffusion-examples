@@ -14,6 +14,7 @@ limitations under the License.
 """
 
 import asyncio
+import typing
 
 from diffusion import sessions, Credentials, SessionId
 from diffusion.messaging import RequestHandler
@@ -27,7 +28,7 @@ class MessageToMessagePath(Example):
         server_url: str = "<url>",
         principal: str = "<principal>",
         password: str = "<password>",
-    ):
+    ) -> None:
         path = "my/message/path"
 
         async with sessions().principal(principal).credentials(
@@ -46,7 +47,7 @@ class MessageToMessagePath(Example):
 
 
 class SimpleRequestHandler(RequestHandler):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             self.on_request,
             diffusion.datatypes.STRING,
@@ -56,21 +57,15 @@ class SimpleRequestHandler(RequestHandler):
     # noinspection PyUnusedLocal
     async def on_request(
         self,
-        request: str,
+        request: typing.Optional[str],
         *,
-        conversation_id: int,
-        sender_session_id: SessionId,
-        path: str,
+        sender_session_id: typing.Optional[SessionId] = None,
+        path: typing.Optional[str] = None,
         **kwargs,
-    ):
+    ) -> str:
         print(f"Received message: {request}.")
         return "Goodbye"
 
-    async def on_close(self):
-        pass
-
-    async def on_error(self, error_reason):
-        pass
 
 
 if __name__ == "__main__":

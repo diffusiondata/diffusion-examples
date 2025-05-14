@@ -22,6 +22,15 @@ import com.pushtechnology.diffusion.client.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This example demonstrates how to set queue conflation for multiple sessions
+ * using a session filter.
+ * <P>
+ * The example uses the filter "$Principal is 'client'" to ensure the change
+ * only applies to 'client' sessions.
+ *
+ * @author DiffusionData Limited
+ */
 public class QueueConflationViaSessionFilterExample {
 
     private static final Logger LOG = LoggerFactory.getLogger(
@@ -29,17 +38,17 @@ public class QueueConflationViaSessionFilterExample {
 
     public static void main(String[] args) throws Exception {
 
-        Session adminSession = Diffusion.sessions()
+        final Session adminSession = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        Session clientSession = Diffusion.sessions()
+        final Session clientSession = Diffusion.sessions()
             .principal("client")
             .password("password")
             .open("ws://localhost:8080");
 
-        SessionFilterOperationResult result = adminSession.feature(ClientControl.class)
+        final SessionFilterOperationResult result = adminSession.feature(ClientControl.class)
             .setConflated("$Principal is 'client'", false).join();
 
         LOG.info("Sessions updated: {}", result.selected());

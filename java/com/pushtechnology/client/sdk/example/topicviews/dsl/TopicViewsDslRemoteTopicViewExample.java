@@ -16,17 +16,27 @@ package com.pushtechnology.client.sdk.example.topicviews.dsl;
 
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.control.RemoteServers;
+import com.pushtechnology.diffusion.client.features.control.topics.views.TopicView;
 import com.pushtechnology.diffusion.client.features.control.topics.views.TopicViews;
 import com.pushtechnology.diffusion.client.session.Session;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This example demonstrates how to create a topic view that maps topics from a remote server.
+ * <P>
+ * A remote server connection is established, and a topic view is created to map
+ * topics from the remote server to a local topic path.
+ *
+ * @author DiffusionData Limited
+ */
 public class TopicViewsDslRemoteTopicViewExample {
-    private static final Logger LOG = LoggerFactory.getLogger(TopicViewsDslRemoteTopicViewExample.class);
 
-    public static void main(String[] args)
-        throws Exception {
+    private static final Logger LOG =
+        LoggerFactory.getLogger(TopicViewsDslRemoteTopicViewExample.class);
+
+    public static void main(String[] args) throws Exception {
 
         try (Session session = Diffusion.sessions()
             .principal("admin")
@@ -46,12 +56,12 @@ public class TopicViewsDslRemoteTopicViewExample {
             session.feature(RemoteServers.class).createRemoteServer(remoteServer)
                 .join();
 
-            session.feature(TopicViews.class).createTopicView(
+            final TopicView view = session.feature(TopicViews.class).createTopicView(
                     remoteTopicViewName,
                     "map my/topic/path from 'Remote Server 1' to views/remote/<path(0)>")
                 .join();
 
-            LOG.info("Remote Topic View '{}' has been created.", remoteTopicViewName);
+            LOG.info("Remote Topic View '{}' has been created.", view.getName());
         }
     }
 }

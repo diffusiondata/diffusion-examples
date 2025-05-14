@@ -19,7 +19,6 @@ import typing
 
 from diffusion import Credentials
 from diffusion.features.topics import TopicAddResponse, TopicSpecification
-from diffusion.internal.services.topics import UnsubscribeReason
 from diffusion_examples.utils.program import Example
 import diffusion.datatypes
 import diffusion.features.timeseries
@@ -68,22 +67,25 @@ class SubscribeToTimeSeriesTopics(Example):
 
 
     class ValueStream(ValueStreamHandler):
-        def __init__(self):
-            self._stream_values = []
+        def __init__(self) -> None:
             super().__init__(
                 diffusion.datatypes.DOUBLE,
-                on_error=self.on_error,
                 subscribe=self.on_subscription,
                 unsubscribe=self.on_unsubscription,
-                update=self.on_value,
+                update=self.on_update,
                 close=self.on_close,
             )
+            self._stream_values: typing.List[str] = []
 
 
-        def on_close(self):
-            pass
 
-        def on_error(self, error_reason):
+        async def on_close(
+                self,
+                topic_path: str,
+                topic_spec: TopicSpecification,
+                topic_value: typing.Optional[diffusion.datatypes.DOUBLE],
+                **kwargs
+        ) -> None:
             pass
 
         # noinspection PyUnusedLocal
@@ -91,8 +93,9 @@ class SubscribeToTimeSeriesTopics(Example):
             self,
             topic_path: str,
             topic_spec: TopicSpecification,
-            topic_value: typing.Optional[diffusion.datatypes.AbstractDataType],
-        ):
+            topic_value: typing.Optional[diffusion.datatypes.DOUBLE],
+            **kwargs
+        ) -> None:
             message = f"Subscribed to {topic_path}."
             print(message)
 
@@ -101,13 +104,21 @@ class SubscribeToTimeSeriesTopics(Example):
             self,
             topic_path: str,
             topic_spec: TopicSpecification,
-            topic_value: typing.Optional[diffusion.datatypes.AbstractDataType],
-            reason: UnsubscribeReason,
-        ):
+            topic_value: typing.Optional[diffusion.datatypes.DOUBLE],
+            reason: typing.Any,
+            **kwargs
+        ) -> None:
             message = f"Unsubscribed from {topic_path}: {reason}."
             print(message)
 
-        def on_value(self, topic_path, topic_spec, old_value, topic_value):
+        def on_update(
+            self,
+            topic_path: str,
+            topic_spec: TopicSpecification,
+            old_value: typing.Optional[diffusion.datatypes.DOUBLE],
+            topic_value: typing.Optional[diffusion.datatypes.DOUBLE],
+            **kwargs,
+        ) -> None:
             message = (
                 f"{topic_path} changed from "
                 f"{'NULL' if old_value is None else old_value} to {topic_value}."

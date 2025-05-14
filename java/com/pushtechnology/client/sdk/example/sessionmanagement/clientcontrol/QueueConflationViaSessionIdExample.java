@@ -22,6 +22,12 @@ import com.pushtechnology.diffusion.client.session.SessionId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This example demonstrates how to set queue conflation for a session
+ * using its ID.
+ *
+ * @author DiffusionData Limited
+ */
 public class QueueConflationViaSessionIdExample {
 
     private static final Logger LOG = LoggerFactory.getLogger(
@@ -29,19 +35,19 @@ public class QueueConflationViaSessionIdExample {
 
     public static void main(String[] args) throws Exception {
 
-        Session adminSession = Diffusion.sessions()
+        final Session adminSession = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        Session clientSession = Diffusion.sessions()
+        final Session clientSession = Diffusion.sessions()
             .principal("client")
             .password("password")
             .open("ws://localhost:8080");
 
-        SessionId clientSessionID = clientSession.getSessionId();
+        final SessionId clientSessionID = clientSession.getSessionId();
 
-        ClientControl clientControl = adminSession.feature(ClientControl.class);
+        final ClientControl clientControl = adminSession.feature(ClientControl.class);
         clientControl.setConflated(clientSessionID, false).join();
 
         LOG.info("Queue conflation configured for session {}.", clientSessionID);

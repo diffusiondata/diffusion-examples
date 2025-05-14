@@ -29,13 +29,21 @@ import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
+/**
+ * This example demonstrates how to set the value of a topic using an update
+ * stream in Diffusion.
+ * <P>
+ * The example creates a JSON topic at a specified path and sets its value using
+ * an update stream.
+ *
+ * @author DiffusionData Limited
+ */
 public class SetTopicViaUpdateStreamExample {
 
     private static final Logger LOG =
         LoggerFactory.getLogger(SetTopicViaUpdateStreamExample.class);
 
-    public static void main(String[] args)
-        throws Throwable {
+    public static void main(String[] args) {
 
         try (Session session = Diffusion.sessions()
             .principal("admin")
@@ -69,8 +77,6 @@ public class SetTopicViaUpdateStreamExample {
         }
         catch (CompletionException e) {
             LOG.error("Failed to add topic.", e);
-
-            throw e.getCause();
         }
     }
 }

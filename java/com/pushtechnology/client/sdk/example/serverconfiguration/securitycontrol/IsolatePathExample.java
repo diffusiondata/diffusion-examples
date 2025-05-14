@@ -22,6 +22,12 @@ import com.pushtechnology.diffusion.client.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This example demonstrates how to isolate a topic path using the security
+ * control feature in Diffusion.
+ *
+ * @author DiffusionData Limited
+ */
 public class IsolatePathExample {
 
     private static final Logger LOG = LoggerFactory.getLogger(
@@ -29,21 +35,21 @@ public class IsolatePathExample {
 
     public static void main(String[] args) throws Exception {
 
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        SecurityControl securityControl = session.feature(SecurityControl.class);
-        ScriptBuilder builder = securityControl.scriptBuilder();
+        final SecurityControl securityControl = session.feature(SecurityControl.class);
+        final ScriptBuilder builder = securityControl.scriptBuilder();
 
         builder.isolatePath("my/topic/path");
-        String script = builder.script();
+        final String script = builder.script();
 
         LOG.info("Isolating my/topic/path permissions from parent and default path permissions");
 
         securityControl.updateStore(script)
-            .whenComplete((r,ex) ->   LOG.info(script));
+            .whenComplete((r, ex) ->   LOG.info(script));
 
         session.close();
     }

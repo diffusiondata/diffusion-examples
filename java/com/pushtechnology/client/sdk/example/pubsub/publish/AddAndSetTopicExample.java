@@ -24,6 +24,15 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This example demonstrates how to create a new topic and set its initial value
+ * in Diffusion.
+ * <P>
+ * The example uses the `addAndSet` method to create a JSON topic at a specified
+ * path and set its initial value.
+ *
+ * @author DiffusionData Limited
+ */
 public class AddAndSetTopicExample {
 
     private static final Logger LOG =

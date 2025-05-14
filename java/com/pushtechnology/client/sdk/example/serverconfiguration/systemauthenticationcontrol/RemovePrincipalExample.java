@@ -7,8 +7,15 @@ import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.features.control.clients.SystemAuthenticationControl;
+import com.pushtechnology.diffusion.client.session.AuthenticationException;
 import com.pushtechnology.diffusion.client.session.Session;
 
+/**
+ * This example demonstrates how to remove a principal using the system
+ * authentication control feature.
+ *
+ * @author DiffusionData Limited
+ */
 public class RemovePrincipalExample {
 
     private static final Logger LOG =
@@ -56,7 +63,7 @@ public class RemovePrincipalExample {
                 .password("password12345")
                 .open("ws://localhost:8080");
         }
-        catch (Exception e) {
+        catch (AuthenticationException e) {
             LOG.info("connection failed: {}", e.getMessage());
         }
 

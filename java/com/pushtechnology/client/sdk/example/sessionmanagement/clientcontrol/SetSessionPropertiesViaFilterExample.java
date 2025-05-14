@@ -25,39 +25,50 @@ import org.slf4j.LoggerFactory;
 import java.util.Collections;
 import java.util.Map;
 
+/**
+ * This example demonstrates how to set session properties for multiple sessions
+ * using a session filter.
+ * <P>
+ * The example uses the filter "$Principal is 'client'" to ensure the change
+ * only applies to 'client' sessions.
+ *
+ * @author DiffusionData Limited
+ */
 public class SetSessionPropertiesViaFilterExample {
     private static final Logger LOG = LoggerFactory.getLogger(
         SetSessionPropertiesViaFilterExample.class);
 
     public static void main(String[] args) throws Exception {
 
-        Session adminSession = Diffusion.sessions()
+        final Session adminSession = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
-        Session clientSession = Diffusion.sessions()
+        final Session clientSession = Diffusion.sessions()
             .principal("client")
             .password("password")
             .open("ws://localhost:8080");
 
-        ClientControl clientControl = adminSession.feature(ClientControl.class);
+        final ClientControl clientControl = adminSession.feature(ClientControl.class);
 
         Map<String, String> sessionProperties = clientControl
-            .getSessionProperties(clientSession.getSessionId(), Collections.singleton(Session.ALL_FIXED_PROPERTIES)).join();
+            .getSessionProperties(clientSession.getSessionId(),
+                Collections.singleton(Session.ALL_FIXED_PROPERTIES)).join();
 
         sessionProperties.forEach((key, value) -> System.out.printf("  <%s> : <%s>\n", key, value));
 
-        Map<String, String> myProperties = Collections.singletonMap("$Country", "CA");
+        final Map<String, String> myProperties = Collections.singletonMap("$Country", "CA");
 
-        SessionFilterOperationResult result = clientControl
+        final SessionFilterOperationResult result = clientControl
             .setSessionProperties("$Principal is 'client'", myProperties)
             .join();
 
         System.out.printf("Updated %s session(s)\n", result.selected());
 
         sessionProperties = clientControl
-            .getSessionProperties(clientSession.getSessionId(), Collections.singleton(Session.ALL_FIXED_PROPERTIES)).join();
+            .getSessionProperties(clientSession.getSessionId(),
+                Collections.singleton(Session.ALL_FIXED_PROPERTIES)).join();
 
         sessionProperties.forEach((key, value) -> System.out.printf("  <%s> : <%s>\n", key, value));
 

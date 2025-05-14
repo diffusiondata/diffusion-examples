@@ -25,12 +25,17 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This example demonstrates how to create a topic view in Diffusion.
+ *
+ * @author DiffusionData Limited
+ */
 public class AddTopicViewExample {
     private static final Logger
         LOG = LoggerFactory.getLogger(AddTopicViewExample.class);
 
     public static void main(String[] args) {
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");

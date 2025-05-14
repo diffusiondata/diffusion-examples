@@ -59,20 +59,24 @@ class SubscribeWithCrossCompatibleValueStream(Example):
 
 
 class JSONStream(ValueStreamHandler):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             diffusion.datatypes.JSON,
             subscribe=self.on_subscription,
             unsubscribe=self.on_unsubscription,
-            value=self.on_value,
+            update=self.on_update,
+            close=self.on_close
         )
-        self._stream_values = []
+        self._stream_values: typing.List[str] = []
 
 
-    def on_close(self):
-        pass
-
-    def on_error(self, error_reason):
+    def on_close(
+            self,
+            topic_path: str,
+            topic_spec: TopicSpecification,
+            topic_value: typing.Optional[diffusion.datatypes.JSON],
+            **kwargs
+    ) -> None:
         pass
 
     # noinspection PyUnusedLocal,PyMethodMayBeStatic
@@ -81,8 +85,8 @@ class JSONStream(ValueStreamHandler):
         topic_path: str,
         topic_spec: TopicSpecification,
         topic_value: typing.Optional[diffusion.datatypes.JSON],
-        reason: typing.Optional[typing.Any] = None,
-    ):
+        **kwargs
+    ) -> None:
         print(f"JSON stream subscribed to {topic_path}.")
 
     # noinspection PyUnusedLocal,PyMethodMayBeStatic
@@ -91,30 +95,31 @@ class JSONStream(ValueStreamHandler):
         topic_path: str,
         topic_spec: TopicSpecification,
         topic_value: typing.Optional[diffusion.datatypes.JSON],
-        reason: typing.Optional[typing.Any],
-    ):
+        reason: typing.Any,
+        **kwargs
+    ) -> None:
         print(f"JSON stream unsubscribed from {topic_path}: {reason}.")
 
     # noinspection PyUnusedLocal,PyMethodMayBeStatic
-    async def on_value(
+    async def on_update(
         self,
         topic_path: str,
         topic_spec: TopicSpecification,
         old_value: typing.Optional[diffusion.datatypes.JSON],
-        new_value: diffusion.datatypes.JSON,
-    ):
-        print(f"JSON stream {topic_path} changed from {old_value} to {new_value}.")
+        topic_value: typing.Optional[diffusion.datatypes.JSON],
+    ) -> None:
+        print(f"JSON stream {topic_path} changed from {old_value} to {topic_value}.")
 
 
 class StringStream(ValueStreamHandler):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             diffusion.datatypes.STRING,
             subscribe=self.on_subscription,
             unsubscribe=self.on_unsubscription,
-            value=self.on_value,
+            update=self.on_update,
         )
-        self._stream_values = []
+        self._stream_values: typing.List[str] = []
 
 
     # noinspection PyUnusedLocal,PyMethodMayBeStatic
@@ -123,8 +128,8 @@ class StringStream(ValueStreamHandler):
         topic_path: str,
         topic_spec: TopicSpecification,
         topic_value: typing.Optional[diffusion.datatypes.STRING],
-        reason: typing.Optional[typing.Any] = None,
-    ):
+        **kwargs
+    ) -> None:
         print(f"String stream subscribed to {topic_path}.")
 
     # noinspection PyUnusedLocal,PyMethodMayBeStatic
@@ -133,19 +138,21 @@ class StringStream(ValueStreamHandler):
         topic_path: str,
         topic_spec: TopicSpecification,
         topic_value: typing.Optional[diffusion.datatypes.STRING],
-        reason: typing.Optional[typing.Any],
-    ):
+        reason: typing.Any,
+        **kwargs
+    ) -> None:
         print(f"String stream unsubscribed from {topic_path}: {reason}.")
 
     # noinspection PyUnusedLocal,PyMethodMayBeStatic
-    async def on_value(
+    async def on_update(
         self,
         topic_path: str,
         topic_spec: TopicSpecification,
         old_value: typing.Optional[diffusion.datatypes.STRING],
-        new_value: diffusion.datatypes.STRING,
-    ):
-        print(f"String stream {topic_path} changed from {old_value} to {new_value}.")
+        topic_value: typing.Optional[diffusion.datatypes.STRING],
+        **kwargs
+    ) -> None:
+        print(f"String stream {topic_path} changed from {old_value} to {topic_value}.")
 
 
 if __name__ == "__main__":

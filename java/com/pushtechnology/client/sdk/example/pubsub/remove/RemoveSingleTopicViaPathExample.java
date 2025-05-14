@@ -27,13 +27,18 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletionException;
 
+/**
+ * This example demonstrates how to remove a single topic in Diffusion using the
+ * topic's path.
+ *
+ * @author DiffusionData Limited
+ */
 public class RemoveSingleTopicViaPathExample {
 
     private static final Logger LOG =
         LoggerFactory.getLogger(RemoveSingleTopicViaPathExample.class);
 
-    public static void main(String[] args)
-        throws Throwable {
+    public static void main(String[] args) throws Throwable {
 
         try (Session session = Diffusion.sessions()
             .principal("admin")

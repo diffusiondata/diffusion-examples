@@ -25,6 +25,16 @@ import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 
+/**
+ * This example demonstrates how to use session trees in Diffusion to map topics based on
+ * client session properties.
+ * <P>
+ * It creates topic branches for different principals (`admin`, `control`, and `anonymous`)
+ * and maps them to a session tree path.
+ * Sessions subscribing to `my/personal/path` receive updates based on their principal.
+ *
+ * @author DiffusionData Limited
+ */
 public class SessionTreesUseCaseExample {
 
     private static final Logger LOG =
@@ -40,13 +50,16 @@ public class SessionTreesUseCaseExample {
             final Topics topicsAdminSession = adminSession.feature(Topics.class);
             final TopicSpecification topicSpecification = Diffusion.newTopicSpecification(TopicType.STRING);
 
-            topicsAdminSession.addAndSet("my/topic/path/for/admin", topicSpecification, String.class, "Good morning Administrator")
+            topicsAdminSession.addAndSet("my/topic/path/for/admin", topicSpecification,
+                    String.class, "Good morning Administrator")
                 .join();
 
-            topicsAdminSession.addAndSet("my/topic/path/for/control", topicSpecification, String.class, "Good afternoon Control Client")
+            topicsAdminSession.addAndSet("my/topic/path/for/control", topicSpecification,
+                    String.class, "Good afternoon Control Client")
                 .join();
 
-            topicsAdminSession.addAndSet("my/topic/path/for/anonymous", topicSpecification, String.class, "Good night Anonymous")
+            topicsAdminSession.addAndSet("my/topic/path/for/anonymous", topicSpecification,
+                    String.class, "Good night Anonymous")
                 .join();
 
             final SessionTrees.BranchMappingTable branchMappingTable = Diffusion.newBranchMappingTableBuilder()
@@ -60,7 +73,8 @@ public class SessionTreesUseCaseExample {
 
             LOG.info("Session tree mappings added.");
 
-            final MyLoggingStringStream myLoggingStringStreamAdminSession = new MyLoggingStringStream(adminSession.getPrincipal());
+            final MyLoggingStringStream myLoggingStringStreamAdminSession =
+                new MyLoggingStringStream(adminSession.getPrincipal());
 
             topicsAdminSession.addStream(">my/personal/path", String.class, myLoggingStringStreamAdminSession);
             topicsAdminSession.subscribe(">my/personal/path")
@@ -71,7 +85,8 @@ public class SessionTreesUseCaseExample {
 
             final Topics topicsAnonymousSession = anonymousSession.feature(Topics.class);
 
-            final MyLoggingStringStream myLoggingStringStreamAnonymousSession = new MyLoggingStringStream(anonymousSession.getPrincipal());
+            final MyLoggingStringStream myLoggingStringStreamAnonymousSession =
+                new MyLoggingStringStream(anonymousSession.getPrincipal());
 
             topicsAnonymousSession.addStream(">my/personal/path", String.class, myLoggingStringStreamAnonymousSession);
             topicsAnonymousSession.subscribe(">my/personal/path")

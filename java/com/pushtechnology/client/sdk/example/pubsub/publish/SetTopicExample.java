@@ -24,6 +24,13 @@ import com.pushtechnology.diffusion.datatype.json.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This example demonstrates how to set the value of a topic in Diffusion.
+ * <P>
+ * The example creates a JSON topic at a specified path and sets its value.
+ *
+ * @author DiffusionData Limited
+ */
 public class SetTopicExample {
 
     private static final Logger LOG =

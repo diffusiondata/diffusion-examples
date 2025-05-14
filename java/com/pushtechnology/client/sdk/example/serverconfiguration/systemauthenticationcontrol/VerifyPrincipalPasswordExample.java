@@ -4,9 +4,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pushtechnology.diffusion.client.Diffusion;
+import com.pushtechnology.diffusion.client.features.ScriptException;
 import com.pushtechnology.diffusion.client.features.control.clients.SystemAuthenticationControl;
+import com.pushtechnology.diffusion.client.session.AuthenticationException;
 import com.pushtechnology.diffusion.client.session.Session;
 
+/**
+ * This example demonstrates how to verify the password for a principal.
+ * <P>
+ * The `verifyPassword` method is used to ensure the current password for the
+ * principal is correct before updating it.
+ *
+ * @author DiffusionData Limited
+ */
 public class VerifyPrincipalPasswordExample {
 
     private static final Logger LOG =

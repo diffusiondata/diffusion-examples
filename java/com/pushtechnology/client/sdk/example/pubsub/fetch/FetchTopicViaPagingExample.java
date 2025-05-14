@@ -14,24 +14,34 @@
  *******************************************************************************/
 package com.pushtechnology.client.sdk.example.pubsub.fetch;
 
-import com.pushtechnology.diffusion.client.Diffusion;
-import com.pushtechnology.diffusion.client.features.Topics;
-import com.pushtechnology.diffusion.client.session.Session;
-import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
-import com.pushtechnology.diffusion.client.topics.details.TopicType;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.CompletionException;
+import com.pushtechnology.diffusion.client.Diffusion;
+import com.pushtechnology.diffusion.client.features.Topics;
+import com.pushtechnology.diffusion.client.features.Topics.FetchResult.TopicResult;
+import com.pushtechnology.diffusion.client.session.Session;
+import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
+import com.pushtechnology.diffusion.client.topics.details.TopicType;
 
+/**
+ * This example demonstrates how to fetch topics in Diffusion using paging.
+ * <P>
+ * The example creates a set of STRING topics, then uses the fetch request feature
+ * with paging to retrieve the topics in batches, allowing efficient handling of
+ * large topic trees.
+ *
+ * @author DiffusionData Limited
+ */
 public class FetchTopicViaPagingExample {
 
     private static final Logger LOG =
         LoggerFactory.getLogger(FetchTopicViaPagingExample.class);
 
-    public static void main(String[] args)
-        throws Throwable {
+    public static void main(String[] args) {
 
         try (Session session = Diffusion.sessions()
             .principal("admin")
@@ -39,6 +49,7 @@ public class FetchTopicViaPagingExample {
             .open("ws://localhost:8080")) {
 
             final Topics topics = session.feature(Topics.class);
+            final String topicSelectorString = "?my/topic/path//";
 
             final TopicSpecification topicSpecification =
                 Diffusion.newTopicSpecification(TopicType.STRING);
@@ -51,41 +62,31 @@ public class FetchTopicViaPagingExample {
                     .join();
             }
 
-            final String topicSelectorString = "?my/topic/path//";
+            final List<TopicResult<String>> topicResults = new ArrayList<>();
 
-            Topics.FetchResult<String> fetchResult = topics.fetchRequest()
+            final Topics.FetchRequest<String> request = topics.fetchRequest()
                 .withValues(String.class)
-                .first(10)
+                .first(10);
+
+            Topics.FetchResult<String> pagedFetch = request
                 .fetch(topicSelectorString)
                 .join();
 
-            while (true) {
-                fetchResult.results().forEach(it -> LOG.info("{}: {}.", it.path(), it.value()));
+            topicResults.addAll(pagedFetch.results());
 
-                if (fetchResult.hasMore()) {
-                    LOG.info("Loading next page.");
+            while (pagedFetch.hasMore()) {
 
-                    final Topics.FetchResult.TopicResult<String> topicResult =
-                        fetchResult.results().get(fetchResult.size() - 1);
+                LOG.info("Loading next page.");
 
-                    fetchResult = topics.fetchRequest()
-                        .withValues(String.class)
-                        .after(topicResult.path())
-                        .first(10)
-                        .fetch(topicSelectorString)
-                        .join();
-                }
-                else {
-                    LOG.info("Done.");
+                final String lastTopic = topicResults.get(topicResults.size() - 1).path();
 
-                    break;
-                }
+                pagedFetch = request.after(lastTopic).fetch(topicSelectorString).join();
+
+                topicResults.addAll(pagedFetch.results());
             }
-        }
-        catch (CompletionException e) {
-            LOG.error("Failed to run example to completion.", e);
 
-            throw e.getCause();
+            topicResults.forEach(topicResult ->
+                LOG.info("{}: {}.", topicResult.path(), topicResult.value()));
         }
     }
 }

@@ -11,6 +11,12 @@ import com.pushtechnology.diffusion.client.features.control.clients.ClientContro
 import com.pushtechnology.diffusion.client.features.control.clients.SystemAuthenticationControl;
 import com.pushtechnology.diffusion.client.session.Session;
 
+/**
+ * This example demonstrates how to configure Diffusion to ignore specified session
+ * properties proposed by clients.
+ *
+ * @author DiffusionData Limited
+ */
 public class IgnoreClientProposedPropertyExample {
 
     private static final Logger LOG =
@@ -26,7 +32,7 @@ public class IgnoreClientProposedPropertyExample {
         final SystemAuthenticationControl authenticationControl =
             adminSession.feature(SystemAuthenticationControl.class);
 
-        String updateScript = authenticationControl.scriptBuilder()
+        final String updateScript = authenticationControl.scriptBuilder()
             .ignoreClientProposedProperty("Rubble")
             .trustClientProposedPropertyMatches("Flintstone", ".*_Flintstone")
             .script();

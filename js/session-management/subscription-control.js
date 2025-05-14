@@ -26,6 +26,7 @@ export async function sessionManagementSubscriptionControl() {
         ['unsubscribed client', 'Unsubscribed from my/topic/path/hello']
     ]);
     const subscribedPromise = promiseWithResolvers();
+    const unsubscribeTopicPromise = promiseWithResolvers();
     /// end::log
     /// tag::session_management_subscription_control[]
     // Connect to the server.
@@ -103,6 +104,7 @@ export async function sessionManagementSubscriptionControl() {
             console.log(`Unsubscribed from ${topic}: ${reason}`);
             /// tag::log
             check.log(`Unsubscribed from ${topic}`);
+            unsubscribeTopicPromise.resolve();
             /// end::log
         },
         value : (topic, spec, newValue, oldValue) => {
@@ -111,6 +113,9 @@ export async function sessionManagementSubscriptionControl() {
     });
 
     await unsubscribePromise;
+    /// tag::log
+    await unsubscribeTopicPromise.promise;
+    /// end::log
 
     await session1.closeSession();
     await session2.closeSession();

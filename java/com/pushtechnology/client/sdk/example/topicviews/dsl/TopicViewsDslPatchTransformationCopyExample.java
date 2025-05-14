@@ -14,18 +14,26 @@
  *******************************************************************************/
 package com.pushtechnology.client.sdk.example.topicviews.dsl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.pushtechnology.diffusion.client.Diffusion;
 import com.pushtechnology.diffusion.client.callbacks.ErrorReason;
 import com.pushtechnology.diffusion.client.features.Topics;
-import com.pushtechnology.diffusion.client.features.control.topics.TopicControl;
+import com.pushtechnology.diffusion.client.features.control.topics.views.TopicView;
 import com.pushtechnology.diffusion.client.session.Session;
 import com.pushtechnology.diffusion.client.topics.details.TopicSpecification;
 import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import com.pushtechnology.diffusion.datatype.json.JSON;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+/**
+ * This example demonstrates how to use the patch transformation to copy a value within a JSON topic.
+ * <P>
+ * A topic view is created that applies a JSON Patch operation to copy a value from one key
+ * to another within the JSON content of the mapped topic.
+ *
+ * @author DiffusionData Limited
+ */
 public class TopicViewsDslPatchTransformationCopyExample {
 
     private static final Logger LOG =
@@ -33,57 +41,72 @@ public class TopicViewsDslPatchTransformationCopyExample {
 
     public static void main(String[] args) {
 
-        Session session = Diffusion.sessions()
+        final Session session = Diffusion.sessions()
             .principal("admin")
             .password("password")
             .open("ws://localhost:8080");
 
         final Topics topics = session.feature(Topics.class);
-        final TopicSpecification mySpec = Diffusion
-            .newTopicSpecification(TopicType.JSON);
+        final String viewSelector = "?views//";
+        final MyStream valueStream = new MyStream();
+
         final JSON jsonValue = Diffusion.dataTypes().json()
-            .fromJsonString("{ \"Meet the Flintstones\": {\"Fred\":\"Flintstone\",\"Barney\":\"Rubble\"}, \"The Jetsons\": {\"George\":\"Jetson\"}}");
+            .fromJsonString("{ \"Meet the Flintstones\": {\"Fred\":\"Flintstone\",\"Barney\":\"Rubble\"}, " +
+                "\"The Jetsons\": {\"George\":\"Jetson\"}}");
 
-        topics.addAndSet("my/topic/path", mySpec, JSON.class, jsonValue)
+        topics.addAndSet("my/topic/path",
+                Diffusion.newTopicSpecification(TopicType.JSON),
+                JSON.class,
+                jsonValue)
             .join();
 
-        topics.addFallbackStream(JSON.class, new MyFallbackStream());
-        topics.subscribe("?views//").join();
+        topics.addStream(viewSelector, JSON.class, valueStream);
+        topics.subscribe(viewSelector).join();
 
-        topics.createTopicView("topic_view_1",
+        final TopicView view = topics.createTopicView("topic_view_1",
                 "map ?my/topic/path// to views/<path(0)> patch " +
-                    "'[ {\"op\": \"copy\", \"from\": \"/Meet the Flintstones/Fred\", \"path\": \"/The Jetsons/Fred\" }]'")
+                    "'[ {\"op\": \"copy\", \"from\": \"/Meet the Flintstones/Fred\", " +
+                    "\"path\": \"/The Jetsons/Fred\" }]'")
             .join();
 
-        System.out.println("Topic View <topic_view_1> has been created");
+        LOG.info("Topic View {} has been created", view.getName());
 
-        topics.removeTopicView("topic_view_1").join();
-        session.feature(TopicControl.class).removeTopics("?.*//").join();
+        topics.removeStream(valueStream);
         session.close();
-
-        LOG.info("Topic View <topic_view_1> has been created");
     }
 
-    static class MyFallbackStream implements Topics.ValueStream<JSON> {
+    private static final class MyStream implements Topics.ValueStream<JSON> {
+
+        @Override
+        public void onValue(
+            String topicPath,
+            TopicSpecification topicSpecification,
+            JSON oldValue,
+            JSON newValue) {
+            LOG.info("{} new value {}", topicPath, newValue.toJsonString());
+        }
 
         @Override
         public void onSubscription(String topicPath,
             TopicSpecification topicSpecification) {
-            System.out.printf("Subscribed to %s\n", topicPath);
+            LOG.info("Subscribed to {}", topicPath);
         }
 
         @Override
         public void onUnsubscription(String topicPath,
             TopicSpecification topicSpecification,
-            Topics.UnsubscribeReason unsubscribeReason) {}
+            Topics.UnsubscribeReason unsubscribeReason) {
+            LOG.info("Unsubscribed from {}", topicPath);
+        }
 
         @Override
-        public void onClose() {}
+        public void onClose() {
+            LOG.info("stream closed");
+        }
 
         @Override
-        public void onError(ErrorReason errorReason) {}
-
-        @Override public void onValue(String s,
-            TopicSpecification topicSpecification, JSON json, JSON v1) {}
+        public void onError(ErrorReason errorReason) {
+            LOG.error("stream error: {}", errorReason);
+        }
     }
 }

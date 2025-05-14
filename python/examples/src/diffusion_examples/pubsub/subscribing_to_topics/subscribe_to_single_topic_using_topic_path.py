@@ -47,6 +47,10 @@ class SubscribeToSingleTopicUsingTopicPath(Example):
             json_stream = JSONStream()
             session.topics.add_value_stream(topic_selector, json_stream)
             await session.topics.subscribe(topic_selector)
+            await session.topics.set_topic(
+                topic, diffusion.datatypes.JSON({"diffusion": "bar"}), diffusion.datatypes.JSON
+            )
+
             await asyncio.sleep(5)
             await session.topics.unsubscribe(topic_selector)
             await session.topics.remove_stream(json_stream)
@@ -54,21 +58,26 @@ class SubscribeToSingleTopicUsingTopicPath(Example):
 
 
 class JSONStream(ValueStreamHandler):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             diffusion.datatypes.JSON,
             subscribe=self.on_subscription,
             unsubscribe=self.on_unsubscription,
-            value=self.on_value,
+            update=self.on_update,
+            close=self.on_close
         )
-        self._stream_values = []
+        self._stream_values: typing.List[str] = []
 
 
-    def on_close(self):
+    async def on_close(
+        self,
+        topic_path: str,
+        topic_spec: TopicSpecification,
+        topic_value: typing.Optional[diffusion.datatypes.JSON],
+        **kwargs
+    ) -> None:
         pass
 
-    def on_error(self, error_reason):
-        pass
 
     # noinspection PyUnusedLocal,PyMethodMayBeStatic
     async def on_subscription(
@@ -76,8 +85,8 @@ class JSONStream(ValueStreamHandler):
         topic_path: str,
         topic_spec: TopicSpecification,
         topic_value: typing.Optional[diffusion.datatypes.JSON],
-        reason: typing.Optional[typing.Any] = None,
-    ):
+        **kwargs
+    ) -> None:
         print(f"Subscribed to {topic_path}.")
 
     # noinspection PyUnusedLocal,PyMethodMayBeStatic
@@ -86,19 +95,21 @@ class JSONStream(ValueStreamHandler):
         topic_path: str,
         topic_spec: TopicSpecification,
         topic_value: typing.Optional[diffusion.datatypes.JSON],
-        reason: typing.Optional[typing.Any],
-    ):
+        reason: typing.Any,
+        **kwargs
+    ) -> None:
         print(f"Unsubscribed from {topic_path}: {reason}.")
 
     # noinspection PyUnusedLocal,PyMethodMayBeStatic
-    async def on_value(
+    async def on_update(
         self,
         topic_path: str,
         topic_spec: TopicSpecification,
         old_value: typing.Optional[diffusion.datatypes.JSON],
-        new_value: diffusion.datatypes.JSON,
-    ):
-        print(f"{topic_path} changed from {old_value} to {new_value}.")
+        topic_value: typing.Optional[diffusion.datatypes.JSON],
+        **kwargs
+    ) -> None:
+        print(f"{topic_path} changed from {old_value} to {topic_value}.")
 
 
 if __name__ == "__main__":

@@ -28,13 +28,22 @@ import com.pushtechnology.diffusion.client.topics.details.TopicType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This example demonstrates how to monitor and handle missing topic notifications
+ * in Diffusion.
+ * <P>
+ * The example registers a missing topic handler that creates a topic when a
+ * subscription request is made to a nonexistent topic.
+ * A value stream is used to observe changes to the newly created topic.
+ *
+ * @author DiffusionData Limited
+ */
 public class MonitoringMissingTopicNotificationsExample {
 
     private static final Logger LOG =
         LoggerFactory.getLogger(MonitoringMissingTopicNotificationsExample.class);
 
-    public static void main(String[] args)
-        throws Exception {
+    public static void main(String[] args) throws Exception {
 
         final String serverUrl = "ws://localhost:8080";
 
