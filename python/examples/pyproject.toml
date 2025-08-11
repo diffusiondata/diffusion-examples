@@ -1,0 +1,97 @@
+[build-system]
+requires = ["setuptools >= 40.8.0", "wheel"]
+build-backend = "setuptools.build_meta"
+isolated_build = true
+
+[tool.black]
+line-length = 96
+target-version = ["py38", "py39", "py310", "py311", "py312"]
+verbose = false
+skip-string-normalization = false
+
+[tool.pytest.ini_options]
+testpaths = "src/diffusion_examples"
+junit_family = "xunit2"
+cache_dir = "target/.pytest_cache"
+filterwarnings = ["ignore:coroutine 'Connection.read_loop' was never awaited", ]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')"
+]
+python_files = [ "conftest.py","*.py", "test_*.py"]
+python_functions = ["run"]
+asyncio_mode = "auto"
+
+[tool.mypy]
+mypy_path = "diffusion/"
+cache_dir = "target/.mypy_cache"
+ignore_missing_imports = true
+disallow_untyped_defs = false
+exclude = [
+    "csharp"
+]
+
+[tool.pydantic-pycharm-plugin]
+constrained-type = "lenient"
+parsable-type-highlight = "disable"
+acceptable-type-highlight = "disable"
+
+[tool.pydantic-pycharm-plugin.parsable-types]
+diffusion.internal.validation.pydantic.StrictPositiveInt = ["int"]
+diffusion.internal.validation.pydantic.StrictPositiveIntClass = ["int"]
+
+[tool.ruff]
+exclude = [
+    "build",
+    "dist",
+    "target",
+    "csharp",
+    ".gitignore"
+]
+line-length = 96
+select = [
+    "E",
+    "F",
+    "W",
+    "RUF013",
+    "N8"
+]
+target-version = "py38"
+
+[tool.ruff.per-file-ignores]
+"*/__init__.py" = ["F401"]
+"*/generated/*.py" = ["E501"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[project]
+name = "diffusion_examples"
+dynamic = ["readme", "version"]
+dependencies = [
+    'diffusion>=6.10.4,<7.0.0'
+]
+requires-python = "<3.13,>=3.8"
+authors = [{ name = "DiffusionData Limited", email = "contact@diffusiondata.com" }]
+license = { text = "Proprietary" }
+keywords = [
+    "diffusion",
+    "cloud",
+    "websockets",
+    "data"]
+classifiers = [
+    "License :: Other/Proprietary License",
+    "Environment :: Other Environment",
+    "Development Status :: 4 - Beta",
+]
+description = "Python SDK for Diffusion."
+
+[project.urls]
+homepage = "https://www.diffusiondata.com/"
+
+[tool.setuptools.dynamic]
+readme = { file = ["README.md"], content-type = "text/markdown" }
+version = { file = ["__version__"]}
+
+[tool.setuptools.package-data]
+devtools = ["*.md"]
+diffusion = ["*.dot"]

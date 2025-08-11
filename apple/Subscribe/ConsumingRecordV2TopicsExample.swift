@@ -91,7 +91,7 @@ public class ClientConsumingRecordV2Topics {
             let topics = session.topics
             let topicSelector = "?" + rootTopic + "//"
             do {
-                try topics.add(valueStream, withSelectorExpression: topicSelector, error:())
+                try topics.add(valueStream, withSelectorExpression: topicSelector)
             }
             catch {
                 print("Error while adding stream with selector expression")

@@ -1,6 +1,6 @@
 //  Diffusion Client Library for iOS, tvOS and OS X / macOS - Examples
 //
-//  Copyright (C) 2020 Push Technology Ltd.
+//  Copyright (C) 2020 - 2023 DiffusionData Ltd.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@
          [self appendValue:@"Diffusion" withDate:date2 toTimeSeriesTopic:topicPath usingSession:session];
 
          NSDate *date3 = [dateFormatter dateFromString:@"2042-09-17 23:53:46 +0000"];
-         [self appendValue:@"Push Technology" withDate:date3 toTimeSeriesTopic:topicPath usingSession:session];
+         [self appendValue:@"DiffusionData" withDate:date3 toTimeSeriesTopic:topicPath usingSession:session];
      }];
 }
 

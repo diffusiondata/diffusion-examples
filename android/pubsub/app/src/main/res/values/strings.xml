@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">PubSub</string>
+    <string name="diffusion_logo">Diffusion logo</string>
 </resources>

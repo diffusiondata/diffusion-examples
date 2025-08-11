@@ -5,8 +5,20 @@
 
     <TextView
         android:id="@+id/value"
+        android:textSize="20sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:layout_centerHorizontal="true"
         android:text="Hello World!" />
+
+    <ImageView
+        android:id="@+id/logoImage"
+        android:layout_width="500dp"
+        android:layout_height="500dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="32dp"
+        android:contentDescription="@string/diffusion_logo"
+        android:src="@drawable/logo" />
 
 </RelativeLayout>
