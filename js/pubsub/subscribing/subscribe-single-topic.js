@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2024 Diffusion Data Ltd.
+ * Copyright (C) 2024 - 2025 Diffusion Data Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ export async function subscribeSingleTopicExample() {
     /// tag::log
     const check = new PartiallyOrderedCheckpointTester([
         ['Subscribed to my/topic/path'],
+        ['my/topic/path changed from undefined to {"diffusion":"data"}'],
+        ['my/topic/path changed from {"diffusion":"data"} to {"diffusion":"more data"}'],
         ['Closed'],
     ]);
     /// end::log
@@ -57,14 +59,30 @@ export async function subscribeSingleTopicExample() {
         },
         /// end::log
         value : (topic, spec, newValue, oldValue) => {
-            console.log(`${topic} changed from ${oldValue.get()} to ${newValue.get()}`);
+            console.log(`${topic} changed from ${JSON.stringify(oldValue?.get())} to ${JSON.stringify(newValue?.get())}`);
             /// tag::log
-            check.log(`${topic} changed from ${oldValue.get()} to ${newValue.get()}`);
+            check.log(`${topic} changed from ${JSON.stringify(oldValue?.get())} to ${JSON.stringify(newValue?.get())}`);
             /// end::log
         }
     });
 
     await session.select('my/topic/path');
+
+    await session.topicUpdate.set(
+        'my/topic/path',
+        diffusion.datatypes.json(),
+        diffusion.datatypes.json().from({ "diffusion": "data" })
+    );
+
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    await session.topicUpdate.set(
+        'my/topic/path',
+        diffusion.datatypes.json(),
+        diffusion.datatypes.json().from({ "diffusion": "more data" })
+    );
+
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     await session.closeSession();
     /// end::pub_sub_subscribe_single_topic_via_path[]
