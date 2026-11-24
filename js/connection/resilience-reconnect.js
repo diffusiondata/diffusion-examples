@@ -1,0 +1,103 @@
+/*******************************************************************************
+ * Copyright (C) 2024 Diffusion Data Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
+const diffusion = require('diffusion');
+
+export async function connectionReconnectExample() {
+    /*
+        This example illustrates provision of a custom reconnect strategy which attempts reconnection
+        at fixed intervals, a finite number of times (for a fixed max duration).
+        In most cases you can omit an explicit reconnect strategy and your session will be allocated a
+        default strategy. The default behaviour uses a randomised backoff approach
+        (retrying at increasing & randomly staggered intervals), for a maximum period of one minute.
+     */
+    let sessionWithCustomReconnectBehaviour;
+    try {
+        // Connect to the server.
+        sessionWithCustomReconnectBehaviour = await diffusion.connect({
+            host: 'localhost',
+            port: 8080,
+            principal: 'admin',
+            credentials: 'password',
+            reconnect: {
+                // Set the maximum amount of time the client will try and reconnect for to 10 minutes
+                timeout: 1000 * 60 * 10,
+                // The reconnection strategy is a function that is called when the session is
+                // disconnected unexpectedly
+                strategy: (reconnect, abort, closeReason, reconnectAttempts) => {
+                    if (reconnectAttempts >= 10) {
+                        // abort after 10 attempts
+                        abort();
+                    } else {
+                        // retry after 3 seconds
+                        setTimeout(reconnect, 3000);
+                    }
+                }
+            }
+        });
+    } catch (err) {
+        console.error('Connection could not be established.', err);
+        throw err;
+    }
+    console.log(`Connected. Session Identifier: ${sessionWithCustomReconnectBehaviour.sessionId.toString()}`);
+
+
+    /*
+       For clarity, the simple and most common / recommended case
+       - utilising the default randomised backoff reconnect behaviour
+     */
+    let sessionWithDefaultReconnectBehaviour;
+    try {
+        // Connect to the server.
+        sessionWithDefaultReconnectBehaviour = await diffusion.connect({
+            host: 'localhost',
+            port: 8080,
+            principal: 'admin',
+            credentials: 'password'
+        });
+    } catch (err) {
+        console.error('Connection could not be established.', err);
+        throw err;
+    }
+    console.log('Connected with staggered reconnect behaviour. Session Identifier: '
+        + sessionWithDefaultReconnectBehaviour.sessionId.toString());
+
+    /*
+       Or less common, explicitly disabling reconnection...
+     */
+    let sessionWithNoReconnectBehaviour;
+    try {
+        // Connect to the server.
+        sessionWithNoReconnectBehaviour = await diffusion.connect({
+            host: 'localhost',
+            port: 8080,
+            principal: 'admin',
+            credentials: 'password',
+            reconnect: false
+        });
+    } catch (err) {
+        console.error('Connection could not be established.', err);
+        throw err;
+    }
+    console.log('Connected without reconnect behaviour. Session Identifier: '
+        + sessionWithNoReconnectBehaviour.sessionId.toString());
+
+
+    // Insert work here
+
+    await sessionWithCustomReconnectBehaviour.closeSession();
+    await sessionWithDefaultReconnectBehaviour.closeSession();
+    await sessionWithNoReconnectBehaviour.closeSession();
+}

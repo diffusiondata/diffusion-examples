@@ -1,6 +1,6 @@
-//  Diffusion Client Library for iOS, tvOS and OS X / macOS - Examples
+//  Diffusion Client Library for iOS and OS X / macOS - Examples
 //
-//  Copyright (C) 2020 Push Technology Ltd.
+//  Copyright (C) 2020 - 2026 DiffusionData Ltd.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@
          // append value to the topic (Publisher)
          [self appendValue:@"hello world!" toTimeSeriesTopic:topicPath usingSession:session];
          [self appendValue:@"Diffusion" toTimeSeriesTopic:topicPath usingSession:session];
-         [self appendValue:@"Push Technology" toTimeSeriesTopic:topicPath usingSession:session];
+         [self appendValue:@"DiffusionData" toTimeSeriesTopic:topicPath usingSession:session];
 
          // range query to see the topic values after append
          [self rangeQueryValuesOfTopic:topicPath usingSession:session];
@@ -119,7 +119,7 @@
          }
 
          NSString *const author = eventMetadata.author;
-         NSDate *const timestamp = [NSDate dateWithTimeIntervalSince1970:eventMetadata.timestamp / 1000];
+         NSDate *const timestamp = [NSDate dateWithTimeIntervalSince1970:(double)eventMetadata.timestamp / 1000.0];
          NSDateFormatter *const dateFormatter = [[NSDateFormatter alloc] init];
          [dateFormatter setDateFormat:@"yyyy-MM-dd hh:mm:ss"];
          NSUInteger sequence = [NSNumber numberWithUnsignedLongLong:eventMetadata.sequence].unsignedIntegerValue;
@@ -153,7 +153,7 @@
          }
 
          NSString *const author = eventMetadata.author;
-         NSDate *const timestamp = [NSDate dateWithTimeIntervalSince1970:eventMetadata.timestamp / 1000];
+         NSDate *const timestamp = [NSDate dateWithTimeIntervalSince1970:(double)eventMetadata.timestamp / 1000.0];
          NSDateFormatter *const dateFormatter = [[NSDateFormatter alloc] init];
          [dateFormatter setDateFormat:@"yyyy-MM-dd hh:mm:ss"];
          NSUInteger sequence = [NSNumber numberWithUnsignedLongLong:eventMetadata.sequence].unsignedIntegerValue;

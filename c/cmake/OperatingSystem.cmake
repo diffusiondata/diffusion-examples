@@ -1,0 +1,5 @@
+if(WIN32)
+    set(DEPENDENCIES ${DEPENDENCIES} wsock32 ws2_32 Rpcrt4.lib)
+else()
+    set(ADDITIONAL_LD_FLAGS ${ADDITIONAL_LD_FLAGS} "-ldl")
+endif()

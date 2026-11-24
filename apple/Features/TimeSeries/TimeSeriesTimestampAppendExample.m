@@ -1,6 +1,6 @@
-//  Diffusion Client Library for iOS, tvOS and OS X / macOS - Examples
+//  Diffusion Client Library for iOS and OS X / macOS - Examples
 //
-//  Copyright (C) 2020 Push Technology Ltd.
+//  Copyright (C) 2020 - 2026 DiffusionData Ltd.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@
          [self appendValue:@"Diffusion" withDate:date2 toTimeSeriesTopic:topicPath usingSession:session];
 
          NSDate *date3 = [dateFormatter dateFromString:@"2042-09-17 23:53:46 +0000"];
-         [self appendValue:@"Push Technology" withDate:date3 toTimeSeriesTopic:topicPath usingSession:session];
+         [self appendValue:@"DiffusionData" withDate:date3 toTimeSeriesTopic:topicPath usingSession:session];
      }];
 }
 
@@ -117,7 +117,7 @@
          }
 
          NSString *const author = eventMetadata.author;
-         NSDate *const timestamp = [NSDate dateWithTimeIntervalSince1970:eventMetadata.timestamp / 1000];
+         NSDate *const timestamp = [NSDate dateWithTimeIntervalSince1970:(double)eventMetadata.timestamp / 1000.0];
          NSDateFormatter *const dateFormatter = [[NSDateFormatter alloc] init];
          [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
          NSLog(@"Time series topic with user supplied timestamp appended by [%@] at [%@]", author, [dateFormatter stringFromDate:timestamp]);

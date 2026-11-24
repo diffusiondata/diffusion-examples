@@ -1,31 +1,51 @@
-apply plugin: 'com.android.application'
+plugins {
+    alias(libs.plugins.android.application)
+}
 
 android {
-    compileSdkVersion 27
-    defaultConfig {
-        multiDexEnabled true
-        applicationId "com.pushtechnology.examples"
-        minSdkVersion 19
-        targetSdkVersion 27
-        versionCode 1
-        versionName "1.0"
+    namespace = 'com.diffusiondata.android.example'
+    compileSdk {
+        version = release(36) {
+            minorApiLevel = 1
+        }
     }
+
+    defaultConfig {
+        applicationId = "com.diffusiondata.android.example"
+        minSdk = 24
+        targetSdk = 36
+        versionCode = 1
+        versionName = "1.0"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            optimization {
+                enable = false
+            }
         }
     }
 
     compileOptions {
-        coreLibraryDesugaringEnabled true
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        coreLibraryDesugaringEnabled = true
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 
 dependencies {
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.0.9'
-    implementation 'org.slf4j:slf4j-api:1.7.21'
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
+    implementation 'org.slf4j:slf4j-api:2.0.16'
+    implementation 'com.github.tony19:logback-android:3.0.0'
+    implementation 'com.pushtechnology.diffusion:diffusion-android-client:x.xx.x' // Include the Diffusion client at the required version via maven repo (see settings.gradle)
+    // implementation fileTree(dir: 'libs', include: ['*.jar']) // Or retrieve manually and package at a file system location
+    implementation libs.activity.ktx
+    implementation libs.appcompat
+    implementation libs.constraintlayout
+    implementation libs.material
+    testImplementation libs.junit
+    androidTestImplementation libs.espresso.core
+    androidTestImplementation libs.ext.junit
 }
